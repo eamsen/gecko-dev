@@ -944,7 +944,7 @@ void ThreadProfile::StreamJSON(SpliceableJSONWriter& aWriter, float aSinceTime)
   }
   aWriter.End();
 
-  mUniqueStacks.reset();
+  // mUniqueStacks.reset();
 }
 
 void ThreadProfile::StreamSamplesAndMarkers(SpliceableJSONWriter& aWriter, float aSinceTime,
