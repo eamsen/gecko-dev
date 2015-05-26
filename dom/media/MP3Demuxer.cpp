@@ -13,6 +13,19 @@
 #include "mozilla/Endian.h"
 #include "VideoUtils.h"
 #include "TimeUnits.h"
+#include "prenv.h"
+
+#define PR_LOGGING
+#ifdef PR_LOGGING
+PRLogModuleInfo* gMP3DemuxerLog;
+#define MP3DEMUXER_LOG(msg, ...) \
+  MOZ_LOG(gMP3DemuxerLog, LogLevel::Debug, ("MP3Demuxer " msg, ##__VA_ARGS__))
+#define MP3DEMUXER_LOGV(msg, ...) \
+  MOZ_LOG(gMP3DemuxerLog, LogLevel::Verbose, ("MP3Demuxer " msg, ##__VA_ARGS__))
+#else
+#define MP3DEMUXER_LOG(msg, ...)
+#define MP3DEMUXER_LOGV(msg, ...)
+#endif
 
 using media::TimeUnit;
 using media::TimeIntervals;
@@ -37,10 +50,13 @@ MP3Demuxer::InitInternal() {
 nsRefPtr<MP3Demuxer::InitPromise>
 MP3Demuxer::Init() {
   if (!InitInternal()) {
+    MP3DEMUXER_LOG("MP3Demuxer::Init() failure: waiting for data");
+
     return InitPromise::CreateAndReject(
       DemuxerFailureReason::WAITING_FOR_DATA, __func__);
   }
 
+  MP3DEMUXER_LOG("MP3Demuxer::Init() successful");
   return InitPromise::CreateAndResolve(NS_OK, __func__);
 }
 
@@ -81,6 +97,7 @@ void
 MP3Demuxer::NotifyDataArrived(uint32_t aLength, int64_t aOffset) {
   // TODO: bug 1169485.
   NS_WARNING("Unimplemented function NotifyDataArrived");
+  MP3DEMUXER_LOGV("NotifyDataArrived(%u, %" PRId64 ")", aLength, aOffset);
 }
 
 void
@@ -103,6 +120,11 @@ MP3TrackDemuxer::MP3TrackDemuxer(MediaResource* aSource)
     mSamplesPerSecond(0),
     mChannels(0)
 {
+#ifdef PR_LOGGING
+  if (!gMP3DemuxerLog) {
+    gMP3DemuxerLog = PR_NewLogModule("MP3Demuxer");
+  }
+#endif
 }
 
 bool
@@ -110,6 +132,10 @@ MP3TrackDemuxer::Init() {
   FastSeek(TimeUnit());
   // Read the first frame to fetch sample rate and other meta data.
   nsRefPtr<MediaRawData> frame(GetNextFrame(FindNextFrame()));
+
+  MP3DEMUXER_LOG("Init StreamLength()=%" PRId64 " first-frame-found=%d",
+                 StreamLength(), !!frame);
+
   if (!frame) {
     return false;
   }
@@ -126,6 +152,10 @@ MP3TrackDemuxer::Init() {
   mInfo->mBitDepth = 16;
   mInfo->mMimeType = "audio/mpeg";
   mInfo->mDuration = Duration().ToMicroseconds();
+
+  MP3DEMUXER_LOG("Init mInfo={mRate=%d mChannels=%d mBitDepth=%d mDuration=%" PRId64 "}",
+                 mInfo->mRate, mInfo->mChannels, mInfo->mBitDepth,
+                 mInfo->mDuration);
 
   return mSamplesPerSecond && mChannels;
 }
@@ -166,6 +196,11 @@ MP3TrackDemuxer::Seek(TimeUnit aTime) {
 
 TimeUnit
 MP3TrackDemuxer::FastSeek(TimeUnit aTime) {
+  MP3DEMUXER_LOG("FastSeek(%" PRId64 ") avgFrameLen=%f mNumParsedFrames=%" PRIu64
+                 " mFrameIndex=%" PRId64 " mOffset=%" PRIu64,
+                 aTime, AverageFrameLength(), mNumParsedFrames, mFrameIndex,
+                 mOffset);
+
   if (!aTime.ToMicroseconds()) {
     // Quick seek to the beginning of the stream.
     mOffset = mFirstFrameOffset;
@@ -182,6 +217,11 @@ MP3TrackDemuxer::FastSeek(TimeUnit aTime) {
                             mSamplesPerSecond / mSamplesPerFrame;
   mOffset = mFirstFrameOffset + numFrames * AverageFrameLength();
   mFrameIndex = numFrames;
+
+  MP3DEMUXER_LOG("FastSeek mSamplesPerSecond=%d mSamplesPerFrame=%d "
+                 "numFrames=%" PRId64,
+                 mSamplesPerSecond, mSamplesPerFrame, numFrames);
+
   mParser.FinishParsing();
 
   return Duration(mFrameIndex);
@@ -189,6 +229,11 @@ MP3TrackDemuxer::FastSeek(TimeUnit aTime) {
 
 TimeUnit
 MP3TrackDemuxer::ScanUntil(TimeUnit aTime) {
+  MP3DEMUXER_LOG("ForwardSeek(%" PRId64 ") avgFrameLen=%f mNumParsedFrames=%" PRIu64
+                 " mFrameIndex=%" PRId64 " mOffset=%" PRIu64,
+                 aTime, AverageFrameLength(), mNumParsedFrames, mFrameIndex,
+                 mOffset);
+
   if (!aTime.ToMicroseconds()) {
     return FastSeek(aTime);
   }
@@ -202,11 +247,24 @@ MP3TrackDemuxer::ScanUntil(TimeUnit aTime) {
     nextRange = FindNextFrame();
   }
 
+  MP3DEMUXER_LOG("ForwardSeek avgFrameLen=%f mNumParsedFrames=%" PRIu64
+              " mFrameIndex=%" PRId64 " mOffset=%" PRIu64,
+              aTime, AverageFrameLength(), mNumParsedFrames, mFrameIndex,
+              mOffset);
+
   return Duration(mFrameIndex);
 }
 
 nsRefPtr<MP3TrackDemuxer::SamplesPromise>
 MP3TrackDemuxer::GetSamples(int32_t aNumSamples) {
+  MP3DEMUXER_LOGV("GetSamples(%d) Begin mOffset=%" PRIu64 " mNumParsedFrames=%" PRIu64
+              " mFrameIndex=%" PRId64
+              " mTotalFrameLen=%" PRIu64 " mSamplesPerFrame=%d mSamplesPerSecond=%d "
+              "mChannels=%d",
+              aNumSamples,
+              mOffset, mNumParsedFrames, mFrameIndex, mTotalFrameLen, mSamplesPerFrame,
+              mSamplesPerSecond, mChannels);
+
   if (!aNumSamples) {
     return SamplesPromise::CreateAndReject(
         DemuxerFailureReason::DEMUXER_ERROR, __func__);
@@ -223,6 +281,15 @@ MP3TrackDemuxer::GetSamples(int32_t aNumSamples) {
     frames->mSamples.AppendElement(frame);
   }
 
+  MP3DEMUXER_LOGV("GetSamples() End mSamples.Size()=%d aNumSamples=%d mOffset=%" PRIu64
+              " mNumParsedFrames=%" PRIu64
+              " mFrameIndex=%" PRId64
+              " mTotalFrameLen=%" PRIu64 " mSamplesPerFrame=%d mSamplesPerSecond=%d "
+              "mChannels=%d",
+              frames->mSamples.Length(), aNumSamples,
+              mOffset, mNumParsedFrames, mFrameIndex, mTotalFrameLen, mSamplesPerFrame,
+              mSamplesPerSecond, mChannels);
+
   if (frames->mSamples.IsEmpty()) {
     return SamplesPromise::CreateAndReject(
         DemuxerFailureReason::END_OF_STREAM, __func__);
@@ -232,6 +299,7 @@ MP3TrackDemuxer::GetSamples(int32_t aNumSamples) {
 
 void
 MP3TrackDemuxer::Reset() {
+  MP3DEMUXER_LOG("Reset()");
   FastSeek(TimeUnit());
 }
 
@@ -297,6 +365,13 @@ MediaByteRange
 MP3TrackDemuxer::FindNextFrame() {
   static const int BUFFER_SIZE = 4096;
 
+  MP3DEMUXER_LOGV("FindNext() Begin mOffset=%" PRIu64 " mNumParsedFrames=%" PRIu64
+              " mFrameIndex=%" PRId64
+              " mTotalFrameLen=%" PRIu64 " mSamplesPerFrame=%d mSamplesPerSecond=%d "
+              "mChannels=%d",
+              mOffset, mNumParsedFrames, mFrameIndex, mTotalFrameLen, mSamplesPerFrame,
+              mSamplesPerSecond, mChannels);
+
   uint8_t buffer[BUFFER_SIZE];
   int32_t read = 0;
   const uint8_t* frameBeg = nullptr;
@@ -311,6 +386,9 @@ MP3TrackDemuxer::FindNextFrame() {
   }
 
   if (frameBeg == bufferEnd || !mParser.CurrentFrame().Length()) {
+    MP3DEMUXER_LOG("FindNext() Exit frameBeg=%p bufferEnd=%p "
+                "mParser.CurrentFrame().Length()=%d ",
+                frameBeg, bufferEnd, mParser.CurrentFrame().Length());
     return { 0, 0 };
   }
 
@@ -328,6 +406,13 @@ MP3TrackDemuxer::SkipNextFrame(const MediaByteRange& aRange) {
 
   UpdateState(aRange);
 
+  MP3DEMUXER_LOGV("SkipNext() End mOffset=%" PRIu64 " mNumParsedFrames=%" PRIu64
+              " mFrameIndex=%" PRId64
+              " mTotalFrameLen=%" PRIu64 " mSamplesPerFrame=%d mSamplesPerSecond=%d "
+              "mChannels=%d",
+              mOffset, mNumParsedFrames, mFrameIndex, mTotalFrameLen, mSamplesPerFrame,
+              mSamplesPerSecond, mChannels);
+
   return true;
 }
 
@@ -342,12 +427,14 @@ MP3TrackDemuxer::GetNextFrame(const MediaByteRange& aRange) {
 
   nsAutoPtr<MediaRawDataWriter> frameWriter(frame->CreateWriter());
   if (!frameWriter->SetSize(aRange.Length())) {
+    MP3DEMUXER_LOG("GetNext() Exit failed to allocated media buffer");
     return nullptr;
   }
 
   const uint32_t read = Read(frameWriter->mData, frame->mOffset, frame->mSize);
 
   if (read != aRange.Length()) {
+    MP3DEMUXER_LOG("GetNext() Exit read=%u frame->mSize=%u", read, frame->mSize);
     return nullptr;
   }
 
@@ -365,6 +452,13 @@ MP3TrackDemuxer::GetNextFrame(const MediaByteRange& aRange) {
     mParser.ParseVBRHeader(frame->mData, frame->mData + frame->mSize);
     mFirstFrameOffset = frame->mOffset;
   }
+
+  MP3DEMUXER_LOGV("GetNext() End mOffset=%" PRIu64 " mNumParsedFrames=%" PRIu64
+              " mFrameIndex=%" PRId64
+              " mTotalFrameLen=%" PRIu64 " mSamplesPerFrame=%d mSamplesPerSecond=%d "
+              "mChannels=%d",
+              mOffset, mNumParsedFrames, mFrameIndex, mTotalFrameLen, mSamplesPerFrame,
+              mSamplesPerSecond, mChannels);
 
   return frame.forget();
 }
