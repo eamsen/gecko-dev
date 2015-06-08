@@ -9,6 +9,8 @@ let Ci = Components.interfaces;
 let Cu = Components.utils;
 let Cr = Components.results;
 
+let tBeg = performance.now();
+
 Cu.import("resource://gre/modules/AppConstants.jsm");
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 Cu.import("resource://gre/modules/Services.jsm");
@@ -17,6 +19,8 @@ Cu.import("resource://gre/modules/DelayedInit.jsm");
 Cu.import('resource://gre/modules/Payment.jsm');
 Cu.import("resource://gre/modules/NotificationDB.jsm");
 Cu.import("resource://gre/modules/SpatialNavigation.jsm");
+
+let tImpEnd = performance.now();
 
 if (AppConstants.ACCESSIBILITY) {
   Cu.import("resource://gre/modules/accessibility/AccessFu.jsm");
@@ -372,6 +376,8 @@ var BrowserApp = {
   deck: null,
 
   startup: function startup() {
+    console.log("RABBITp browser.js: -000 // " + (tImpEnd - tBeg));
+    tBeg = performance.now();
     window.QueryInterface(Ci.nsIDOMChromeWindow).browserDOMWindow = new nsBrowserAccess();
     dump("zerdatime " + Date.now() + " - browser chrome startup finished.");
 
@@ -379,6 +385,9 @@ var BrowserApp = {
 
     BrowserEventHandler.init();
     ViewportHandler.init();
+
+    console.log("RABBITp browser.js: 000 // " + (performance.now() - tBeg));
+    tBeg = performance.now();
 
     Services.androidBridge.browserApp = this;
 
@@ -458,18 +467,29 @@ var BrowserApp = {
     // TODO: replace with Android implementation of WebappOSUtils.isLaunchable.
     Cu.import("resource://gre/modules/Webapps.jsm");
     DOMApplicationRegistry.allAppsLaunchable = true;
+    console.log("RABBITp browser.js: 100 // " + (performance.now() - tBeg));
+    tBeg = performance.now();
     RemoteDebugger.init();
+    console.log("RABBITp browser.js: 102 // " + (performance.now() - tBeg));
+    tBeg = performance.now();
     UserAgentOverrides.init();
+    console.log("RABBITp browser.js: 103 // " + (performance.now() - tBeg));
+    tBeg = performance.now();
     DesktopUserAgent.init();
     Distribution.init();
     Tabs.init();
     SearchEngines.init();
+    console.log("RABBITp browser.js: 105 // " + (performance.now() - tBeg));
+    tBeg = performance.now();
     if (AppConstants.ACCESSIBILITY) {
       AccessFu.attach(window);
     }
     if (AppConstants.NIGHTLY_BUILD) {
       ShumwayUtils.init();
     }
+
+    console.log("RABBITp browser.js: 110 // " + (performance.now() - tBeg));
+    tBeg = performance.now();
 
     let url = null;
     if ("arguments" in window) {
@@ -485,6 +505,9 @@ var BrowserApp = {
     // Make sure the "Open in App" context menu item appears at the bottom of the list
     this.initContextMenu();
     ExternalApps.init();
+
+    console.log("RABBITp browser.js: 200 // " + (performance.now() - tBeg));
+    tBeg = performance.now();
 
     // XXX maybe we don't do this if the launch was kicked off from external
     Services.io.offline = false;
@@ -553,6 +576,7 @@ var BrowserApp = {
       }, BrowserApp, "gmpInstallManager");
 
     }, false);
+    console.log("RABBITp browser.js: end // " + (performance.now() - tBeg));
   },
 
   get _startupStatus() {
