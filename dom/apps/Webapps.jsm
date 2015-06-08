@@ -203,6 +203,7 @@ this.DOMApplicationRegistry = {
   dirKey: DIRECTORY_NAME,
 
   init: function() {
+    debug("RABBIT Webapps.jsm: init");
     this.messages = ["Webapps:Install",
                      "Webapps:Uninstall",
                      "Webapps:GetSelf",
@@ -257,6 +258,7 @@ this.DOMApplicationRegistry = {
 
   // loads the current registry, that could be empty on first run.
   loadCurrentRegistry: function() {
+    debug("RABBIT Webapps.jsm: loadCurrentRegistry");
     return AppsUtils.loadJSONAsync(this.appsFile).then((aData) => {
       if (!aData) {
         return;
@@ -344,6 +346,7 @@ this.DOMApplicationRegistry = {
   // Notify we are starting with registering apps.
   _registryStarted: Promise.defer(),
   notifyAppsRegistryStart: function notifyAppsRegistryStart() {
+    debug("RABBIT Webapps.jsm: notifyAppsRegistryRestart");
     Services.obs.notifyObservers(this, "webapps-registry-start", null);
     this._registryStarted.resolve();
   },
@@ -358,6 +361,7 @@ this.DOMApplicationRegistry = {
   // Notify we are done with registering apps and save a copy of the registry.
   _registryReady: Promise.defer(),
   notifyAppsRegistryReady: function notifyAppsRegistryReady() {
+    debug("RABBIT Webapps.jsm: notifyAppsRegistryReady");
     // Usually this promise will be resolved earlier, but just in case,
     // resolve it here also.
     this._safeToClone.resolve();
@@ -376,6 +380,7 @@ this.DOMApplicationRegistry = {
 
   // Ensure that the .to property in redirects is a relative URL.
   sanitizeRedirects: function sanitizeRedirects(aSource) {
+    debug("RABBIT Webapps.jsm: sanitizeRedirects");
     if (!aSource) {
       return null;
     }
@@ -393,6 +398,7 @@ this.DOMApplicationRegistry = {
   },
 
   _saveWidgetsFullPath: function(aManifest, aDestApp) {
+    debug("RABBIT Webapps.jsm: _saveWidgetsFullPath");
     if (aManifest.widgetPages) {
       let resolve = (aPage)=>{
         let filepath = AppsUtils.getFilePath(aPage);
@@ -406,6 +412,7 @@ this.DOMApplicationRegistry = {
 
   // Registers all the activities and system messages.
   registerAppsHandlers: Task.async(function*(aRunUpdate) {
+    debug("RABBIT Webapps.jsm: registerAppsHandlers");
     this.notifyAppsRegistryStart();
     let ids = [];
     for (let id in this.webapps) {
@@ -446,6 +453,7 @@ this.DOMApplicationRegistry = {
   }),
 
   updateDataStoreForApp: Task.async(function*(aId) {
+    debug("RABBIT Webapps.jsm: updateDataStoreForApp");
     if (!this.webapps[aId]) {
       return;
     }
@@ -458,6 +466,7 @@ this.DOMApplicationRegistry = {
   }),
 
   appKind: function(aApp, aManifest) {
+    debug("RABBIT Webapps.jsm: appKind");
     if (aApp.origin.startsWith("app://")) {
       return this.kPackaged;
     } else {
@@ -473,6 +482,7 @@ this.DOMApplicationRegistry = {
   },
 
   updatePermissionsForApp: function(aId, aIsPreinstalled) {
+    debug("RABBIT Webapps.jsm: updatePermissionsForApp");
     if (!this.webapps[aId]) {
       return;
     }
@@ -499,6 +509,7 @@ this.DOMApplicationRegistry = {
   },
 
   updateOfflineCacheForApp: function(aId) {
+    debug("RABBIT Webapps.jsm: updateOfflineCacheForApp");
     let app = this.webapps[aId];
     this._readManifests([{ id: aId }]).then((aResult) => {
       let manifest =
@@ -518,6 +529,7 @@ this.DOMApplicationRegistry = {
 
   // Installs a 3rd party app.
   installPreinstalledApp: function installPreinstalledApp(aId) {
+    debug("RABBIT Webapps.jsm: installPreinstalledApp");
 #ifdef MOZ_WIDGET_GONK
     // In some cases, the app might be already installed under a different ID but
     // with the same manifestURL. In that case, the only content of the webapp will
@@ -627,6 +639,7 @@ this.DOMApplicationRegistry = {
   // For hosted apps, uninstall an app served from http:// if we have
   // one installed from the same url with an https:// scheme.
   removeIfHttpsDuplicate: function(aId) {
+    debug("RABBIT Webapps.jsm: removeIfHttpsDuplicate");
 #ifdef MOZ_WIDGET_GONK
     let app = this.webapps[aId];
     if (!app || !app.origin.startsWith("http://")) {
@@ -657,6 +670,7 @@ this.DOMApplicationRegistry = {
   //   c. for all apps in the new core registry, install them if they are not
   //      yet in the current registry, and run installPermissions()
   installSystemApps: function() {
+    debug("RABBIT Webapps.jsm: installSystemApps");
     return Task.spawn(function*() {
       let file;
       try {
@@ -734,6 +748,7 @@ this.DOMApplicationRegistry = {
   },
 
   loadAndUpdateApps: function() {
+    debug("RABBIT Webapps.jsm: loadAndUpdateApps");
     return Task.spawn(function*() {
       let runUpdate = AppsUtils.isFirstRun(Services.prefs);
       let loadAppPermission = Services.prefs.getBoolPref("dom.apps.reset-permissions");
@@ -811,6 +826,7 @@ this.DOMApplicationRegistry = {
   },
 
   updateDataStore: function(aId, aOrigin, aManifestURL, aManifest) {
+    debug("RABBIT Webapps.jsm: updateDataStore");
     if (!aManifest) {
       debug("updateDataStore: no manifest for " + aOrigin);
       return;
@@ -853,6 +869,7 @@ this.DOMApplicationRegistry = {
   //
   // TODO Bug 908094 Refine _registerSystemMessagesForEntryPoint(...).
   _registerSystemMessagesForEntryPoint: function(aManifest, aApp, aEntryPoint) {
+    debug("RABBIT Webapps.jsm: _registerSystemMessagesForEntryPoint");
     let root = aManifest;
     if (aEntryPoint && aManifest.entry_points[aEntryPoint]) {
       root = aManifest.entry_points[aEntryPoint];
@@ -906,6 +923,7 @@ this.DOMApplicationRegistry = {
   // TODO Bug 908094 Refine _registerInterAppConnectionsForEntryPoint(...).
   _registerInterAppConnectionsForEntryPoint: function(aManifest, aApp,
                                                       aEntryPoint) {
+    debug("RABBIT Webapps.jsm: _registerInterAppConnectionsForEntryPoint");
     let root = aManifest;
     if (aEntryPoint && aManifest.entry_points[aEntryPoint]) {
       root = aManifest.entry_points[aEntryPoint];
@@ -963,6 +981,7 @@ this.DOMApplicationRegistry = {
   },
 
   _registerSystemMessages: function(aManifest, aApp) {
+    debug("RABBIT Webapps.jsm: _registerSystemMessages");
     this._registerSystemMessagesForEntryPoint(aManifest, aApp, null);
 
     if (!aManifest.entry_points) {
@@ -975,6 +994,7 @@ this.DOMApplicationRegistry = {
   },
 
   _registerInterAppConnections: function(aManifest, aApp) {
+    debug("RABBIT Webapps.jsm: _registerInterAppConnections");
     this._registerInterAppConnectionsForEntryPoint(aManifest, aApp, null);
 
     if (!aManifest.entry_points) {
@@ -990,6 +1010,7 @@ this.DOMApplicationRegistry = {
   // |aEntryPoint| is either the entry_point name or the null in which case we
   // use the root of the manifest.
   _createActivitiesToRegister: function(aManifest, aApp, aEntryPoint, aRunUpdate) {
+    debug("RABBIT Webapps.jsm: _createActivitiesToRegister");
     let activitiesToRegister = [];
     let root = aManifest;
     if (aEntryPoint && aManifest.entry_points[aEntryPoint]) {
@@ -1050,6 +1071,7 @@ this.DOMApplicationRegistry = {
   // |aAppsToRegister| contains an array of apps to be registered, where
   // each element is an object in the format of {manifest: foo, app: bar}.
   _registerActivitiesForApps: function(aAppsToRegister, aRunUpdate) {
+    debug("RABBIT Webapps.jsm: _registerActivitiesForApps");
     // Collect the activities to be registered for root and entry_points.
     let activitiesToRegister = [];
     aAppsToRegister.forEach(function (aApp) {
@@ -1090,6 +1112,7 @@ this.DOMApplicationRegistry = {
   // |aEntryPoint| is either the entry_point name or the null in which case we
   // use the root of the manifest.
   _createActivitiesToUnregister: function(aManifest, aApp, aEntryPoint) {
+    debug("RABBIT Webapps.jsm: _createActivitiesToUnregister");
     let activitiesToUnregister = [];
     let root = aManifest;
     if (aEntryPoint && aManifest.entry_points[aEntryPoint]) {
@@ -1112,6 +1135,7 @@ this.DOMApplicationRegistry = {
   // |aAppsToUnregister| contains an array of apps to be unregistered, where
   // each element is an object in the format of {manifest: foo, app: bar}.
   _unregisterActivitiesForApps: function(aAppsToUnregister) {
+    debug("RABBIT Webapps.jsm: _unregisterActivitiesForApps");
     // Collect the activities to be unregistered for root and entry_points.
     let activitiesToUnregister = [];
     aAppsToUnregister.forEach(function (aApp) {
@@ -1141,6 +1165,7 @@ this.DOMApplicationRegistry = {
   },
 
   _processManifestForIds: function(aIds, aRunUpdate) {
+    debug("RABBIT Webapps.jsm: _processManifestForIds");
     this._readManifests(aIds).then((aResults) => {
       let appsToRegister = [];
       aResults.forEach((aResult) => {
@@ -1177,6 +1202,7 @@ this.DOMApplicationRegistry = {
   },
 
   observe: function(aSubject, aTopic, aData) {
+    debug("RABBIT Webapps.jsm: observe " + aSubject + " " + aTopic + " " + aData);
     if (aTopic == "xpcom-shutdown") {
       this.messages.forEach((function(msgName) {
         ppmm.removeMessageListener(msgName, this);
@@ -1191,6 +1217,7 @@ this.DOMApplicationRegistry = {
   },
 
   addMessageListener: function(aMsgNames, aApp, aMm) {
+    debug("RABBIT Webapps.jsm: addMessageListener");
     aMsgNames.forEach(function (aMsgName) {
       let man = aApp && aApp.manifestURL;
       if (!(aMsgName in this.children)) {
@@ -1235,6 +1262,7 @@ this.DOMApplicationRegistry = {
   },
 
   removeMessageListener: function(aMsgNames, aMm) {
+    debug("RABBIT Webapps.jsm: removeMessageListener");
     if (aMsgNames.length === 1 &&
         aMsgNames[0] === "Webapps:Internal:AllMessages") {
       for (let msgName in this.children) {
@@ -1284,6 +1312,7 @@ this.DOMApplicationRegistry = {
   },
 
   receiveMessage: function(aMessage) {
+    debug("RABBIT Webapps.jsm: receiveMessage " + aMessage.name);
     // nsIPrefBranch throws if pref does not exist, faster to simply write
     // the pref instead of first checking if it is false.
     Services.prefs.setBoolPref("dom.mozApps.used", true);
@@ -1467,6 +1496,7 @@ this.DOMApplicationRegistry = {
   },
 
   getAppInfo: function getAppInfo(aAppId) {
+    debug("RABBIT Webapps.jsm: getAppInfo");
     return AppsUtils.getAppInfo(this.webapps, aAppId);
   },
 
@@ -1480,6 +1510,7 @@ this.DOMApplicationRegistry = {
   // Webapps:checkForUpdate:Return:OK
   // Webapps:UpdateState
   broadcastMessage: function broadcastMessage(aMsgName, aContent) {
+    debug("RABBIT Webapps.jsm: broadcastMessage");
     if (!(aMsgName in this.children)) {
       return;
     }
@@ -1489,10 +1520,12 @@ this.DOMApplicationRegistry = {
   },
 
   registerUpdateHandler: function(aHandler) {
+    debug("RABBIT Webapps.jsm: registerUpdateHandler");
     this._updateHandlers.push(aHandler);
   },
 
   unregisterUpdateHandler: function(aHandler) {
+    debug("RABBIT Webapps.jsm: unregisterUpdateHandler");
     let index = this._updateHandlers.indexOf(aHandler);
     if (index != -1) {
       this._updateHandlers.splice(index, 1);
@@ -1500,6 +1533,7 @@ this.DOMApplicationRegistry = {
   },
 
   notifyUpdateHandlers: function(aApp, aManifest, aZipPath) {
+    debug("RABBIT Webapps.jsm: notifyUpdateHandler");
     for (let updateHandler of this._updateHandlers) {
       updateHandler(aApp, aManifest, aZipPath);
     }
@@ -1544,6 +1578,7 @@ this.DOMApplicationRegistry = {
     * Returns the full list of apps and manifests.
     */
   doGetList: function() {
+    debug("RABBIT Webapps.jsm: doGetList");
     let tmp = [];
 
     let res = {};
@@ -1574,6 +1609,7 @@ this.DOMApplicationRegistry = {
   },
 
   doExport: function(aMsg, aMm) {
+    debug("RABBIT Webapps.jsm: doExport");
 
     let sendError = (aError) => {
       aMm.sendAsyncMessage("Webapps:Export:Return",
@@ -1604,6 +1640,7 @@ this.DOMApplicationRegistry = {
   },
 
   doImport: function(aMsg, aMm) {
+    debug("RABBIT Webapps.jsm: doImport");
     let sendError = (aError) => {
       aMm.sendAsyncMessage("Webapps:Import:Return",
         { requestID: aMsg.requestID,
@@ -1633,6 +1670,7 @@ this.DOMApplicationRegistry = {
   },
 
   doExtractManifest: function(aMsg, aMm) {
+    debug("RABBIT Webapps.jsm: doExtractManifest");
     let sendError = (aError) => {
       aMm.sendAsyncMessage("Webapps:ExtractManifest:Return",
         { requestID: aMsg.requestID,
@@ -1668,6 +1706,7 @@ this.DOMApplicationRegistry = {
   },
 
   doLaunch: function (aData, aMm) {
+    debug("RABBIT Webapps.jsm: doLaunch");
     this.launch(
       aData.manifestURL,
       aData.startPoint,
@@ -1683,6 +1722,7 @@ this.DOMApplicationRegistry = {
   },
 
   launch: function launch(aManifestURL, aStartPoint, aTimeStamp, aOnSuccess, aOnFailure) {
+    debug("RABBIT Webapps.jsm: launch");
     let app = this.getAppByManifestURL(aManifestURL);
     if (!app) {
       aOnFailure("NO_SUCH_APP");
@@ -1724,6 +1764,7 @@ this.DOMApplicationRegistry = {
   },
 
   close: function close(aApp) {
+    debug("RABBIT Webapps.jsm: close");
     debug("close");
 
     // We have to clone the app object as nsIDOMApplication objects are
@@ -1733,6 +1774,7 @@ this.DOMApplicationRegistry = {
   },
 
   cancelDownload: function cancelDownload(aManifestURL, aError) {
+    debug("RABBIT Webapps.jsm: cancelDownload");
     debug("cancelDownload " + aManifestURL);
     let error = aError || "DOWNLOAD_CANCELED";
     let download = AppDownloadManager.get(aManifestURL);
@@ -1782,6 +1824,7 @@ this.DOMApplicationRegistry = {
   },
 
   startDownload: Task.async(function*(aManifestURL) {
+    debug("RABBIT Webapps.jsm: startDownload");
     debug("startDownload for " + aManifestURL);
 
     let id = this._appIdForManifestURL(aManifestURL);
@@ -1916,6 +1959,7 @@ this.DOMApplicationRegistry = {
   }),
 
   applyDownload: Task.async(function*(aManifestURL) {
+    debug("RABBIT Webapps.jsm: applyDownload");
     debug("applyDownload for " + aManifestURL);
     let id = this._appIdForManifestURL(aManifestURL);
     let app = this.webapps[id];
@@ -2034,6 +2078,7 @@ this.DOMApplicationRegistry = {
   }),
 
   startOfflineCacheDownload: function(aManifest, aApp, aProfileDir, aIsUpdate) {
+    debug("RABBIT Webapps.jsm: startOfflineCacheDownload");
     debug("startOfflineCacheDownload " + aApp.id + " " + aApp.kind);
     if ((aApp.kind !== this.kHostedAppcache &&
          aApp.kind !== this.kTrustedHosted) ||
@@ -2089,12 +2134,14 @@ this.DOMApplicationRegistry = {
 
   // Returns the MD5 hash of the manifest.
   computeManifestHash: function(aManifest) {
+    debug("RABBIT Webapps.jsm: computeManifestHash");
     return AppsUtils.computeHash(JSON.stringify(aManifest));
   },
 
   // Updates the redirect mapping, activities and system message handlers.
   // aOldManifest can be null if we don't have any handler to unregister.
   updateAppHandlers: function(aOldManifest, aNewManifest, aApp) {
+    debug("RABBIT Webapps.jsm: updateAppHandlers");
     debug("updateAppHandlers: old=" + uneval(aOldManifest) +
           " new=" + uneval(aNewManifest));
     this.notifyAppsRegistryStart();
@@ -2130,6 +2177,7 @@ this.DOMApplicationRegistry = {
   },
 
   checkForUpdate: function(aData, aMm) {
+    debug("RABBIT Webapps.jsm: checkForUpdate");
     debug("checkForUpdate for " + aData.manifestURL);
 
     let sendError = (aError) => {
@@ -2228,6 +2276,7 @@ this.DOMApplicationRegistry = {
 
     // On xhr load request event
     function onload(xhr, oldManifest) {
+    debug("RABBIT Webapps.jsm: onload");
       debug("Got http status=" + xhr.status + " for " + aData.manifestURL);
       let oldHash = app.manifestHash;
       let isPackage = app.kind == DOMApplicationRegistry.kPackaged;
@@ -2336,6 +2385,7 @@ this.DOMApplicationRegistry = {
 
     // Try to download a new manifest.
     function doRequest(oldManifest, headers) {
+    debug("RABBIT Webapps.jsm: doRequest");
       headers = headers || [];
       let xhr = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"]
                   .createInstance(Ci.nsIXMLHttpRequest);
@@ -2383,6 +2433,7 @@ this.DOMApplicationRegistry = {
   },
 
   updatePackagedApp: Task.async(function*(aData, aId, aApp, aNewManifest) {
+    debug("RABBIT Webapps.jsm: updatePackagedApp");
     debug("updatePackagedApp");
 
     // Store the new update manifest.
@@ -2419,6 +2470,7 @@ this.DOMApplicationRegistry = {
   // it has actually been updated, while 'aOldManifest' contains the
   // stored app manifest.
   updateHostedApp: Task.async(function*(aData, aId, aApp, aOldManifest, aNewManifest) {
+    debug("RABBIT Webapps.jsm: updateHostedApp");
     debug("updateHostedApp " + aData.manifestURL);
 
     // Clean up the deprecated manifest cache if needed.
@@ -2536,6 +2588,7 @@ this.DOMApplicationRegistry = {
   // Downloads the manifest and run checks, then eventually triggers the
   // installation UI.
   doInstall: function doInstall(aData, aMm) {
+    debug("RABBIT Webapps.jsm: doInstall");
     let app = aData.app;
 
     let sendError = (aError) => {
@@ -2698,6 +2751,7 @@ this.DOMApplicationRegistry = {
   },
 
   doInstallPackage: function doInstallPackage(aData, aMm) {
+    debug("RABBIT Webapps.jsm: doInstallPackage");
     let app = aData.app;
 
     let sendError = (aError) => {
@@ -2821,6 +2875,7 @@ this.DOMApplicationRegistry = {
   },
 
   pushContentAction: function(windowID) {
+    debug("RABBIT Webapps.jsm: pushContentAction");
     let actions = this._contentActions.get(windowID);
     if (!actions) {
       actions = {
@@ -2833,6 +2888,7 @@ this.DOMApplicationRegistry = {
   },
 
   popContentAction: function(windowID) {
+    debug("RABBIT Webapps.jsm: popContentAction");
     let actions = this._contentActions.get(windowID);
     if (!actions) {
       Cu.reportError(`Failed to pop content action for window with ID ${windowID}`);
@@ -2915,6 +2971,7 @@ this.DOMApplicationRegistry = {
   }),
 
   _setupApp: function(aData, aId) {
+    debug("RABBIT Webapps.jsm: _setupApp");
     let app = aData.app;
 
     // app can be uninstalled
@@ -2933,6 +2990,7 @@ this.DOMApplicationRegistry = {
   },
 
   _cloneApp: function(aData, aNewApp, aLocaleManifest, aManifest, aId, aLocalId) {
+    debug("RABBIT Webapps.jsm: _cloneApp");
     let appObject = AppsUtils.cloneAppObject(aNewApp);
     appObject.appStatus =
       aNewApp.appStatus || Ci.nsIPrincipal.APP_STATUS_INSTALLED;
@@ -2978,6 +3036,7 @@ this.DOMApplicationRegistry = {
   },
 
   _writeManifestFile: function(aId, aIsPackage, aJsonManifest) {
+    debug("RABBIT Webapps.jsm: _writeManifestFile");
     debug("_writeManifestFile");
 
     // For packaged apps, keep the update manifest distinct from the app manifest.
@@ -2990,6 +3049,7 @@ this.DOMApplicationRegistry = {
 
   // Add an app that is already installed to the registry.
   addInstalledApp: Task.async(function*(aApp, aManifest, aUpdateManifest) {
+    debug("RABBIT Webapps.jsm: addInstalledApp");
     if (this.getAppLocalIdByManifestURL(aApp.manifestURL) !=
         Ci.nsIScriptSecurityManager.NO_APP_ID) {
       return;
@@ -3066,6 +3126,7 @@ this.DOMApplicationRegistry = {
   }),
 
   confirmInstall: Task.async(function*(aData, aProfileDir, aInstallSuccessCallback) {
+    debug("RABBIT Webapps.jsm: confirmInstall");
     debug("confirmInstall");
 
     let origin = Services.io.newURI(aData.app.origin, null, null);
@@ -3317,6 +3378,7 @@ this.DOMApplicationRegistry = {
   },
 
   _appIdForManifestURL: function(aURI) {
+    debug("RABBIT Webapps.jsm: _appIdForManifestURL");
     for (let id in this.webapps) {
       if (this.webapps[id].manifestURL == aURI)
         return id;
@@ -3325,11 +3387,13 @@ this.DOMApplicationRegistry = {
   },
 
   makeAppId: function() {
+    debug("RABBIT Webapps.jsm: makeAppId");
     let uuidGenerator = Cc["@mozilla.org/uuid-generator;1"].getService(Ci.nsIUUIDGenerator);
     return uuidGenerator.generateUUID().toString();
   },
 
   _saveApps: function() {
+    debug("RABBIT Webapps.jsm: _saveApps");
     return this._writeFile(this.appsFile, JSON.stringify(this.webapps, null, 2));
   },
 
@@ -3340,6 +3404,7 @@ this.DOMApplicationRegistry = {
   _manifestCache: {},
 
   _readManifests: function(aData) {
+    debug("RABBIT Webapps.jsm: _readManifests");
     let manifestCache = this._manifestCache;
     return Task.spawn(function*() {
       for (let elem of aData) {
@@ -3369,6 +3434,7 @@ this.DOMApplicationRegistry = {
   },
 
   downloadPackage: Task.async(function*(aId, aOldApp, aManifest, aNewApp, aIsUpdate) {
+    debug("RABBIT Webapps.jsm: doanloadPackage");
     // Here are the steps when installing a package:
     // - create a temp directory where to store the app.
     // - download the zip in this directory.
@@ -3601,6 +3667,7 @@ this.DOMApplicationRegistry = {
   },
 
   _getPackage: function(aRequestChannel, aId, aOldApp, aNewApp) {
+    debug("RABBIT Webapps.jsm: _getPackage");
     let deferred = Promise.defer();
 
     AppsUtils.getFile(aRequestChannel, aId, "application.zip").then((aFile) => {
@@ -3627,6 +3694,7 @@ this.DOMApplicationRegistry = {
    * @returns {String} the MD5 hash of the file
    */
   _computeFileHash: function(aFilePath) {
+    debug("RABBIT Webapps.jsm: _compuateFileHash");
     let deferred = Promise.defer();
 
     let file = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsIFile);
@@ -3756,6 +3824,7 @@ this.DOMApplicationRegistry = {
   },
 
   _openPackage: function(aZipFile, aApp, aIsLocalFileInstall) {
+    debug("RABBIT Webapps.jsm: _openPackage");
     return Task.spawn((function*() {
       let certDb;
       try {
@@ -3815,6 +3884,7 @@ this.DOMApplicationRegistry = {
   },
 
   _openSignedPackage: function(aInstallOrigin, aManifestURL, aZipFile, aCertDb) {
+    debug("RABBIT Webapps.jsm: _openSingedPackage");
     let deferred = Promise.defer();
 
     let root = TrustedRootCertificate.index;
@@ -3864,6 +3934,7 @@ this.DOMApplicationRegistry = {
   _readPackage: function(aOldApp, aNewApp, aIsLocalFileInstall, aIsUpdate,
                          aManifest, aRequestChannel, aHash, aZipReader,
                          aIsSigned) {
+    debug("RABBIT Webapps.jsm: _readPackage");
     this._checkSignature(aNewApp, aIsSigned, aIsLocalFileInstall);
 
     if (!aZipReader.hasEntry("manifest.webapp")) {
@@ -4288,6 +4359,7 @@ this.DOMApplicationRegistry = {
   },
 
   getSelf: function(aData, aMm) {
+    debug("RABBIT Webapps.jsm: getSelf");
     aData.apps = [];
 
     if (aData.appId == Ci.nsIScriptSecurityManager.NO_APP_ID ||
@@ -4322,6 +4394,7 @@ this.DOMApplicationRegistry = {
   },
 
   checkInstalled: function(aData, aMm) {
+    debug("RABBIT Webapps.jsm: checkInstalled");
     aData.app = null;
     let tmp = [];
 
@@ -4344,6 +4417,7 @@ this.DOMApplicationRegistry = {
   },
 
   getInstalled: function(aData, aMm) {
+    debug("RABBIT Webapps.jsm: getInstalled");
     aData.apps = [];
     let tmp = [];
 
@@ -4363,6 +4437,7 @@ this.DOMApplicationRegistry = {
   },
 
   getNotInstalled: function(aData, aMm) {
+    debug("RABBIT Webapps.jsm: getNotInstalled");
     aData.apps = [];
     let tmp = [];
 
@@ -4381,6 +4456,7 @@ this.DOMApplicationRegistry = {
   },
 
   getIcon: function(aData, aMm) {
+    debug("RABBIT Webapps.jsm: getIcon");
     let sendError = (aError) => {
       debug("getIcon error: " + aError);
       aData.error = aError;
@@ -4449,6 +4525,7 @@ this.DOMApplicationRegistry = {
   },
 
   getAll: function(aCallback) {
+    debug("RABBIT Webapps.jsm: getAll");
     debug("getAll");
     let apps = [];
     let tmp = [];
@@ -4657,6 +4734,7 @@ this.DOMApplicationRegistry = {
   },
 
   setEnabled: function(aData) {
+    debug("RABBIT Webapps.jsm: setEnabled");
     debug("setEnabled " + aData.manifestURL + " : " + aData.enabled);
     let id = this._appIdForManifestURL(aData.manifestURL);
     if (!id || !this.webapps[id]) {
@@ -4682,6 +4760,7 @@ this.DOMApplicationRegistry = {
   },
 
   getManifestFor: function(aManifestURL, aEntryPoint) {
+    debug("RABBIT Webapps.jsm: getManifestFor");
     let id = this._appIdForManifestURL(aManifestURL);
     let app = this.webapps[id];
     if (!id || (app.installState == "pending" && !app.retryingDownload)) {
@@ -4703,6 +4782,7 @@ this.DOMApplicationRegistry = {
 
   // Returns a promise that resolves to the app object with the manifest.
   getFullAppByManifestURL: function(aManifestURL, aEntryPoint, aLang) {
+    debug("RABBIT Webapps.jsm: getFullAppByManifestURL");
     let app = this.getAppByManifestURL(aManifestURL);
     if (!app) {
       return Promise.reject("NoSuchApp");
@@ -4727,6 +4807,7 @@ this.DOMApplicationRegistry = {
   },
 
   _getAppWithManifest: Task.async(function*(aManifestURL) {
+    debug("RABBIT Webapps.jsm: _getAppWithManifest");
     let app = this.getAppByManifestURL(aManifestURL);
     if (!app) {
       throw new Error("NO_SUCH_APP");
@@ -4738,41 +4819,50 @@ this.DOMApplicationRegistry = {
   }),
 
   getManifestCSPByLocalId: function(aLocalId) {
+    debug("RABBIT Webapps.jsm: getManifestCSPByLocalId");
     debug("getManifestCSPByLocalId:" + aLocalId);
     return AppsUtils.getManifestCSPByLocalId(this.webapps, aLocalId);
   },
 
   getDefaultCSPByLocalId: function(aLocalId) {
+    debug("RABBIT Webapps.jsm: getDefaultCSPByLocalId");
     debug("getDefaultCSPByLocalId:" + aLocalId);
     return AppsUtils.getDefaultCSPByLocalId(this.webapps, aLocalId);
   },
 
   getAppLocalIdByStoreId: function(aStoreId) {
+    debug("RABBIT Webapps.jsm: getAppLocalIdByStoreId");
     debug("getAppLocalIdByStoreId:" + aStoreId);
     return AppsUtils.getAppLocalIdByStoreId(this.webapps, aStoreId);
   },
 
   getAppByLocalId: function(aLocalId) {
+    debug("RABBIT Webapps.jsm: getAppByLocalId");
     return AppsUtils.getAppByLocalId(this.webapps, aLocalId);
   },
 
   getManifestURLByLocalId: function(aLocalId) {
+    debug("RABBIT Webapps.jsm: getManifestURLByLocalId");
     return AppsUtils.getManifestURLByLocalId(this.webapps, aLocalId);
   },
 
   getAppLocalIdByManifestURL: function(aManifestURL) {
+    debug("RABBIT Webapps.jsm: getAppLocalIdByManifestURL");
     return AppsUtils.getAppLocalIdByManifestURL(this.webapps, aManifestURL);
   },
 
   getCoreAppsBasePath: function() {
+    debug("RABBIT Webapps.jsm: getCoreAppsBasePath");
     return AppsUtils.getCoreAppsBasePath();
   },
 
   getWebAppsBasePath: function() {
+    debug("RABBIT Webapps.jsm: getWebAppsBasePath");
     return OS.Path.dirname(this.appsFile);
   },
 
   _isLaunchable: function(aApp) {
+    debug("RABBIT Webapps.jsm: _isLaunchable");
     if (this.allAppsLaunchable)
       return true;
 
@@ -4848,6 +4938,7 @@ this.DOMApplicationRegistry = {
   },
 
   receiveAppMessage: function(appId, message) {
+    debug("RABBIT Webapps.jsm: receiveAppMessage");
     switch (message.name) {
       case "Webapps:ClearBrowserData":
         this._clearPrivateData(appId, true, message.data);
