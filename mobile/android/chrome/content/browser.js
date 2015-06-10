@@ -10,6 +10,7 @@ let Cu = Components.utils;
 let Cr = Components.results;
 
 let tBeg = performance.now();
+let tBegAll = performance.now();
 
 Cu.import("resource://gre/modules/AppConstants.jsm");
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
@@ -19,8 +20,6 @@ Cu.import("resource://gre/modules/DelayedInit.jsm");
 Cu.import('resource://gre/modules/Payment.jsm');
 Cu.import("resource://gre/modules/NotificationDB.jsm");
 Cu.import("resource://gre/modules/SpatialNavigation.jsm");
-
-let tImpEnd = performance.now();
 
 if (AppConstants.ACCESSIBILITY) {
   Cu.import("resource://gre/modules/accessibility/AccessFu.jsm");
@@ -356,6 +355,8 @@ const kFormHelperModeEnabled = 1;
 const kFormHelperModeDynamic = 2;   // disabled on tablets
 const kMaxHistoryListSize = 50;
 
+let tImpEnd = performance.now();
+
 var BrowserApp = {
   _tabs: [],
   _selectedTab: null,
@@ -577,6 +578,7 @@ var BrowserApp = {
 
     }, false);
     console.log("RABBITp browser.js: end // " + (performance.now() - tBeg));
+    console.log("RABBITp browser.js: total // " + (performance.now() - tBegAll));
   },
 
   get _startupStatus() {
