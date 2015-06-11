@@ -254,6 +254,61 @@ if (AppConstants.MOZ_WEBRTC) {
     "@mozilla.org/mediaManagerService;1", "nsIMediaManagerService");
 }
 
+XPCOMUtils.defineLazyModuleGetter(
+  this,
+  "DOMApplicationRegistry",
+  "resource://gre/modules/Webapps.jsm",
+  null,
+  function() {
+    XPCOMUtils.defineLazyServiceGetter(this, "ppmm",
+                                   "@mozilla.org/parentprocessmessagemanager;1",
+                                   "nsIMessageBroadcaster");
+
+    this.messages = ["Webapps:Install",
+                     "Webapps:Uninstall",
+                     "Webapps:GetSelf",
+                     "Webapps:CheckInstalled",
+                     "Webapps:GetInstalled",
+                     "Webapps:GetNotInstalled",
+                     "Webapps:Launch",
+                     "Webapps:LocationChange",
+                     "Webapps:InstallPackage",
+                     "Webapps:GetList",
+                     "Webapps:RegisterForMessages",
+                     "Webapps:UnregisterForMessages",
+                     "Webapps:CancelDownload",
+                     "Webapps:CheckForUpdate",
+                     "Webapps:Download",
+                     "Webapps:ApplyDownload",
+                     "Webapps:Install:Return:Ack",
+                     "Webapps:AddReceipt",
+                     "Webapps:RemoveReceipt",
+                     "Webapps:ReplaceReceipt",
+                     "Webapps:RegisterBEP",
+                     "Webapps:Export",
+                     "Webapps:Import",
+                     "Webapps:GetIcon",
+                     "Webapps:ExtractManifest",
+                     "Webapps:SetEnabled",
+                     "child-process-shutdown"];
+
+    this.messages.forEach(msgName => {
+      this.ppmm.addMessageListener(msgName, this);
+    });
+  },
+  function() {
+    this.messages.forEach(msgName => {
+      this.ppmm.removeMessageListener(msgName, this);
+    });
+  },
+  {
+    receiveMessage: function() {
+      return DOMApplicationRegistry.receiveMessage.apply(
+          DOMApplicationRegistry, arguments);
+    }
+  }
+);
+
 const kStateActive = 0x00000001; // :active pseudoclass for elements
 
 const kXLinkNamespace = "http://www.w3.org/1999/xlink";
@@ -465,7 +520,6 @@ var BrowserApp = {
     XPInstallObserver.init();
     CharacterEncoding.init();
     ActivityObserver.init();
-    Cu.import("resource://gre/modules/Webapps.jsm");
     console.log("RABBITp browser.js: 100 // " + (performance.now() - tBeg));
     tBeg = performance.now();
     RemoteDebugger.init();
