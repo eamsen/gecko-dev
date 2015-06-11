@@ -465,9 +465,7 @@ var BrowserApp = {
     XPInstallObserver.init();
     CharacterEncoding.init();
     ActivityObserver.init();
-    // TODO: replace with Android implementation of WebappOSUtils.isLaunchable.
     Cu.import("resource://gre/modules/Webapps.jsm");
-    DOMApplicationRegistry.allAppsLaunchable = true;
     console.log("RABBITp browser.js: 100 // " + (performance.now() - tBeg));
     tBeg = performance.now();
     RemoteDebugger.init();
