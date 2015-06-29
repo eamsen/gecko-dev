@@ -66,6 +66,7 @@ const VALID_TYPES_REGEXP = /^[\w\-]+$/;
 Cu.import("resource://gre/modules/Services.jsm");
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 Cu.import("resource://gre/modules/AsyncShutdown.jsm");
+Cu.import("resource://gre/modules/DelayedInit.jsm");
 
 XPCOMUtils.defineLazyModuleGetter(this, "Task",
                                   "resource://gre/modules/Task.jsm");
@@ -734,6 +735,16 @@ var AddonManagerInternal = {
     logger.debug(`Provider finished startup: ${providerName(aProvider)}`);
   },
 
+  _ready: Promise.defer(),
+
+  notifyReady: function notifyReady() {
+    this._ready.resolve();
+  },
+
+  get ready() {
+    return this._ready.promise;
+  },
+
   /**
    * Initializes the AddonManager, loading any known providers and initializing
    * them.
@@ -864,13 +875,13 @@ var AddonManagerInternal = {
       }
 
       // Register our shutdown handler with the AsyncShutdown manager
-      gShutdownBarrier = new AsyncShutdown.Barrier("AddonManager: Waiting for providers to shut down.");
       AsyncShutdown.profileBeforeChange.addBlocker("AddonManager: shutting down.",
                                                    this.shutdownManager.bind(this),
                                                    {fetchState: this.shutdownState.bind(this)});
 
       // Once we start calling providers we must allow all normal methods to work.
       gStarted = true;
+      this.notifyReady();
 
       for (let provider of this.pendingProviders) {
         this._startProvider(provider, appChanged, oldAppVersion, oldPlatformVersion);
@@ -2227,34 +2238,36 @@ var AddonManagerInternal = {
    * @throws if the aCallback argument is not specified
    */
   getAddonsByTypes: function AMI_getAddonsByTypes(aTypes, aCallback) {
-    if (!gStarted)
-      throw Components.Exception("AddonManager is not initialized",
-                                 Cr.NS_ERROR_NOT_INITIALIZED);
+    this.ready.then(() => {
+      if (!gStarted)
+        throw Components.Exception("AddonManager is not initialized",
+                                   Cr.NS_ERROR_NOT_INITIALIZED);
 
-    if (aTypes && !Array.isArray(aTypes))
-      throw Components.Exception("aTypes must be an array or null",
-                                 Cr.NS_ERROR_INVALID_ARG);
+      if (aTypes && !Array.isArray(aTypes))
+        throw Components.Exception("aTypes must be an array or null",
+                                   Cr.NS_ERROR_INVALID_ARG);
 
-    if (typeof aCallback != "function")
-      throw Components.Exception("aCallback must be a function",
-                                 Cr.NS_ERROR_INVALID_ARG);
+      if (typeof aCallback != "function")
+        throw Components.Exception("aCallback must be a function",
+                                   Cr.NS_ERROR_INVALID_ARG);
 
-    let addons = [];
+      let addons = [];
 
-    new AsyncObjectCaller(this.providers, "getAddonsByTypes", {
-      nextObject: function getAddonsByTypes_nextObject(aCaller, aProvider) {
-        callProviderAsync(aProvider, "getAddonsByTypes", aTypes,
-                          function getAddonsByTypes_concatAddons(aProviderAddons) {
-          if (aProviderAddons) {
-            addons = addons.concat(aProviderAddons);
-          }
-          aCaller.callNext();
-        });
-      },
+      new AsyncObjectCaller(this.providers, "getAddonsByTypes", {
+        nextObject: function getAddonsByTypes_nextObject(aCaller, aProvider) {
+          callProviderAsync(aProvider, "getAddonsByTypes", aTypes,
+                            function getAddonsByTypes_concatAddons(aProviderAddons) {
+            if (aProviderAddons) {
+              addons = addons.concat(aProviderAddons);
+            }
+            aCaller.callNext();
+          });
+        },
 
-      noMoreObjects: function getAddonsByTypes_noMoreObjects(aCaller) {
-        safeCall(aCallback, addons);
-      }
+        noMoreObjects: function getAddonsByTypes_noMoreObjects(aCaller) {
+          safeCall(aCallback, addons);
+        }
+      });
     });
   },
 
@@ -2513,7 +2526,11 @@ var AddonManagerInternal = {
  */
 this.AddonManagerPrivate = {
   startup: function AMP_startup() {
-    AddonManagerInternal.startup();
+    if (!gShutdownBarrier) {
+      gShutdownBarrier = new AsyncShutdown.Barrier("AddonManager: Waiting for providers to shut down.");
+    }
+    DelayedInit.schedule(() => { AddonManagerInternal.startup(); },
+                         null, "AddonManagerInternal");
   },
 
   registerProvider: function AMP_registerProvider(aProvider, aTypes) {
