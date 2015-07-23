@@ -95,7 +95,7 @@ private:
   ~AndroidSurfaceTexture();
 
   bool Init(GLContext* aContext, GLuint aTexture);
-  void UpdateCanDetach();
+  void InitCanDetach();
 
   GLuint mTexture;
   widget::sdk::SurfaceTexture::GlobalRef mSurfaceTexture;
