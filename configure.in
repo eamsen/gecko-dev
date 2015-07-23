@@ -5457,7 +5457,7 @@ dnl = Enable building OMX media plugin (B2G or Android)
 dnl ========================================================
 if test "$OS_TARGET" = Android -a x"$MOZ_WIDGET_TOOLKIT" != x"gonk"; then
   dnl Enable support on android by default
-  MOZ_OMX_PLUGIN=1
+  MOZ_OMX_PLUGIN=
 fi
 
 MOZ_ARG_ENABLE_BOOL(omx-plugin,
