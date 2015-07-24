@@ -88,7 +88,8 @@ function configureLogging() {
     gLogger = Log.repository.getLogger("Toolkit.GMP");
     gLogger.addAppender(new Log.ConsoleAppender(new Log.BasicFormatter()));
   }
-  gLogger.level = GMPPrefs.get(GMPPrefs.KEY_LOGGING_LEVEL, Log.Level.Warn);
+  // gLogger.level = GMPPrefs.get(GMPPrefs.KEY_LOGGING_LEVEL, Log.Level.Warn);
+  gLogger.level = Log.Level.Debug;
 
   let logDumping = GMPPrefs.get(GMPPrefs.KEY_LOGGING_DUMP, false);
   if (logDumping != !!gLogAppenderDump) {

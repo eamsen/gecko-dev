@@ -548,6 +548,7 @@ var AddonManagerInternal = {
   addonListeners: [],
   typeListeners: [],
   pendingProviders: new Set(),
+  lazyPendingProviders: new Set(),
   providers: new Set(),
   providerShutdowns: new Map(),
   types: {},
@@ -862,8 +863,9 @@ var AddonManagerInternal = {
 
         try {
           logger.debug("importing entry " + url);
-          Components.utils.import(url, {});
-          logger.debug(`Loaded provider scope for ${url}`);
+          this.lazyPendingProviders.add(url);
+          // Components.utils.import(url, {});
+          // logger.debug(`Loaded provider scope for ${url}`);
         }
         catch (e) {
           AddonManagerPrivate.recordException("AMI", "provider " + url + " load failed", e);
@@ -2298,6 +2300,12 @@ var AddonManagerInternal = {
     if (typeof aCallback != "function")
       throw Components.Exception("aCallback must be a function",
                                  Cr.NS_ERROR_INVALID_ARG);
+
+    
+    for (let provider of this.lazyPendingProviders) {
+      Components.utils.import(provider, {});
+    }
+    this.lazyPendingProviders.clear();
 
     this.getAddonsByTypes(null, aCallback);
     logger.debug(" ->  " + (Cu.now() - t0));
