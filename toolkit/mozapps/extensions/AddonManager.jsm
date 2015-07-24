@@ -145,12 +145,7 @@ var PrefObserver = {
         Services.obs.removeObserver(this, "xpcom-shutdown");
       }
       else if (aTopic == NS_PREFBRANCH_PREFCHANGE_TOPIC_ID) {
-        let debugLogEnabled = false;
-        try {
-          debugLogEnabled = Services.prefs.getBoolPref(PREF_LOGGING_ENABLED);
-        }
-        catch (e) {
-        }
+        let debugLogEnabled = true;
         if (debugLogEnabled) {
           parentLogger.level = Log.Level.Debug;
         }
@@ -739,9 +734,14 @@ var AddonManagerInternal = {
    * them.
    */
   startup: function AMI_startup() {
+    let t0 = Cu.now();
+    let ts = t0;
     try {
       if (gStarted)
         return;
+      logger.debug("startup");
+      logger.debug(" 0000 " + (Cu.now() - t0));
+      t0 = Cu.now();
 
       this.recordTimestamp("AMI_startup_begin");
 
@@ -821,6 +821,9 @@ var AddonManagerInternal = {
       } catch (e) {}
       AddonManagerPrivate.recordSimpleMeasure("default_providers", defaultProvidersEnabled);
 
+      logger.debug(" 0100 " + (Cu.now() - t0));
+      t0 = Cu.now();
+
       // Ensure all default providers have had a chance to register themselves
       if (defaultProvidersEnabled) {
         for (let url of DEFAULT_PROVIDERS) {
@@ -843,6 +846,8 @@ var AddonManagerInternal = {
           }
         };
       }
+      logger.debug(" 1000 " + (Cu.now() - t0));
+      t0 = Cu.now();
 
       // Load any providers registered in the category manager
       let catman = Cc["@mozilla.org/categorymanager;1"].
@@ -852,7 +857,11 @@ var AddonManagerInternal = {
         let entry = entries.getNext().QueryInterface(Ci.nsISupportsCString).data;
         let url = catman.getCategoryEntry(CATEGORY_PROVIDER_MODULE, entry);
 
+        logger.debug(" 1100 " + (Cu.now() - t0));
+        t0 = Cu.now();
+
         try {
+          logger.debug("importing entry " + url);
           Components.utils.import(url, {});
           logger.debug(`Loaded provider scope for ${url}`);
         }
@@ -862,6 +871,8 @@ var AddonManagerInternal = {
                 url + "\"", e);
         }
       }
+      logger.debug(" 2000 " + (Cu.now() - t0));
+      t0 = Cu.now();
 
       // Register our shutdown handler with the AsyncShutdown manager
       gShutdownBarrier = new AsyncShutdown.Barrier("AddonManager: Waiting for providers to shut down.");
@@ -872,8 +883,15 @@ var AddonManagerInternal = {
       // Once we start calling providers we must allow all normal methods to work.
       gStarted = true;
 
+      logger.debug(" 3000 " + (Cu.now() - t0));
+      t0 = Cu.now();
+
+      let t0310 = 0;
       for (let provider of this.pendingProviders) {
         this._startProvider(provider, appChanged, oldAppVersion, oldPlatformVersion);
+        logger.debug(" 310" + t0310 + " " + (Cu.now() - t0));
+        t0 = Cu.now();
+        t0310 += 1;
       }
 
       // If this is a new profile just pretend that there were no changes
@@ -881,6 +899,9 @@ var AddonManagerInternal = {
         for (let type in this.startupChanges)
           delete this.startupChanges[type];
       }
+
+      logger.debug(" 3200 " + (Cu.now() - t0));
+      t0 = Cu.now();
 
       // Support for remote about:plugins. Note that this module isn't loaded
       // at the top because Services.appinfo is defined late in tests.
@@ -891,13 +912,16 @@ var AddonManagerInternal = {
 
       gStartupComplete = true;
       this.recordTimestamp("AMI_startup_end");
+
+      logger.debug(" 4000 " + (Cu.now() - t0));
+      t0 = Cu.now();
     }
     catch (e) {
       logger.error("startup failed", e);
       AddonManagerPrivate.recordException("AMI", "startup failed", e);
     }
 
-    logger.debug("Completed startup sequence");
+    logger.debug("Completed startup sequence in " + (Cu.now() - ts));
     this.callManagerListeners("onStartup");
   },
 
@@ -2265,6 +2289,8 @@ var AddonManagerInternal = {
    *         A callback which will be passed an array of Addons
    */
   getAllAddons: function AMI_getAllAddons(aCallback) {
+    logger.debug("getAllAddons");
+    let t0 = Cu.now();
     if (!gStarted)
       throw Components.Exception("AddonManager is not initialized",
                                  Cr.NS_ERROR_NOT_INITIALIZED);
@@ -2274,6 +2300,7 @@ var AddonManagerInternal = {
                                  Cr.NS_ERROR_INVALID_ARG);
 
     this.getAddonsByTypes(null, aCallback);
+    logger.debug(" ->  " + (Cu.now() - t0));
   },
 
   /**
