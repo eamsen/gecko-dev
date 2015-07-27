@@ -2383,8 +2383,7 @@ this.XPIProvider = {
           logger.debug(" 4200 " + (Cu.now() - t0));
           t0 = Cu.now();
         }
-        // DelayedInit.schedule(this.addAddonsToCrashReporter);
-        // this.addAddonsToCrashReporter();
+        DelayedInit.schedule(() => this.addAddonsToCrashReporter());
         logger.debug(" 4300 " + (Cu.now() - t0));
         t0 = Cu.now();
       }
@@ -4525,7 +4524,7 @@ this.XPIProvider = {
       multiprocessCompatible: aMultiprocessCompatible
     };
     this.persistBootstrappedAddons();
-    this.addAddonsToCrashReporter();
+    DelayedInit.schedule(() => this.addAddonsToCrashReporter());
 
     // Locales only contain chrome and can't have bootstrap scripts
     if (aType == "locale") {
@@ -4616,7 +4615,7 @@ this.XPIProvider = {
     delete this.bootstrapScopes[aId];
     delete this.bootstrappedAddons[aId];
     this.persistBootstrappedAddons();
-    this.addAddonsToCrashReporter();
+    DelayedInit.schedule(() => this.addAddonsToCrashReporter());
 
     // Only access BrowserToolboxProcess if ToolboxProcess.jsm has been
     // initialized as otherwise, there won't be any addon globals added to it
