@@ -2670,6 +2670,7 @@ this.XPIProvider = {
    * Adds a list of currently active add-ons to the next crash report.
    */
   addAddonsToCrashReporter: function XPI_addAddonsToCrashReporter() {
+    let t0 = Cu.now();
     if (!("nsICrashReporter" in Ci) ||
         !(Services.appinfo instanceof Ci.nsICrashReporter))
       return;
@@ -2684,15 +2685,23 @@ this.XPIProvider = {
       data += (data ? "," : "") + encodeURIComponent(id) + ":" +
               encodeURIComponent(this.bootstrappedAddons[id].version);
     }
+    logger.debug(" addAddonsToCR 0000 " + (Cu.now() - t0));
+    t0 = Cu.now();
 
     try {
       Services.appinfo.annotateCrashReport("Add-ons", data);
     }
     catch (e) { }
+    logger.debug(" addAddonsToCR 1000 " + (Cu.now() - t0));
+    t0 = Cu.now();
 
     let TelemetrySession =
       Cu.import("resource://gre/modules/TelemetrySession.jsm", {}).TelemetrySession;
+    logger.debug(" addAddonsToCR 1100 " + (Cu.now() - t0));
+    t0 = Cu.now();
     TelemetrySession.setAddOns(data);
+    logger.debug(" addAddonsToCR 2000 " + (Cu.now() - t0));
+    t0 = Cu.now();
   },
 
   /**
