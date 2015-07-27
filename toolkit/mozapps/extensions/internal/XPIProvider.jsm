@@ -11,10 +11,11 @@ const Cu = Components.utils;
 
 this.EXPORTED_SYMBOLS = ["XPIProvider"];
 
-Components.utils.import("resource://gre/modules/Services.jsm");
-Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
-Components.utils.import("resource://gre/modules/AddonManager.jsm");
-Components.utils.import("resource://gre/modules/Preferences.jsm");
+Cu.import("resource://gre/modules/Services.jsm");
+Cu.import("resource://gre/modules/XPCOMUtils.jsm");
+Cu.import("resource://gre/modules/AddonManager.jsm");
+Cu.import("resource://gre/modules/Preferences.jsm");
+Cu.import("resource://gre/modules/DelayedInit.jsm");
 
 XPCOMUtils.defineLazyModuleGetter(this, "AddonRepository",
                                   "resource://gre/modules/addons/AddonRepository.jsm");
@@ -2176,6 +2177,8 @@ this.XPIProvider = {
    *         if it is a new profile or the version is unknown
    */
   startup: function XPI_startup(aAppChanged, aOldAppVersion, aOldPlatformVersion) {
+    let t0 = Cu.now();
+    let ts = t0;
     function addDirectoryInstallLocation(aName, aKey, aPaths, aScope, aLocked) {
       try {
         var dir = FileUtils.getDir(aKey, aPaths);
@@ -2233,6 +2236,8 @@ this.XPIProvider = {
       let enabledScopes = Preferences.get(PREF_EM_ENABLED_SCOPES,
                                           AddonManager.SCOPE_ALL);
 
+      logger.debug(" 0000 " + (Cu.now() - t0));
+      t0 = Cu.now();
       // These must be in order of priority, highest to lowest,
       // for processFileChanges etc. to work
       // The profile location is always enabled
@@ -2270,6 +2275,8 @@ this.XPIProvider = {
                                      AddonManager.SCOPE_SYSTEM);
         }
       }
+      logger.debug(" 1000 " + (Cu.now() - t0));
+      t0 = Cu.now();
 
       let defaultPrefs = new Preferences({ defaultBranch: true });
       this.defaultSkin = defaultPrefs.get(PREF_GENERAL_SKINS_SELECTEDSKIN,
@@ -2307,6 +2314,8 @@ this.XPIProvider = {
 
       // Changes to installed extensions may have changed which theme is selected
       this.applyThemeChange();
+      logger.debug(" 2000 " + (Cu.now() - t0));
+      t0 = Cu.now();
 
       AddonManagerPrivate.markProviderSafe(this);
 
@@ -2336,6 +2345,8 @@ this.XPIProvider = {
         }
       }
 
+      logger.debug(" 3000 " + (Cu.now() - t0));
+      t0 = Cu.now();
       if (flushCaches) {
         flushStartupCache();
         // UI displayed early in startup (like the compatibility UI) may have
@@ -2348,19 +2359,38 @@ this.XPIProvider = {
 
       this.enabledAddons = Preferences.get(PREF_EM_ENABLED_ADDONS, "");
 
+      logger.debug(" 4000 " + (Cu.now() - t0));
+      t0 = Cu.now();
       if ("nsICrashReporter" in Ci &&
           Services.appinfo instanceof Ci.nsICrashReporter) {
         // Annotate the crash report with relevant add-on information.
         try {
           Services.appinfo.annotateCrashReport("Theme", this.currentSkin);
-        } catch (e) { }
+          logger.debug(" 4100 " + (Cu.now() - t0));
+          t0 = Cu.now();
+        } catch (e) {
+          logger.debug(e);
+          logger.debug(" 4100 " + (Cu.now() - t0));
+          t0 = Cu.now();
+        }
         try {
           Services.appinfo.annotateCrashReport("EMCheckCompatibility",
                                                AddonManager.checkCompatibility);
-        } catch (e) { }
-        this.addAddonsToCrashReporter();
+          logger.debug(" 4200 " + (Cu.now() - t0));
+          t0 = Cu.now();
+        } catch (e) {
+          logger.debug(e);
+          logger.debug(" 4200 " + (Cu.now() - t0));
+          t0 = Cu.now();
+        }
+        // DelayedInit.schedule(this.addAddonsToCrashReporter);
+        // this.addAddonsToCrashReporter();
+        logger.debug(" 4300 " + (Cu.now() - t0));
+        t0 = Cu.now();
       }
 
+      logger.debug(" 5000 " + (Cu.now() - t0));
+      t0 = Cu.now();
       try {
         AddonManagerPrivate.recordTimestamp("XPI_bootstrap_addons_begin");
         for (let id in this.bootstrappedAddons) {
@@ -2387,6 +2417,8 @@ this.XPIProvider = {
         logger.error("bootstrap startup failed", e);
         AddonManagerPrivate.recordException("XPI-BOOTSTRAP", "startup failed", e);
       }
+      logger.debug(" 6000 " + (Cu.now() - t0));
+      t0 = Cu.now();
 
       // Let these shutdown a little earlier when they still have access to most
       // of XPCOM
@@ -2415,6 +2447,8 @@ this.XPIProvider = {
 
       AddonManagerPrivate.recordTimestamp("XPI_startup_end");
 
+      logger.debug(" 7000 " + (Cu.now() - t0));
+      t0 = Cu.now();
       this.extensionsActive = true;
       this.runPhase = XPI_BEFORE_UI_STARTUP;
 
@@ -2428,6 +2462,7 @@ this.XPIProvider = {
       logger.error("startup failed", e);
       AddonManagerPrivate.recordException("XPI", "startup failed", e);
     }
+    logger.debug(" final " + (Cu.now() - ts));
   },
 
   /**
