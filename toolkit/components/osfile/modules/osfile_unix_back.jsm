@@ -25,6 +25,8 @@
      let libc = SysAll.libc;
      let Const = SharedAll.Constants.libc;
 
+     LOG("RABBIT osfile_unix_back");
+
      /**
       * Initialize the Unix module.
       *

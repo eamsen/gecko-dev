@@ -2383,7 +2383,7 @@ this.XPIProvider = {
           logger.debug(" 4200 " + (Cu.now() - t0));
           t0 = Cu.now();
         }
-        DelayedInit.schedule(() => this.addAddonsToCrashReporter());
+        this.addAddonsToCrashReporter();
         logger.debug(" 4300 " + (Cu.now() - t0));
         t0 = Cu.now();
       }
@@ -2697,7 +2697,7 @@ this.XPIProvider = {
 
     let TelemetrySession =
       Cu.import("resource://gre/modules/TelemetrySession.jsm", {}).TelemetrySession;
-    logger.debug(" addAddonsToCR 1100 " + (Cu.now() - t0));
+    logger.debug(" addAddonsToCR 1100 " + (Cu.now() - t0) + " ******************");
     t0 = Cu.now();
     TelemetrySession.setAddOns(data);
     logger.debug(" addAddonsToCR 2000 " + (Cu.now() - t0));
@@ -4533,7 +4533,7 @@ this.XPIProvider = {
       multiprocessCompatible: aMultiprocessCompatible
     };
     this.persistBootstrappedAddons();
-    DelayedInit.schedule(() => this.addAddonsToCrashReporter());
+    this.addAddonsToCrashReporter();
 
     // Locales only contain chrome and can't have bootstrap scripts
     if (aType == "locale") {
@@ -4624,7 +4624,7 @@ this.XPIProvider = {
     delete this.bootstrapScopes[aId];
     delete this.bootstrappedAddons[aId];
     this.persistBootstrappedAddons();
-    DelayedInit.schedule(() => this.addAddonsToCrashReporter());
+    this.addAddonsToCrashReporter();
 
     // Only access BrowserToolboxProcess if ToolboxProcess.jsm has been
     // initialized as otherwise, there won't be any addon globals added to it
