@@ -531,6 +531,20 @@ TimeStamp::Now(bool aHighResolution)
   return TimeStamp(TimeStampValue(GTC, QPC, useQPC));
 }
 
+TimeStamp
+TimeStamp::ThreadTime()
+{
+  // TODO: Insert platform-specific implementation.
+  return TimeStamp();
+}
+
+TimeStamp
+TimeStamp::ProcessTime()
+{
+  // TODO: Insert platform-specific implementation.
+  return TimeStamp();
+}
+
 // Computes and returns the process uptime in microseconds.
 // Returns 0 if an error was encountered.
 

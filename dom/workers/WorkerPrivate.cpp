@@ -2127,6 +2127,8 @@ WorkerPrivateParent<Derived>::WorkerPrivateParent(
   mIsChromeWorker(aIsChromeWorker), mMainThreadObjectsForgotten(false),
   mWorkerType(aWorkerType),
   mCreationTimeStamp(TimeStamp::Now()),
+  mCreationThreadTime(TimeStamp::ThreadTime()),
+  mCreationProcessTime(TimeStamp::ProcessTime()),
   mCreationTimeHighRes((double)PR_Now() / PR_USEC_PER_MSEC)
 {
   MOZ_ASSERT_IF(!IsDedicatedWorker(),
@@ -2150,6 +2152,8 @@ WorkerPrivateParent<Derived>::WorkerPrivateParent(
     MOZ_ASSERT(IsDedicatedWorker());
     mNowBaseTimeStamp = aParent->NowBaseTimeStamp();
     mNowBaseTimeHighRes = aParent->NowBaseTimeHighRes();
+    mThreadBaseTime = aParent->ThreadBaseTime();
+    mProcessBaseTime = aParent->ProcessBaseTime();
   }
   else {
     AssertIsOnMainThread();
@@ -2162,9 +2166,15 @@ WorkerPrivateParent<Derived>::WorkerPrivateParent(
         GetNavigationStartTimeStamp();
       mNowBaseTimeHighRes = mLoadInfo.mWindow->GetPerformance()->GetDOMTiming()->
         GetNavigationStartHighRes();
+      mThreadBaseTime = mLoadInfo.mWindow->GetPerformance()->GetDOMTiming()->
+        GetNavigationStartThreadTime();
+      mProcessBaseTime = mLoadInfo.mWindow->GetPerformance()->GetDOMTiming()->
+        GetNavigationStartProcessTime();
     } else {
       mNowBaseTimeStamp = CreationTimeStamp();
       mNowBaseTimeHighRes = CreationTimeHighRes();
+      mThreadBaseTime = mCreationThreadTime;
+      mProcessBaseTime = mCreationProcessTime;
     }
   }
 }

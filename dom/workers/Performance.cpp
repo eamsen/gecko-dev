@@ -41,6 +41,22 @@ Performance::Now() const
   return floor(nowTime / maxResolutionMs) * maxResolutionMs;
 }
 
+DOMHighResTimeStamp
+Performance::ThreadTime() const
+{
+  TimeDuration duration = TimeStamp::ThreadTime() -
+                          mWorkerPrivate->ThreadBaseTime();
+  return duration.ToMilliseconds();
+}
+
+DOMHighResTimeStamp
+Performance::ProcessTime() const
+{
+  TimeDuration duration = TimeStamp::ProcessTime() -
+                          mWorkerPrivate->ProcessBaseTime();
+  return duration.ToMilliseconds();
+}
+
 // To be removed once bug 1124165 lands
 bool
 Performance::IsPerformanceTimingAttribute(const nsAString& aName)
