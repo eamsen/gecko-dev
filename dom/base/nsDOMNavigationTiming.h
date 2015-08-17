@@ -47,6 +47,12 @@ public:
   mozilla::TimeStamp GetNavigationStartTimeStamp() const {
     return mNavigationStartTimeStamp;
   }
+  mozilla::TimeStamp GetNavigationStartThreadTime() const {
+    return mNavigationStartThreadTime;
+  }
+  mozilla::TimeStamp GetNavigationStartProcessTime() const {
+    return mNavigationStartProcessTime;
+  }
   DOMTimeMilliSec GetUnloadEventStart();
   DOMTimeMilliSec GetUnloadEventEnd();
   DOMTimeMilliSec GetDomLoading() const {
@@ -89,9 +95,24 @@ public:
   void NotifyDOMContentLoadedEnd(nsIURI* aURI);
   DOMTimeMilliSec TimeStampToDOM(mozilla::TimeStamp aStamp) const;
 
-  inline DOMHighResTimeStamp TimeStampToDOMHighRes(mozilla::TimeStamp aStamp)
+  DOMHighResTimeStamp TimeStampToDOMHighRes(
+    const mozilla::TimeStamp& aStamp) const
   {
     mozilla::TimeDuration duration = aStamp - mNavigationStartTimeStamp;
+    return duration.ToMilliseconds();
+  }
+
+  DOMHighResTimeStamp ThreadTimeToDOMHighRes(
+    const mozilla::TimeStamp& aStamp) const
+  {
+    mozilla::TimeDuration duration = aStamp - mNavigationStartThreadTime;
+    return duration.ToMilliseconds();
+  }
+
+  DOMHighResTimeStamp ProcessTimeToDOMHighRes(
+    const mozilla::TimeStamp& aStamp) const
+  {
+    mozilla::TimeDuration duration = aStamp - mNavigationStartProcessTime;
     return duration.ToMilliseconds();
   }
 
@@ -107,6 +128,8 @@ private:
   nsDOMPerformanceNavigationType mNavigationType;
   DOMHighResTimeStamp mNavigationStartHighRes;
   mozilla::TimeStamp mNavigationStartTimeStamp;
+  mozilla::TimeStamp mNavigationStartThreadTime;
+  mozilla::TimeStamp mNavigationStartProcessTime;
   DOMTimeMilliSec DurationFromStart();
 
   DOMTimeMilliSec mBeforeUnloadStart;

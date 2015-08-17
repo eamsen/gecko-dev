@@ -512,6 +512,18 @@ nsPerformance::Now() const
   return floor(nowTimeMs / maxResolutionMs) * maxResolutionMs;
 }
 
+DOMHighResTimeStamp
+nsPerformance::ThreadTime() const
+{
+  return GetDOMTiming()->ThreadTimeToDOMHighRes(TimeStamp::ThreadTime());
+}
+
+DOMHighResTimeStamp
+nsPerformance::ProcessTime() const
+{
+  return GetDOMTiming()->ProcessTimeToDOMHighRes(TimeStamp::ProcessTime());
+}
+
 JSObject*
 nsPerformance::WrapObject(JSContext *cx, JS::Handle<JSObject*> aGivenProto)
 {

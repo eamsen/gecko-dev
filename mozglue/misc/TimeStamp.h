@@ -447,6 +447,18 @@ public:
   static TimeStamp NowLoRes() { return Now(false); }
 
   /**
+   * Returns a timestamp reflecting the CPU thread time clock.
+   * The characteristics of the returned timestamp are platform-specific.
+   */
+  static MFBT_API TimeStamp ThreadTime();
+
+  /**
+   * Returns a timestamp reflecting the CPU process time clock.
+   * The characteristics of the returned timestamp are platform-specific.
+   */
+  static MFBT_API TimeStamp ProcessTime();
+
+  /**
    * Return a timestamp representing the time when the current process was
    * created which will be comparable with other timestamps taken with this
    * class. If the actual process creation time is detected to be inconsistent

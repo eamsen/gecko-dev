@@ -206,6 +206,20 @@ TimeStamp::Now(bool aHighResolution)
   return TimeStamp(ClockTimeNs());
 }
 
+TimeStamp
+TimeStamp::ThreadTime()
+{
+  // TODO: Insert platform-specific implementation.
+  return TimeStamp();
+}
+
+TimeStamp
+TimeStamp::ProcessTime()
+{
+  // TODO: Insert platform-specific implementation.
+  return TimeStamp();
+}
+
 #if defined(XP_LINUX) || defined(ANDROID)
 
 // Calculates the amount of jiffies that have elapsed since boot and up to the

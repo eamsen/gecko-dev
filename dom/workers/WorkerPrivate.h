@@ -190,8 +190,12 @@ private:
   bool mMainThreadObjectsForgotten;
   WorkerType mWorkerType;
   TimeStamp mCreationTimeStamp;
+  TimeStamp mCreationThreadTime;
+  TimeStamp mCreationProcessTime;
   DOMHighResTimeStamp mCreationTimeHighRes;
   TimeStamp mNowBaseTimeStamp;
+  TimeStamp mThreadBaseTime;
+  TimeStamp mProcessBaseTime;
   DOMHighResTimeStamp mNowBaseTimeHighRes;
 
 protected:
@@ -562,6 +566,16 @@ public:
   DOMHighResTimeStamp NowBaseTimeHighRes() const
   {
     return mNowBaseTimeHighRes;
+  }
+
+  TimeStamp ThreadBaseTime() const
+  {
+    return mThreadBaseTime;
+  }
+
+  TimeStamp ProcessBaseTime() const
+  {
+    return mProcessBaseTime;
   }
 
   nsIPrincipal*

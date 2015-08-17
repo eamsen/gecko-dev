@@ -67,6 +67,8 @@ nsDOMNavigationTiming::NotifyNavigationStart()
 {
   mNavigationStartHighRes = (double)PR_Now() / PR_USEC_PER_MSEC;
   mNavigationStartTimeStamp = mozilla::TimeStamp::Now();
+  mNavigationStartThreadTime = mozilla::TimeStamp::ThreadTime();
+  mNavigationStartProcessTime = mozilla::TimeStamp::ProcessTime();
 }
 
 void

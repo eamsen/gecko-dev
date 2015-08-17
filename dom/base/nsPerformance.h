@@ -312,6 +312,8 @@ public:
   void ClearResourceTimings();
 
   virtual DOMHighResTimeStamp Now() const = 0;
+  virtual DOMHighResTimeStamp ThreadTime() const = 0;
+  virtual DOMHighResTimeStamp ProcessTime() const = 0;
 
   void Mark(const nsAString& aName, mozilla::ErrorResult& aRv);
   void ClearMarks(const mozilla::dom::Optional<nsAString>& aName);
@@ -411,6 +413,9 @@ public:
 
   // Performance WebIDL methods
   DOMHighResTimeStamp Now() const override;
+
+  DOMHighResTimeStamp ThreadTime() const override;
+  DOMHighResTimeStamp ProcessTime() const override;
 
   nsPerformanceTiming* Timing();
   nsPerformanceNavigation* Navigation();

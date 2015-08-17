@@ -36,6 +36,8 @@ public:
 
   // WebIDL (public APIs)
   DOMHighResTimeStamp Now() const override;
+  DOMHighResTimeStamp ThreadTime() const override;
+  DOMHighResTimeStamp ProcessTime() const override;
 
   using PerformanceBase::Mark;
   using PerformanceBase::ClearMarks;

@@ -17,6 +17,10 @@ typedef sequence <PerformanceEntry> PerformanceEntryList;
 interface Performance {
   [DependsOn=DeviceState, Affects=Nothing]
   DOMHighResTimeStamp now();
+  [DependsOn=DeviceState, Affects=Nothing, ChromeOnly]
+  DOMHighResTimeStamp threadTime();
+  [DependsOn=DeviceState, Affects=Nothing, ChromeOnly]
+  DOMHighResTimeStamp processTime();
 };
 
 [Exposed=Window]
