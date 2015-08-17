@@ -321,6 +321,10 @@ function dump(msg) {
   Log.d("Browser", msg);
 }
 
+function rabbit(msg) {
+  Log.d("Browser rabbit", msg);
+}
+
 const kStateActive = 0x00000001; // :active pseudoclass for elements
 
 const kXLinkNamespace = "http://www.w3.org/1999/xlink";
@@ -403,6 +407,9 @@ var BrowserApp = {
   deck: null,
 
   startup: function startup() {
+    let t0 = performance.threadTime();
+    let p0 = performance.processTime();
+    let w0 = performance.now();
     window.QueryInterface(Ci.nsIDOMChromeWindow).browserDOMWindow = new nsBrowserAccess();
     dump("zerdatime " + Date.now() + " - browser chrome startup finished.");
 
@@ -415,6 +422,29 @@ var BrowserApp = {
     }
 
     ViewportHandler.init();
+
+    let tX = performance.threadTime();
+    let pX = performance.processTime();
+    let wX = performance.now();
+    
+    rabbit("startup WHY START - tV=" + (tX) +
+           " pV=" + (pX) + "  wV=" + (wX));
+
+    let y = 12;
+    for (let i = 1; i < 10; ++i) {
+      for (let j = 0; j < 900000; ++j) {
+        y += 2 * i - j;
+      }
+      rabbit("startup WHY END - t=" + (performance.threadTime() - tX) +
+             " p=" + (performance.processTime() - pX) + " w=" + (performance.now() - wX));
+      tX = performance.threadTime();
+      pX = performance.processTime();
+      wX = performance.now();
+    }
+
+    rabbit("startup 000 - t=" + (performance.threadTime() - t0) +
+           " p=" + (performance.processTime() - p0) + " w=" + (performance.now() - w0));
+
 
     Services.androidBridge.browserApp = this;
 
@@ -589,6 +619,9 @@ var BrowserApp = {
       }, BrowserApp, "gmpInstallManager");
 
     }, false);
+
+    rabbit("startup END - t=" + (performance.threadTime() - t0) +
+           " p=" + (performance.processTime() - p0) + " w=" + (performance.now() - w0));
   },
 
   get _startupStatus() {
