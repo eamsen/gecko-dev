@@ -7,6 +7,7 @@
 // Implement TimeStamp::Now() with QueryPerformanceCounter() controlled with
 // values of GetTickCount().
 
+#include "mozilla/Casting.h"
 #include "mozilla/MathAlgorithms.h"
 #include "mozilla/TimeStamp.h"
 
@@ -531,17 +532,49 @@ TimeStamp::Now(bool aHighResolution)
   return TimeStamp(TimeStampValue(GTC, QPC, useQPC));
 }
 
+double
+FileTimeToMilliseconds(const FILETIME& ft) {
+  // Need to BitwiseCast to fix alignment, then divide by 10000 to convert
+  // 100-nanoseconds to milliseconds. This only works on little-endian
+  // machines.
+  return BitwiseCast<int64_t>(ft) / 10000.0;
+}
+
 TimeStamp
 TimeStamp::ThreadTime()
 {
-  // TODO: Insert platform-specific implementation.
+  FILETIME creationTime;
+  FILETIME exitTime;
+  FILETIME kernelTime;
+  FILETIME userTime;
+
+  if (::GetThreadTimes(::GetCurrentThread(), &creationTime, &exitTime,
+                       &kernelTime, &userTime)) {
+    double timeMs = FileTimeToMilliseconds(kernelTime) +
+                    FileTimeToMilliseconds(userTime);
+    int64_t ticks =
+      BaseTimeDurationPlatformUtils::TicksFromMilliseconds(timeMs);
+    return TimeStamp(TimeStampValue(ticks, 0, false));
+  }
   return TimeStamp();
 }
 
 TimeStamp
 TimeStamp::ProcessTime()
 {
-  // TODO: Insert platform-specific implementation.
+  FILETIME creationTime;
+  FILETIME exitTime;
+  FILETIME kernelTime;
+  FILETIME userTime;
+
+  if (::GetProcessTimes(::GetCurrentProcess(), &creationTime, &exitTime,
+                        &kernelTime, &userTime)) {
+    double timeMs = FileTimeToMilliseconds(kernelTime) +
+                    FileTimeToMilliseconds(userTime);
+    int64_t ticks =
+      BaseTimeDurationPlatformUtils::TicksFromMilliseconds(timeMs);
+    return TimeStamp(TimeStampValue(ticks, 0, false));
+  }
   return TimeStamp();
 }
 
