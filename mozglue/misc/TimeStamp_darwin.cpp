@@ -17,6 +17,18 @@
 // of storing the time value in nanoseconds.
 
 #include <mach/mach_time.h>
+#include <mach/mach_init.h>
+#include <mach/mach_host.h>
+#include <mach/mach_port.h>
+#include <mach/mach_traps.h>
+#include <mach/task_info.h>
+#include <mach/thread_info.h>
+#include <mach/thread_act.h>
+#include <mach/vm_region.h>
+#include <mach/vm_map.h>
+#include <mach/task.h>
+
+#include <sys/types.h>
 #include <sys/time.h>
 #include <sys/sysctl.h>
 #include <time.h>
@@ -162,17 +174,38 @@ TimeStamp::Now(bool aHighResolution)
   return TimeStamp(ClockTime());
 }
 
+template<typename Info>
+uint64_t MachInfoToNs(const Info& aInfo)
+{
+  return (aInfo.user_time.seconds + aInfo.system_time.seconds) * 1000000000 +
+         (aInfo.user_time.microseconds + aInfo.system_time.microseconds) * 1000;
+}
+
 TimeStamp
 TimeStamp::ThreadTime()
 {
-  // TODO: Insert platform-specific implementation.
+  mach_msg_type_number_t numInfo = THREAD_BASIC_INFO_COUNT;
+  thread_basic_info_data_t threadInfo;
+
+  if (thread_info(mach_thread_self(), THREAD_BASIC_INFO,
+                  reinterpret_cast<thread_info_t>(&threadInfo), &numInfo)
+      == KERN_SUCCESS) {
+    return TimeStamp(MachInfoToNs(threadInfo));
+  }
   return TimeStamp();
 }
 
 TimeStamp
 TimeStamp::ProcessTime()
 {
-  // TODO: Insert platform-specific implementation.
+  mach_msg_type_number_t numInfo = TASK_THREAD_TIMES_INFO_COUNT;
+  task_thread_times_info threadTimesInfo;
+
+  if (task_info(mach_task_self(), TASK_THREAD_TIMES_INFO,
+                reinterpret_cast<task_info_t>(&threadTimesInfo), &numInfo)
+      == KERN_SUCCESS) {
+    return TimeStamp(MachInfoToNs(threadTimesInfo));
+  }
   return TimeStamp();
 }
 
