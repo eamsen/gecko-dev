@@ -209,14 +209,24 @@ TimeStamp::Now(bool aHighResolution)
 TimeStamp
 TimeStamp::ThreadTime()
 {
-  // TODO: Insert platform-specific implementation.
+#ifdef CLOCK_THREAD_CPUTIME_ID
+  struct timespec ts;
+  if (!clock_gettime(CLOCK_THREAD_CPUTIME_ID, &ts)) {
+    return TimeStamp(TimespecToNs(ts));
+  }
+#endif
   return TimeStamp();
 }
 
 TimeStamp
 TimeStamp::ProcessTime()
 {
-  // TODO: Insert platform-specific implementation.
+#ifdef CLOCK_PROCESS_CPUTIME_ID
+  struct timespec ts;
+  if (!clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &ts)) {
+    return TimeStamp(TimespecToNs(ts));
+  }
+#endif
   return TimeStamp();
 }
 
