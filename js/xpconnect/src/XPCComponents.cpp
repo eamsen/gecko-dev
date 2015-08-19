@@ -35,6 +35,9 @@
 #include "nsIAddonInterposition.h"
 #include "nsISimpleEnumerator.h"
 
+#include <vector>
+#include <string>
+
 using namespace mozilla;
 using namespace JS;
 using namespace js;
@@ -2486,6 +2489,38 @@ nsXPCComponents_Utils::SetSandboxMetadata(HandleValue sandboxVal,
     return NS_OK;
 }
 
+struct ImportStats
+{
+    ImportStats(const std::string& moduleName)
+    : moduleName(moduleName),
+      threadTime(TimeStamp::ThreadTime()),
+      processTime(TimeStamp::ProcessTime()),
+      realTime(TimeStamp::Now())
+    {}
+
+    TimeDuration ThreadDuration() const {
+      return TimeStamp::ThreadTime() - threadTime;
+    }
+
+    TimeDuration ProcessDuration() const {
+      return TimeStamp::ProcessTime() - processTime;
+    }
+
+    TimeDuration RealDuration() const {
+      return TimeStamp::Now() - realTime;
+    }
+
+    const std::string moduleName;
+    const TimeStamp threadTime;
+    const TimeStamp processTime;
+    const TimeStamp realTime;
+
+    static std::vector<ImportStats> stack;
+};
+
+std::vector<ImportStats>
+ImportStats::stack = std::vector<ImportStats>(1, ImportStats("root")); 
+
 /* JSObject import (in AUTF8String registryLocation,
  *                  [optional] in JSObject targetObj);
  */
@@ -2500,7 +2535,38 @@ nsXPCComponents_Utils::Import(const nsACString& registryLocation,
         do_GetService(MOZJSCOMPONENTLOADER_CONTRACTID);
     if (!moduleloader)
         return NS_ERROR_FAILURE;
-    return moduleloader->Import(registryLocation, targetObj, cx, optionalArgc, retval);
+
+    ImportStats::stack.push_back(ImportStats(registryLocation.Data()));
+
+    const nsresult rv = moduleloader->Import(registryLocation, targetObj, cx,
+                                             optionalArgc, retval);
+
+    ImportStats stats = ImportStats::stack.back();
+    ImportStats::stack.pop_back();
+    ImportStats parentStats = ImportStats::stack.back();
+
+    nsCOMPtr<nsIConsoleService> console(
+            do_GetService(NS_CONSOLESERVICE_CONTRACTID));
+    if (console) {
+        static bool sPrintHeader = true;
+
+        nsCString timeLogs;
+        if (sPrintHeader) {
+            sPrintHeader = false;
+            timeLogs.AppendPrintf("rabbit nsXPCComponents_Utils::Import [ms]"
+                                  "\tstackSize\tparent\tregLoc\tthread\tprocess\treal\n");
+        }
+        timeLogs.AppendPrintf("rabbit %u\t%s\t%s\t%.2f\t%.2f\t%.2f\n",
+                 ImportStats::stack.size(),
+                 parentStats.moduleName.c_str(),
+                 stats.moduleName.c_str(),
+                 stats.ThreadDuration().ToMilliseconds(),
+                 stats.ProcessDuration().ToMilliseconds(),
+                 stats.RealDuration().ToMilliseconds());
+        console->LogStringMessage(NS_ConvertUTF8toUTF16(timeLogs).Data());
+    }
+
+    return rv;
 }
 
 /* boolean isModuleLoaded (in AUTF8String registryLocation);
