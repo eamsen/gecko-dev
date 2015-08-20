@@ -1,0 +1,89 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <title>Test for CPU Timers</title>
+  <script type="text/javascript"
+    src="chrome://mochikit/content/tests/SimpleTest/SimpleTest.js"></script>
+  <link rel="stylesheet" type="text/css"
+    href="chrome://mochikit/content/tests/SimpleTest/test.css" />
+</head>
+<body>
+  <script>
+    var perf = window.performance;
+
+    ok(perf, "Performance object should exist.");
+    ok(typeof perf.threadTime == 'function',
+      "Performance object should have a 'threadTime' method.");
+    ok(typeof perf.processTime == 'function',
+      "Performance object should have a 'processTime' method.");
+
+    SimpleTest.requestFlakyTimeout("untriaged");
+
+    var threadTime = perf.threadTime();
+    var processTime = perf.processTime();
+    var realTime = perf.now();
+
+    var threadStartTime = threadTime;
+    var processStartTime = processTime;
+    var realStartTime = realTime;
+
+    var threadTimeDiffMs = 0;
+    var processTimeDiffMs = 0;
+    var realTimeDiffMs = 0;
+
+    var totalRuntimeMs = 1000;
+    var minResolutionMs = 25;
+    var numLoopIters = 1e6;
+
+    var testVar1 = 0;
+    var testVar2 = 1;
+
+    while (realTime - realStartTime < totalRuntimeMs) {
+      // Keep the CPU busy for a bit.
+      for (var i = 0; i < numLoopIters; ++i) {
+        testVar2 += testVar1;
+        testVar1 = testVar2 - testVar1;
+
+        if (testVar2 == Infinity) {
+          // Reset on overflow.
+          testVar1 = 0;
+          testVar2 = 1;
+        }
+      }
+
+      var threadTimeDiffMs = perf.threadTime() - threadTime;
+      var processTimeDiffMs = perf.processTime() - processTime;
+      var realTimeDiffMs = perf.now() - realTime;
+
+      // Test monotonicity.
+      ok(threadTimeDiffMs + minResolutionMs >= 0,
+         "The value of threadTime() should monotonically increase.");
+      ok(processTimeDiffMs + minResolutionMs >= 0,
+       "The value of processTime() should monotonically increase.");
+      ok(realTimeDiffMs + minResolutionMs >= 0,
+       "The value of now() should monotonically increase.");
+
+      var absThreadTimeMs = perf.threadTime() - threadStartTime;
+      var absProcessTimeMs = perf.processTime() - processStartTime;
+      var absRealTimeMs = perf.now() - realStartTime;
+
+      // Test timer relation constraints.
+      ok(absThreadTimeMs <= absProcessTimeMs + minResolutionMs,
+         "Thread time may not exceed process time (threadTime=" +
+         absThreadTimeMs + ", processTime=" + absProcessTimeMs + ").");
+      ok(absThreadTimeMs <= absRealTimeMs + minResolutionMs,
+         "Thread time may not exceed real time (threadTime=" +
+         absThreadTimeMs + ", realTime=" + absRealTimeMs + ").");
+      // There are no constraints between process and real time, since process
+      // time is accumulative across its threads, which may exceed real time.
+
+      threadTime = perf.threadTime();
+      processTime = perf.processTime();
+      realTime = perf.now();
+    }
+    // Let's make sure the for-loop is not optimized out.
+    ok(testVar2 > testVar1,
+       "The Fibonacci sequence should be monotonically increasing.");
+  </script>
+</body>
+</html>
