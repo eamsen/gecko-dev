@@ -33,6 +33,10 @@ using namespace mozilla::layers;
     __android_log_print(ANDROID_LOG_ERROR, "OMXCodecWrapper", ##args);         \
   } while (0)
 
+#undef LOG
+#include <android/log.h>
+#define LOG(args...) __android_log_print(ANDROID_LOG_DEBUG, "OMXCodecWrapper", ## args);
+
 namespace android {
 
 enum BufferState
@@ -528,6 +532,10 @@ nsresult
 OMXAudioEncoder::Configure(int aChannels, int aInputSampleRate,
                            int aEncodedSampleRate)
 {
+  LOG("OMXAudioEncoder::Configure | aChannels=%d | aInputSampleRate=%d | "
+      "aEncodedSampleRate=%d | mStarted=%d",
+      aChannels, aInputSampleRate, aEncodedSampleRate, mStarted);
+
   MOZ_ASSERT(!mStarted);
 
   NS_ENSURE_TRUE(aChannels > 0 && aInputSampleRate > 0 && aEncodedSampleRate >= 0,
@@ -540,12 +548,14 @@ OMXAudioEncoder::Configure(int aChannels, int aInputSampleRate,
                                       aEncodedSampleRate,
                                       SPEEX_RESAMPLER_QUALITY_DEFAULT,
                                       &error);
+    LOG("OMXAudioEncoder::Configure | speex_resampler_init()->error=%d", error);
 
     if (error != RESAMPLER_ERR_SUCCESS) {
       return NS_ERROR_FAILURE;
     }
     speex_resampler_skip_zeros(mResampler);
   }
+  LOG("OMXAudioEncoder::Configure | mCodecType=%d", mCodecType);
   // Set up configuration parameters for AAC encoder.
   sp<AMessage> format = new AMessage;
   // Fixed values.
@@ -573,6 +583,7 @@ OMXAudioEncoder::Configure(int aChannels, int aInputSampleRate,
   mResamplingRatio = aEncodedSampleRate > 0 ? 1.0 *
                       aEncodedSampleRate / aInputSampleRate : 1.0;
   result = Start();
+  LOG("OMXAudioEncoder::Configure | Start()->resul=%d", result);
 
   return result == OK ? NS_OK : NS_ERROR_FAILURE;
 }

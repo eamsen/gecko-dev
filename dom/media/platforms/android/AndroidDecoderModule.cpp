@@ -24,6 +24,10 @@ using namespace mozilla;
 using namespace mozilla::gl;
 using namespace mozilla::widget::sdk;
 
+#include "android/log.h"
+#undef LOG
+#define LOG(args...)  __android_log_print(ANDROID_LOG_DEBUG, "AndroidDecoderModule" , ## args)
+
 namespace mozilla {
 
 #define ENVOKE_CALLBACK(Func, ...) \
@@ -269,20 +273,25 @@ public:
 
 bool AndroidDecoderModule::SupportsMimeType(const nsACString& aMimeType)
 {
+  LOG("SupportsMimeType | mMimeType=%s", aMimeType.Data());
   if (!AndroidBridge::Bridge() || (AndroidBridge::Bridge()->GetAPIVersion() < 16)) {
+    LOG("SupportsMimeType | false 0");
     return false;
   }
 
   if (aMimeType.EqualsLiteral("video/mp4") ||
       aMimeType.EqualsLiteral("video/avc")) {
+    LOG("SupportsMimeType | true 1");
     return true;
   }
 
   MediaCodec::LocalRef ref = mozilla::CreateDecoder(aMimeType);
   if (!ref) {
+    LOG("SupportsMimeType | false 2");
     return false;
   }
   ref->Release();
+  LOG("SupportsMimeType | true 3");
   return true;
 }
 
@@ -301,6 +310,10 @@ AndroidDecoderModule::CreateVideoDecoder(
       aConfig.mDisplay.width,
       aConfig.mDisplay.height,
       &format), nullptr);
+
+  LOG("CreateVideoDecoder | mMimeType=%s | mDisplay=(%d, %d)",
+      TranslateMimeType(aConfig.mMimeType), aConfig.mDisplay.width,
+      aConfig.mDisplay.height);
 
   nsRefPtr<MediaDataDecoder> decoder =
     new VideoDataDecoder(aConfig, format, aCallback, aImageContainer);
@@ -322,6 +335,9 @@ AndroidDecoderModule::CreateAudioDecoder(const AudioInfo& aConfig,
       aConfig.mBitDepth,
       aConfig.mChannels,
       &format), nullptr);
+
+  LOG("CreateAudioDecoder | mMimeType=%s | mBitDepth=%d | mChannels=%d)",
+      aConfig.mMimeType.get(), aConfig.mBitDepth, aConfig.mChannels);
 
   nsRefPtr<MediaDataDecoder> decoder =
     new AudioDataDecoder(aConfig, format, aCallback);
@@ -385,6 +401,7 @@ nsresult MediaCodecDataDecoder::InitDecoder(Surface::Param aSurface)
   }
 
   nsresult rv;
+  // rabbit fails
   NS_ENSURE_SUCCESS(rv = mDecoder->Configure(mFormat, aSurface, nullptr, 0), rv);
   NS_ENSURE_SUCCESS(rv = mDecoder->Start(), rv);
 
