@@ -51,6 +51,45 @@ using namespace mozilla::scache;
 using namespace xpc;
 using namespace JS;
 
+struct ImportStats
+{
+    ImportStats(const std::string& moduleName="")
+    : moduleName(moduleName),
+      threadTime(TimeStamp::ThreadTime()),
+      processTime(TimeStamp::ProcessTime()),
+      realTime(TimeStamp::Now())
+    {}
+
+    TimeDuration ThreadDuration() const {
+      return TimeStamp::ThreadTime() - threadTime;
+    }
+
+    TimeDuration ProcessDuration() const {
+      return TimeStamp::ProcessTime() - processTime;
+    }
+
+    TimeDuration RealDuration() const {
+      return TimeStamp::Now() - realTime;
+    }
+
+    const std::string moduleName;
+    const TimeStamp threadTime;
+    const TimeStamp processTime;
+    const TimeStamp realTime;
+
+    static std::vector<ImportStats> stack;
+};
+
+template <typename... Params>
+static void PerfLog(const std::string& format, Params... params)
+{
+    static nsCOMPtr<nsIConsoleService> console(
+            do_GetService(NS_CONSOLESERVICE_CONTRACTID));
+
+    nsCString logs;
+    logs.AppendPrintf(format.c_str(), params...);
+    console->LogStringMessage(NS_ConvertUTF8toUTF16(logs).Data());
+}
 // This JSClass exists to trick silly code that expects toString()ing the
 // global in a component scope to return something with "BackstagePass" in it
 // to continue working.
@@ -624,6 +663,12 @@ mozJSComponentLoader::ObjectForLocation(ComponentLoaderInfo& aInfo,
                                         bool aPropagateExceptions,
                                         MutableHandleValue aException)
 {
+    ImportStats start;
+
+    auto t1 = start.ThreadDuration().ToMilliseconds();
+    auto t2 = start.ThreadDuration().ToMilliseconds();
+    auto t3 = start.ThreadDuration().ToMilliseconds();
+
     MOZ_ASSERT(NS_IsMainThread(), "Must be on main thread.");
 
     dom::AutoJSAPI jsapi;
@@ -830,16 +875,24 @@ mozJSComponentLoader::ObjectForLocation(ComponentLoaderInfo& aInfo,
             nsAutoArrayPtr<char> buf(new char[len + 1]);
             if (!buf)
                 return NS_ERROR_OUT_OF_MEMORY;
+    t1 = start.ThreadDuration().ToMilliseconds();
+
 
             /* read the file in one swoop */
             rv = scriptStream->Read(buf, len, &bytesRead);
             if (bytesRead != len)
                 return NS_BASE_STREAM_OSERROR;
 
+    t2 = start.ThreadDuration().ToMilliseconds();
+        // rabbit A start
+
             buf[len] = '\0';
 
             if (!mReuseLoaderGlobal) {
                 Compile(cx, options, buf, bytesRead, &script);
+
+    t3 = start.ThreadDuration().ToMilliseconds();
+        // rabbit A end
             } else {
                 // Note: exceptions will get handled further down;
                 // don't early return for them here.
@@ -887,6 +940,8 @@ mozJSComponentLoader::ObjectForLocation(ComponentLoaderInfo& aInfo,
             LOG(("Failed to write to cache\n"));
         }
     }
+
+    // rabbit B start
 
     // Assign aObject here so that it's available to recursive imports.
     // See bug 384168.
@@ -937,6 +992,15 @@ mozJSComponentLoader::ObjectForLocation(ComponentLoaderInfo& aInfo,
         return NS_ERROR_OUT_OF_MEMORY;
     }
 
+    const auto t4 = start.ThreadDuration().ToMilliseconds();
+    PerfLog("rabbitx2 mozJSComponentLoader::ObjectForLocation [ms]"
+            "\tt1=%.2f t2=%.2f t3=%.2f t4=%.2f -> %.2f ms",
+            100.0*t1/t4,
+            100.0*(t2-t1)/t4,
+            100.0*(t3-t2)/t4,
+            100.0*(t4-t3)/t4,
+            t4);
+    // rabbit B end
     return NS_OK;
 }
 
@@ -982,10 +1046,15 @@ mozJSComponentLoader::Import(const nsACString& registryLocation,
                              uint8_t optionalArgc,
                              MutableHandleValue retval)
 {
+    ImportStats start;
+
     MOZ_ASSERT(nsContentUtils::IsCallerChrome());
 
     RootedValue targetVal(cx, targetValArg);
     RootedObject targetObject(cx, nullptr);
+
+    const auto t1 = start.ThreadDuration().ToMilliseconds();
+
     if (optionalArgc) {
         // The caller passed in the optional second argument. Get it.
         if (targetVal.isObject()) {
@@ -1012,14 +1081,19 @@ mozJSComponentLoader::Import(const nsACString& registryLocation,
         NS_ENSURE_SUCCESS(rv, rv);
     }
 
+    const auto t2 = start.ThreadDuration().ToMilliseconds();
+
     Maybe<JSAutoCompartment> ac;
     if (targetObject) {
         ac.emplace(cx, targetObject);
     }
 
+    const auto t3 = start.ThreadDuration().ToMilliseconds();
+
     RootedObject global(cx);
     nsresult rv = ImportInto(registryLocation, targetObject, cx, &global);
 
+    const auto t4 = start.ThreadDuration().ToMilliseconds();
     if (global) {
         if (!JS_WrapObject(cx, &global)) {
             NS_ERROR("can't wrap return value");
@@ -1028,6 +1102,16 @@ mozJSComponentLoader::Import(const nsACString& registryLocation,
 
         retval.setObject(*global);
     }
+    const auto t5 = start.ThreadDuration().ToMilliseconds();
+
+    PerfLog("rabbit mozJSComponentLoader::Import [ms]"
+            "\tt1=%.2f [%.2f]\tt2=%.2f [%.2f]\tt3=%.2f [%.2f]\tt4=%.2f [%.2f]\tt5=%.2f [%.2f]",
+            t1, 100.0*t1/t5,
+            t2, 100.0*(t2-t1)/t5,
+            t3, 100.0*(t3-t2)/t5,
+            t4, 100.0*(t4-t3)/t5,
+            t5, 100.0*(t5-t4)/t5);
+
     return rv;
 }
 
@@ -1077,6 +1161,8 @@ mozJSComponentLoader::ImportInto(const nsACString& aLocation,
                                  JSContext* callercx,
                                  MutableHandleObject vp)
 {
+    ImportStats start;
+
     vp.set(nullptr);
 
     nsresult rv;
@@ -1105,6 +1191,7 @@ mozJSComponentLoader::ImportInto(const nsACString& aLocation,
         baseFileURL = do_QueryInterface(info.ResolvedURI(), &rv);
         NS_ENSURE_SUCCESS(rv, rv);
     }
+    const auto t1 = start.ThreadDuration().ToMilliseconds();
 
     nsCOMPtr<nsIFile> sourceFile;
     rv = baseFileURL->GetFile(getter_AddRefs(sourceFile));
@@ -1117,23 +1204,35 @@ mozJSComponentLoader::ImportInto(const nsACString& aLocation,
     rv = info.EnsureKey();
     NS_ENSURE_SUCCESS(rv, rv);
 
+    const auto t2 = start.ThreadDuration().ToMilliseconds();
+    // rabbit Y start
+
     ModuleEntry* mod;
     nsAutoPtr<ModuleEntry> newEntry;
     if (!mImports.Get(info.Key(), &mod) && !mInProgressImports.Get(info.Key(), &mod)) {
+        const auto t2_1 = start.ThreadDuration().ToMilliseconds();
         newEntry = new ModuleEntry(callercx);
         if (!newEntry)
             return NS_ERROR_OUT_OF_MEMORY;
         mInProgressImports.Put(info.Key(), newEntry);
+        const auto t2_2 = start.ThreadDuration().ToMilliseconds();
 
         rv = info.EnsureURI();
+        const auto t2_3 = start.ThreadDuration().ToMilliseconds();
         NS_ENSURE_SUCCESS(rv, rv);
+        const auto t2_4 = start.ThreadDuration().ToMilliseconds();
         RootedValue exception(callercx);
+        const auto t2_5 = start.ThreadDuration().ToMilliseconds();
+        // rabbit X start
         rv = ObjectForLocation(info, sourceLocalFile, &newEntry->obj,
                                &newEntry->thisObjectKey,
                                &newEntry->location, true, &exception);
+        // rabbit X end
+        const auto t2_6 = start.ThreadDuration().ToMilliseconds();
 
         mInProgressImports.Remove(info.Key());
 
+        const auto t2_7 = start.ThreadDuration().ToMilliseconds();
         if (NS_FAILED(rv)) {
             if (!exception.isUndefined()) {
                 // An exception was thrown during compilation. Propagate it
@@ -1147,6 +1246,7 @@ mozJSComponentLoader::ImportInto(const nsACString& aLocation,
             // Something failed, but we don't know what it is, guess.
             return NS_ERROR_FILE_NOT_FOUND;
         }
+        const auto t2_8 = start.ThreadDuration().ToMilliseconds();
 
         // Set the location information for the new global, so that tools like
         // about:memory may use that information
@@ -1155,7 +1255,24 @@ mozJSComponentLoader::ImportInto(const nsACString& aLocation,
         }
 
         mod = newEntry;
+        const auto t2_9 = start.ThreadDuration().ToMilliseconds();
+
+        PerfLog("rabbitx mozJSComponentLoader::ImportInto [ms]"
+                "\tt1=%.2f t2=%.2f t3=%.2f t4=%.2f t5=%.2f t6=%.2f t7=%.2f t8=%.2f t9=%.2f-> %.2f",
+                100.0*t2_1/t2_9,
+                100.0*(t2_2-t2_1)/t2_9,
+                100.0*(t2_3-t2_2)/t2_9,
+                100.0*(t2_4-t2_3)/t2_9,
+                100.0*(t2_5-t2_4)/t2_9,
+                100.0*(t2_6-t2_5)/t2_9,
+                100.0*(t2_7-t2_6)/t2_9,
+                100.0*(t2_8-t2_7)/t2_9,
+                100.0*(t2_9-t2_8)/t2_9,
+                t2_9);
     }
+
+    // rabbit Y end
+    const auto t3 = start.ThreadDuration().ToMilliseconds();
 
     MOZ_ASSERT(mod->obj, "Import table contains entry with no object");
     vp.set(mod->obj);
@@ -1247,12 +1364,23 @@ mozJSComponentLoader::ImportInto(const nsACString& aLocation,
         }
     }
 
+    const auto t4 = start.ThreadDuration().ToMilliseconds();
+
     // Cache this module for later
     if (newEntry) {
         mImports.Put(info.Key(), newEntry);
         newEntry.forget();
     }
 
+    const auto t5 = start.ThreadDuration().ToMilliseconds();
+
+    PerfLog("rabbit mozJSComponentLoader::ImportInto [ms]"
+            "\tt1=%.2f [%.2f]\tt2=%.2f [%.2f]\tt3=%.2f [%.2f]\tt4=%.2f [%.2f]\tt5=%.2f [%.2f]",
+            t1, 100.0*t1/t5,
+            t2, 100.0*(t2-t1)/t5,
+            t3, 100.0*(t3-t2)/t5,
+            t4, 100.0*(t4-t3)/t5,
+            t5, 100.0*(t5-t4)/t5);
     return NS_OK;
 }
 
