@@ -383,7 +383,7 @@ public class GeckoThread extends Thread implements GeckoEventListener {
         if (!AppConstants.MOZILLA_OFFICIAL) {
             Log.w(LOGTAG, "STARTUP PERFORMANCE WARNING: un-official build: purging the " +
                           "startup (JavaScript) caches.");
-            args.append(" -purgecaches");
+            // args.append(" -purgecaches");
         }
 
         return args.toString();
