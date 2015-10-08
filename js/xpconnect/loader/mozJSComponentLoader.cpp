@@ -860,10 +860,14 @@ mozJSComponentLoader::ObjectForLocation(ComponentLoaderInfo& aInfo,
             if (bytesRead != len)
                 return NS_BASE_STREAM_OSERROR;
 
+            // rabbit A start
+
             buf[len] = '\0';
 
             if (!mReuseLoaderGlobal) {
                 Compile(cx, options, buf, bytesRead, &script);
+
+            // rabbit A end
             } else {
                 // Note: exceptions will get handled further down;
                 // don't early return for them here.
@@ -936,7 +940,9 @@ mozJSComponentLoader::ObjectForLocation(ComponentLoaderInfo& aInfo,
         if (aPropagateExceptions)
             ContextOptionsRef(cx).setDontReportUncaught(true);
         if (script) {
+        // rabbit B start
             ok = JS_ExecuteScript(cx, script);
+        // rabbit B end
         } else {
             RootedValue rval(cx);
             ok = JS_CallFunction(cx, obj, function, JS::HandleValueArray::empty(), &rval);
@@ -1161,6 +1167,8 @@ mozJSComponentLoader::ImportInto(const nsACString& aLocation,
     rv = info.EnsureKey();
     NS_ENSURE_SUCCESS(rv, rv);
 
+    // rabbit Y start
+
     ModuleEntry* mod;
     nsAutoPtr<ModuleEntry> newEntry;
     if (!mImports.Get(info.Key(), &mod) && !mInProgressImports.Get(info.Key(), &mod)) {
@@ -1172,9 +1180,11 @@ mozJSComponentLoader::ImportInto(const nsACString& aLocation,
         rv = info.EnsureURI();
         NS_ENSURE_SUCCESS(rv, rv);
         RootedValue exception(callercx);
+        // rabbit X start
         rv = ObjectForLocation(info, sourceLocalFile, &newEntry->obj,
                                &newEntry->thisObjectKey,
                                &newEntry->location, true, &exception);
+        // rabbit X end
 
         mInProgressImports.Remove(info.Key());
 
@@ -1200,6 +1210,8 @@ mozJSComponentLoader::ImportInto(const nsACString& aLocation,
 
         mod = newEntry;
     }
+
+    // rabbit Y end
 
     MOZ_ASSERT(mod->obj, "Import table contains entry with no object");
     vp.set(mod->obj);
