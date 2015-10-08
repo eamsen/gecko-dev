@@ -46,11 +46,65 @@
 #include "mozilla/Preferences.h"
 #include "mozilla/dom/ScriptSettings.h"
 
+#include <stdlib.h>
+#include <time.h>
+
 using namespace mozilla;
 using namespace mozilla::scache;
 using namespace xpc;
 using namespace JS;
 
+struct XImportStats
+{
+    XImportStats(const std::string& moduleName="undefined")
+    : moduleName(moduleName),
+      threadTime(TimeStamp::ThreadTime()),
+      processTime(TimeStamp::ProcessTime()),
+      realTime(TimeStamp::Now())
+    {
+      if (!sessionId) {
+        srand(time(0));
+        sessionId = rand() % 999999+ 1;
+      }
+    }
+
+    TimeDuration ThreadDuration() const {
+      return TimeStamp::ThreadTime() - threadTime;
+    }
+
+    TimeDuration ProcessDuration() const {
+      return TimeStamp::ProcessTime() - processTime;
+    }
+
+    TimeDuration RealDuration() const {
+      return TimeStamp::Now() - realTime;
+    }
+
+    std::string moduleName;
+    TimeStamp threadTime;
+    TimeStamp processTime;
+    TimeStamp realTime;
+    static int sessionId;
+
+    static std::vector<XImportStats> stack;
+};
+
+std::vector<XImportStats>
+XImportStats::stack = std::vector<XImportStats>(1, XImportStats("root")); 
+
+int
+XImportStats::sessionId = 0;
+
+template <typename... Params>
+static void PerfLog(const std::string& format, Params... params)
+{
+    static nsCOMPtr<nsIConsoleService> console(
+            do_GetService(NS_CONSOLESERVICE_CONTRACTID));
+
+    nsCString logs;
+    logs.AppendPrintf(format.c_str(), params...);
+    console->LogStringMessage(NS_ConvertUTF8toUTF16(logs).Data());
+}
 // This JSClass exists to trick silly code that expects toString()ing the
 // global in a component scope to return something with "BackstagePass" in it
 // to continue working.
@@ -258,8 +312,8 @@ class MOZ_STACK_CLASS ComponentLoaderInfo {
         return mResolvedURI->GetSpec(*mKey);
     }
 
-  private:
     const nsACString& mLocation;
+  private:
     nsCOMPtr<nsIIOService> mIOService;
     nsCOMPtr<nsIURI> mURI;
     nsCOMPtr<nsIChannel> mScriptChannel;
@@ -647,6 +701,12 @@ mozJSComponentLoader::ObjectForLocation(ComponentLoaderInfo& aInfo,
                                         bool aPropagateExceptions,
                                         MutableHandleValue aException)
 {
+    XImportStats start(aInfo.mLocation.Data());
+    XImportStats p1Stats = start;
+    XImportStats p1ParentStats = start;
+    XImportStats p2Stats = start;
+    XImportStats p2ParentStats = start;
+
     MOZ_ASSERT(NS_IsMainThread(), "Must be on main thread.");
 
     dom::AutoJSAPI jsapi;
@@ -683,6 +743,8 @@ mozJSComponentLoader::ObjectForLocation(ComponentLoaderInfo& aInfo,
     NS_ENSURE_SUCCESS(rv, rv);
 
     if (cache) {
+        XImportStats::stack.push_back(XImportStats(aInfo.mLocation.Data()));
+
         if (!mReuseLoaderGlobal) {
             rv = ReadCachedScript(cache, cachePath, cx, mSystemPrincipal, &script);
         } else {
@@ -692,17 +754,23 @@ mozJSComponentLoader::ObjectForLocation(ComponentLoaderInfo& aInfo,
 
         if (NS_SUCCEEDED(rv)) {
             LOG(("Successfully loaded %s from startupcache\n", nativePath.get()));
+            PerfLog("rabbitq Successfully loaded %s from startupcache", nativePath.get());
         } else {
             // This is ok, it just means the script is not yet in the
             // cache. Could mean that the cache was corrupted and got removed,
             // but either way we're going to write this out.
             writeToCache = true;
         }
+
+        p1Stats = XImportStats::stack.back();
+        XImportStats::stack.pop_back();
+        p1ParentStats = XImportStats::stack.back();
     }
 
     if (!script && !function) {
         // The script wasn't in the cache , so compile it now.
         LOG(("Slow loading %s\n", nativePath.get()));
+        PerfLog("rabbitq Slow loading %s", nativePath.get());
 
         // If aPropagateExceptions is true, then our caller wants us to propagate
         // any exceptions out to our caller. Ensure that the engine doesn't
@@ -864,10 +932,16 @@ mozJSComponentLoader::ObjectForLocation(ComponentLoaderInfo& aInfo,
 
             buf[len] = '\0';
 
+            XImportStats::stack.push_back(XImportStats(aInfo.mLocation.Data()));
+
             if (!mReuseLoaderGlobal) {
                 Compile(cx, options, buf, bytesRead, &script);
 
             // rabbit A end
+
+            p1Stats = XImportStats::stack.back();
+            XImportStats::stack.pop_back();
+            p1ParentStats = XImportStats::stack.back();
             } else {
                 // Note: exceptions will get handled further down;
                 // don't early return for them here.
@@ -915,7 +989,6 @@ mozJSComponentLoader::ObjectForLocation(ComponentLoaderInfo& aInfo,
             LOG(("Failed to write to cache\n"));
         }
     }
-
     // Assign aObject here so that it's available to recursive imports.
     // See bug 384168.
     aObject.set(obj);
@@ -939,6 +1012,9 @@ mozJSComponentLoader::ObjectForLocation(ComponentLoaderInfo& aInfo,
         AutoSaveContextOptions asco(cx);
         if (aPropagateExceptions)
             ContextOptionsRef(cx).setDontReportUncaught(true);
+
+        XImportStats::stack.push_back(XImportStats(aInfo.mLocation.Data()));
+
         if (script) {
         // rabbit B start
             ok = JS_ExecuteScript(cx, script);
@@ -947,6 +1023,10 @@ mozJSComponentLoader::ObjectForLocation(ComponentLoaderInfo& aInfo,
             RootedValue rval(cx);
             ok = JS_CallFunction(cx, obj, function, JS::HandleValueArray::empty(), &rval);
         }
+
+        p2Stats = XImportStats::stack.back();
+        XImportStats::stack.pop_back();
+        p2ParentStats = XImportStats::stack.back();
      }
 
     if (!ok) {
@@ -967,6 +1047,32 @@ mozJSComponentLoader::ObjectForLocation(ComponentLoaderInfo& aInfo,
         return NS_ERROR_OUT_OF_MEMORY;
     }
 
+    static bool sPrintHeader = false;
+    if (sPrintHeader) {
+        sPrintHeader = false;
+        PerfLog("rabbit p1 mozJSComponentLoader::ObjectForLocation [ms]"
+                              "\tstackSize\tparent\tregLoc\tthread\tprocess\treal"
+                              "\tsessionId");
+        PerfLog("rabbit p2 mozJSComponentLoader::ObjectForLocation [ms]"
+                              "\tstackSize\tparent\tregLoc\tthread\tprocess\treal"
+                              "\tsessionId");
+    }
+    PerfLog("rabbit p1\t%u\t%s\t%s\t%.2f\t%.2f\t%.2f\t%d\n",
+             XImportStats::stack.size(),
+             p1ParentStats.moduleName.c_str(),
+             p1Stats.moduleName.c_str(),
+             p1Stats.ThreadDuration().ToMilliseconds(),
+             p1Stats.ProcessDuration().ToMilliseconds(),
+             p1Stats.RealDuration().ToMilliseconds(),
+             XImportStats::sessionId);
+    PerfLog("rabbit p2\t%u\t%s\t%s\t%.2f\t%.2f\t%.2f\t%d\n",
+             XImportStats::stack.size(),
+             p2ParentStats.moduleName.c_str(),
+             p2Stats.moduleName.c_str(),
+             p2Stats.ThreadDuration().ToMilliseconds(),
+             p2Stats.ProcessDuration().ToMilliseconds(),
+             p2Stats.RealDuration().ToMilliseconds(),
+             XImportStats::sessionId);
     return NS_OK;
 }
 
