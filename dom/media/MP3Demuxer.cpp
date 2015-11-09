@@ -193,13 +193,16 @@ MP3TrackDemuxer::Seek(TimeUnit aTime) {
   // Correct seek position by scanning the next frames.
   const TimeUnit seekTime = ScanUntil(aTime);
 
+  MP3LOG("Seek(%" PRId64 ") -> mFrameIndex=%" PRId64 " mOffset=%" PRId64,
+         aTime, mFrameIndex, mOffset);
+
   return SeekPromise::CreateAndResolve(seekTime, __func__);
 }
 
 TimeUnit
 MP3TrackDemuxer::FastSeek(const TimeUnit& aTime) {
   MP3LOG("FastSeek(%" PRId64 ") avgFrameLen=%f mNumParsedFrames=%" PRIu64
-         " mFrameIndex=%" PRId64 " mOffset=%" PRIu64,
+         " mFrameIndex=%" PRId64 " mOffset=%" PRId64,
          aTime, AverageFrameLength(), mNumParsedFrames, mFrameIndex, mOffset);
 
   const auto& vbr = mParser.VBRInfo();
@@ -235,7 +238,7 @@ MP3TrackDemuxer::FastSeek(const TimeUnit& aTime) {
 TimeUnit
 MP3TrackDemuxer::ScanUntil(const TimeUnit& aTime) {
   MP3LOG("ScanUntil(%" PRId64 ") avgFrameLen=%f mNumParsedFrames=%" PRIu64
-         " mFrameIndex=%" PRId64 " mOffset=%" PRIu64,
+         " mFrameIndex=%" PRId64 " mOffset=%" PRId64,
          aTime, AverageFrameLength(), mNumParsedFrames, mFrameIndex, mOffset);
 
   if (!aTime.ToMicroseconds()) {
@@ -247,16 +250,17 @@ MP3TrackDemuxer::ScanUntil(const TimeUnit& aTime) {
   }
 
   MediaByteRange nextRange = FindNextFrame();
-  while (SkipNextFrame(nextRange) && Duration(mFrameIndex + 1) < aTime) {
+  while (Duration(mFrameIndex) < aTime && SkipNextFrame(nextRange) &&
+         Duration(mFrameIndex + 1) < aTime) {
     nextRange = FindNextFrame();
     MP3LOGV("ScanUntil* avgFrameLen=%f mNumParsedFrames=%" PRIu64
-            " mFrameIndex=%" PRId64 " mOffset=%" PRIu64 " Duration=%" PRId64,
+            " mFrameIndex=%" PRId64 " mOffset=%" PRId64 " Duration=%" PRId64,
             aTime, AverageFrameLength(), mNumParsedFrames, mFrameIndex,
             mOffset, Duration(mFrameIndex + 1));
   }
 
   MP3LOG("ScanUntil End avgFrameLen=%f mNumParsedFrames=%" PRIu64
-         " mFrameIndex=%" PRId64 " mOffset=%" PRIu64,
+         " mFrameIndex=%" PRId64 " mOffset=%" PRId64,
          aTime, AverageFrameLength(), mNumParsedFrames, mFrameIndex, mOffset);
 
   return Duration(mFrameIndex);
@@ -264,7 +268,7 @@ MP3TrackDemuxer::ScanUntil(const TimeUnit& aTime) {
 
 RefPtr<MP3TrackDemuxer::SamplesPromise>
 MP3TrackDemuxer::GetSamples(int32_t aNumSamples) {
-  MP3LOGV("GetSamples(%d) Begin mOffset=%" PRIu64 " mNumParsedFrames=%" PRIu64
+  MP3LOGV("GetSamples(%d) Begin mOffset=%" PRId64 " mNumParsedFrames=%" PRIu64
           " mFrameIndex=%" PRId64 " mTotalFrameLen=%" PRIu64 " mSamplesPerFrame=%d "
           "mSamplesPerSecond=%d mChannels=%d",
           aNumSamples, mOffset, mNumParsedFrames, mFrameIndex, mTotalFrameLen,
@@ -286,7 +290,7 @@ MP3TrackDemuxer::GetSamples(int32_t aNumSamples) {
     frames->mSamples.AppendElement(frame);
   }
 
-  MP3LOGV("GetSamples() End mSamples.Size()=%d aNumSamples=%d mOffset=%" PRIu64
+  MP3LOGV("GetSamples() End mSamples.Size()=%d aNumSamples=%d mOffset=%" PRId64
           " mNumParsedFrames=%" PRIu64 " mFrameIndex=%" PRId64
           " mTotalFrameLen=%" PRIu64 " mSamplesPerFrame=%d mSamplesPerSecond=%d "
           "mChannels=%d",
@@ -374,7 +378,7 @@ MP3TrackDemuxer::FindNextFrame() {
   static const int BUFFER_SIZE = 4096;
   static const int MAX_SKIPPED_BYTES = 10 * BUFFER_SIZE;
 
-  MP3LOGV("FindNext() Begin mOffset=%" PRIu64 " mNumParsedFrames=%" PRIu64
+  MP3LOGV("FindNext() Begin mOffset=%" PRId64 " mNumParsedFrames=%" PRIu64
           " mFrameIndex=%" PRId64 " mTotalFrameLen=%" PRIu64
           " mSamplesPerFrame=%d mSamplesPerSecond=%d mChannels=%d",
           mOffset, mNumParsedFrames, mFrameIndex, mTotalFrameLen,
@@ -418,7 +422,7 @@ MP3TrackDemuxer::FindNextFrame() {
     return { 0, 0 };
   }
 
-  MP3LOGV("FindNext() End mOffset=%" PRIu64 " mNumParsedFrames=%" PRIu64
+  MP3LOGV("FindNext() End mOffset=%" PRId64 " mNumParsedFrames=%" PRIu64
           " mFrameIndex=%" PRId64 " frameHeaderOffset=%d"
           " mTotalFrameLen=%" PRIu64 " mSamplesPerFrame=%d mSamplesPerSecond=%d"
           " mChannels=%d",
@@ -438,7 +442,7 @@ MP3TrackDemuxer::SkipNextFrame(const MediaByteRange& aRange) {
 
   UpdateState(aRange);
 
-  MP3LOGV("SkipNext() End mOffset=%" PRIu64 " mNumParsedFrames=%" PRIu64
+  MP3LOGV("SkipNext() End mOffset=%" PRId64 " mNumParsedFrames=%" PRIu64
           " mFrameIndex=%" PRId64 " mTotalFrameLen=%" PRIu64
           " mSamplesPerFrame=%d mSamplesPerSecond=%d mChannels=%d",
           mOffset, mNumParsedFrames, mFrameIndex, mTotalFrameLen,
@@ -490,7 +494,7 @@ MP3TrackDemuxer::GetNextFrame(const MediaByteRange& aRange) {
     mFirstFrameOffset = frame->mOffset;
   }
 
-  MP3LOGV("GetNext() End mOffset=%" PRIu64 " mNumParsedFrames=%" PRIu64
+  MP3LOGV("GetNext() End mOffset=%" PRId64 " mNumParsedFrames=%" PRIu64
           " mFrameIndex=%" PRId64 " mTotalFrameLen=%" PRIu64
           " mSamplesPerFrame=%d mSamplesPerSecond=%d mChannels=%d",
           mOffset, mNumParsedFrames, mFrameIndex, mTotalFrameLen,
