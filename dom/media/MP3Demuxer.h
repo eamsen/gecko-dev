@@ -417,6 +417,8 @@ private:
   // Returns the frame index for the given time.
   int64_t FrameIndexFromTime(const media::TimeUnit& aTime) const;
 
+  int64_t OffsetFromFrameIndex(int64_t aFrameIndex) const;
+
   // Reads aSize bytes into aBuffer from the source starting at aOffset.
   // Returns the actual size read.
   int32_t Read(uint8_t* aBuffer, int64_t aOffset, int32_t aSize);

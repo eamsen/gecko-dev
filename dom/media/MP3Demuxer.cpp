@@ -208,29 +208,33 @@ MP3TrackDemuxer::FastSeek(const TimeUnit& aTime) {
   const auto& vbr = mParser.VBRInfo();
   if (!aTime.ToMicroseconds()) {
     // Quick seek to the beginning of the stream.
-    mOffset = mFirstFrameOffset;
+    mFrameIndex = 0;
   } else if (vbr.IsTOCPresent()) {
     // Use TOC for more precise seeking.
     const float durationFrac = static_cast<float>(aTime.ToMicroseconds()) /
                                                   Duration().ToMicroseconds();
-    mOffset = vbr.Offset(durationFrac);
+    mFrameIndex = FrameIndexFromOffset(vbr.Offset(durationFrac));
   } else if (AverageFrameLength() > 0) {
-    mOffset = mFirstFrameOffset + FrameIndexFromTime(aTime) *
-              AverageFrameLength();
+    mFrameIndex = FrameIndexFromTime(aTime);
   }
+
+  if (Duration(mFrameIndex) > aTime) {
+    --mFrameIndex;
+  }
+  mOffset = OffsetFromFrameIndex(mFrameIndex);
 
   if (mOffset > mFirstFrameOffset && StreamLength() > 0) {
     mOffset = std::min(StreamLength() - 1, mOffset);
   }
 
-  mFrameIndex = FrameIndexFromOffset(mOffset);
   mParser.EndFrameSession();
 
   MP3LOG("FastSeek End TOC=%d avgFrameLen=%f mNumParsedFrames=%" PRIu64
-         " mFrameIndex=%" PRId64 " mFirstFrameOffset=%llu mOffset=%" PRIu64
-         " SL=%llu NumBytes=%u",
+         " mFrameIndex=%" PRId64 " mFirstFrameOffset=%llu mOffset=%" PRId64
+         " Duration(...)=%" PRId64 " SL=%llu NumBytes=%u",
          vbr.IsTOCPresent(), AverageFrameLength(), mNumParsedFrames, mFrameIndex,
-         mFirstFrameOffset, mOffset, StreamLength(), vbr.NumBytes().valueOr(0));
+         mFirstFrameOffset, mOffset, Duration(mFrameIndex), StreamLength(),
+         vbr.NumBytes().valueOr(0));
 
   return Duration(mFrameIndex);
 }
@@ -530,6 +534,23 @@ MP3TrackDemuxer::FrameIndexFromTime(const media::TimeUnit& aTime) const {
   MP3LOGV("FrameIndexFromOffset(%fs) -> %" PRId64, aTime.ToSeconds(), frameIndex);
   return std::max<int64_t>(0, frameIndex);
 }
+
+int64_t
+MP3TrackDemuxer::OffsetFromFrameIndex(int64_t aFrameIndex) const {
+  int64_t offset = 0;
+  const auto& vbr = mParser.VBRInfo();
+
+  if (vbr.NumBytes() && vbr.NumAudioFrames()) {
+    offset = mFirstFrameOffset + aFrameIndex * vbr.NumBytes().value() /
+             vbr.NumAudioFrames().value();
+  } else if (AverageFrameLength() > 0) {
+    offset = mFirstFrameOffset + aFrameIndex * AverageFrameLength();
+  }
+
+  MP3LOGV("OffsetFromFrameIndex(%" PRId64 ") -> %" PRId64, aFrameIndex, offset);
+  return std::max<int64_t>(mFirstFrameOffset, offset);
+}
+
 
 void
 MP3TrackDemuxer::UpdateState(const MediaByteRange& aRange) {
