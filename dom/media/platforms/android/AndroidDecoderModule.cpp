@@ -18,7 +18,11 @@
 #include "nsAutoPtr.h"
 #include "nsPromiseFlatString.h"
 
+#include <android/log.h>
 #include <jni.h>
+
+#undef LOG
+#define LOG(args...) __android_log_print(ANDROID_LOG_INFO, "AndroidDecoderModule", ## args)
 
 using namespace mozilla;
 using namespace mozilla::gl;
@@ -696,6 +700,17 @@ MediaCodecDataDecoder::DecoderLoop()
   mMonitor.Notify();
 }
 
+const char*
+MediaCodecDataDecoder::ModuleStateStr(ModuleState aState) {
+  static const char* kStr[] = {
+    "Decoding", "Flushing", "DrainQueue", "DrainDecoder", "DrainWaitEOS",
+    "Stopping", "Shutdown"
+  };
+
+  MOZ_ASSERT(aState < sizeof(kStr) / sizeof(kStr[0]));
+  return kStr[aState];
+}
+
 MediaCodecDataDecoder::ModuleState
 MediaCodecDataDecoder::State() const
 {
@@ -705,6 +720,9 @@ MediaCodecDataDecoder::State() const
 void
 MediaCodecDataDecoder::State(ModuleState aState)
 {
+  LOG("MediaCodecDataDecoder::State %s -> %s",
+      ModuleStateStr(mState), ModuleStateStr(aState));
+
   if (aState == kDrainDecoder) {
     MOZ_ASSERT(mState == kDrainQueue);
   } else if (aState == kDrainWaitEOS) {
