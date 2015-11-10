@@ -72,7 +72,7 @@ protected:
   void SetUp() override {
     {
       MP3Resource res;
-      res.mFilePath = "noise.mp3";
+      res.mFilePath = "/home/esawin/dev/g/dom/media/gtest/noise.mp3";
       res.mIsVBR = false;
       res.mFileSize = 965257;
       res.mMPEGLayer = 3;
@@ -115,7 +115,7 @@ protected:
       // not properly implemented, depending on the strictness of the MPEG frame parser a false
       // sync will be detected somewhere within the metadata at or after 112087, or failing
       // that, at the artificially added extraneous header at 114532.
-      res.mFilePath = "id3v2header.mp3";
+      res.mFilePath = "/home/esawin/dev/gd/dom/media/gtest/id3v2header.mp3";
       res.mIsVBR = false;
       res.mFileSize = 191302;
       res.mMPEGLayer = 3;
@@ -154,7 +154,7 @@ protected:
 
     {
       MP3Resource res;
-      res.mFilePath = "noise_vbr.mp3";
+      res.mFilePath = "/home/esawin/dev/gd/dom/media/gtest/noise_vbr.mp3";
       res.mIsVBR = true;
       res.mFileSize = 583679;
       res.mMPEGLayer = 3;
@@ -178,6 +178,44 @@ protected:
 
       // VBR stream resources contain header info on total frames numbers, which
       // is used to estimate the total duration.
+      MP3Resource streamRes = res;
+      streamRes.mFileSize = -1;
+
+      res.mResource = new MockMP3MediaResource(res.mFilePath);
+      res.mDemuxer = new MP3TrackDemuxer(res.mResource);
+      mTargets.push_back(res);
+
+      streamRes.mResource = new MockMP3StreamMediaResource(streamRes.mFilePath);
+      streamRes.mDemuxer = new MP3TrackDemuxer(streamRes.mResource);
+      mTargets.push_back(streamRes);
+    }
+
+    {
+      MP3Resource res;
+      res.mFilePath = "/home/esawin/dev/gd/dom/media/gtest/small-shot.mp3";
+      res.mIsVBR = true;
+      res.mFileSize = 6825;
+      res.mMPEGLayer = 3;
+      res.mMPEGVersion = 1;
+      res.mID3MajorVersion = 4;
+      res.mID3MinorVersion = 0;
+      res.mID3Flags = 0;
+      res.mID3Size = 24;
+      res.mDuration = 336686;
+      res.mDurationError = 0.01f;
+      res.mSeekError = 0.2f;
+      res.mSampleRate = 44100;
+      res.mSamplesPerFrame = 1152;
+      res.mNumSamples = 12;
+      res.mNumTrailingFrames = 0;
+      res.mBitrate = 256000;
+      res.mSlotSize = 1;
+      res.mPrivate = 0;
+      const int syncs[] = { 34, 556, 1078, 1601, 2123, 2646, 3168, 3691, 4213,
+                            4736, 5258, 5781, 6303 };
+      res.mSyncOffsets.insert(res.mSyncOffsets.begin(), syncs, syncs + 13);
+
+      // No content length can be estimated for CBR stream resources.
       MP3Resource streamRes = res;
       streamRes.mFileSize = -1;
 
@@ -347,5 +385,30 @@ TEST_F(MP3DemuxerTest, Seek) {
       target.mDemuxer->Seek(TimeUnit::FromMicroseconds(pos));
       frameData = target.mDemuxer->DemuxSample();
     }
+  }
+
+  // Seek out of range tests.
+  for (const auto& target: mTargets) {
+    // Skip tests for stream media resources because of lacking duration.
+    if (target.mFileSize <= 0) {
+      continue;
+    }
+
+    target.mDemuxer->Reset();
+    RefPtr<MediaRawData> frameData(target.mDemuxer->DemuxSample());
+    ASSERT_TRUE(frameData);
+
+    const int64_t duration = target.mDemuxer->Duration().ToMicroseconds();
+    const int64_t pos = duration + 1e6;
+
+    // Attempt to seek 1 second past the end of stream.
+    target.mDemuxer->Seek(TimeUnit::FromMicroseconds(pos));
+    // The seek should bring us to the end of the stream.
+    EXPECT_NEAR(duration, target.mDemuxer->SeekPosition().ToMicroseconds(),
+                target.mSeekError * duration);
+
+    // Since we're at the end of the stream, there should be no frames left.
+    frameData = target.mDemuxer->DemuxSample();
+    ASSERT_FALSE(frameData);
   }
 }
