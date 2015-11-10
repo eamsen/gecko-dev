@@ -10,6 +10,7 @@
 
 #include "MediaCodec.h"
 #include "TimeUnits.h"
+#include "mozilla/Atomics.h"
 #include "mozilla/Monitor.h"
 
 #include <queue>
@@ -121,13 +122,12 @@ protected:
   jni::ObjectArray::GlobalRef mOutputBuffers;
 
   nsCOMPtr<nsIThread> mThread;
+  Atomic<ModuleState> mState;
 
   // Only these members are protected by mMonitor.
   Monitor mMonitor;
-
-  ModuleState mState;
-
   SampleQueue mQueue;
+
   // Durations are stored in microseconds.
   std::queue<media::TimeUnit> mDurations;
 };

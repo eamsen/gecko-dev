@@ -551,8 +551,6 @@ MediaCodecDataDecoder::QueueSample(const MediaRawData* aSample)
 nsresult
 MediaCodecDataDecoder::QueueEOS()
 {
-  mMonitor.AssertCurrentThreadOwns();
-
   nsresult res = NS_OK;
   int32_t inputIndex = -1;
   res = mDecoder->DequeueInputBuffer(kDecoderTimeout, &inputIndex);
@@ -564,7 +562,6 @@ MediaCodecDataDecoder::QueueEOS()
                                    MediaCodec::BUFFER_FLAG_END_OF_STREAM);
   if (NS_SUCCEEDED(res)) {
     State(kDrainWaitEOS);
-    mMonitor.Notify();
   }
   return res;
 }
@@ -572,12 +569,8 @@ MediaCodecDataDecoder::QueueEOS()
 void
 MediaCodecDataDecoder::HandleEOS(int32_t aOutputStatus)
 {
-  MonitorAutoLock lock(mMonitor);
-
   if (State() == kDrainWaitEOS) {
     State(kDecoding);
-    mMonitor.Notify();
-
     INVOKE_CALLBACK(DrainComplete);
   }
 
@@ -628,13 +621,10 @@ MediaCodecDataDecoder::DecoderLoop()
   while (WaitForInput()) {
     sample = PeekNextSample();
 
-    {
-      MonitorAutoLock lock(mMonitor);
-      if (State() == kDrainDecoder) {
-        MOZ_ASSERT(!sample, "Shouldn't have a sample when pushing EOF frame");
-        res = QueueEOS();
-        BREAK_ON_DECODER_ERROR();
-      }
+    if (State() == kDrainDecoder) {
+      MOZ_ASSERT(!sample, "Shouldn't have a sample when pushing EOF frame");
+      res = QueueEOS();
+      BREAK_ON_DECODER_ERROR();
     }
 
     if (sample) {
@@ -695,9 +685,7 @@ MediaCodecDataDecoder::DecoderLoop()
   Cleanup();
 
   // We're done.
-  MonitorAutoLock lock(mMonitor);
   State(kShutdown);
-  mMonitor.Notify();
 }
 
 const char*
