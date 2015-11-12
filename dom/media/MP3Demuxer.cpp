@@ -110,6 +110,7 @@ MP3TrackDemuxer::MP3TrackDemuxer(MediaResource* aSource)
   , mSamplesPerFrame(0)
   , mSamplesPerSecond(0)
   , mChannels(0)
+  , mIsVBR(false)
 {
   Reset();
 
@@ -187,7 +188,31 @@ MP3TrackDemuxer::GetInfo() const {
 }
 
 bool
+MP3TrackDemuxer::IsVBR() const {
+  return mIsVBR;
+}
+
+bool
 MP3TrackDemuxer::UseFastSeek(const media::TimeUnit& aTime) const {
+  static const TimeUnit MIN_SEEK_DURATION = TimeUnit::FromSeconds(10);
+  static const int64_t MIN_PARSED_FRAMES = 100;
+
+  const TimeUnit duration = Duration();
+  if (duration > TimeUnit() && duration < MIN_SEEK_DURATION) {
+    // Small forward seeks are efficient enough using scanning.
+    // TODO: we should use the the actual seek distance instead of the total
+    // duration, but since Reset is called before seeking, this is not
+    // available here.
+    return false;
+  }
+
+  if (IsVBR() && !mParser.VBRInfo().IsTOCPresent() &&
+      mNumParsedFrames < MIN_PARSED_FRAMES) {
+    // Seeking accuracy is reduced for VBR streams without TOC and uncertain
+    // average frame lengths.
+    return false;
+  }
+
   return true;
 }
 
@@ -431,12 +456,16 @@ MP3TrackDemuxer::FindNextFrame() {
     return { 0, 0 };
   }
 
+  mIsVBR = mIsVBR || mParser.CurrentFrame().Header().Bitrate() !=
+           mParser.FirstFrame().Header().Bitrate();
+
   MP3LOGV("FindNext() End mOffset=%" PRId64 " mNumParsedFrames=%" PRIu64
           " mFrameIndex=%" PRId64 " frameHeaderOffset=%d"
           " mTotalFrameLen=%" PRIu64 " mSamplesPerFrame=%d mSamplesPerSecond=%d"
-          " mChannels=%d",
+          " mChannels=%d mIsVBR=%d",
           mOffset, mNumParsedFrames, mFrameIndex, frameHeaderOffset,
-          mTotalFrameLen, mSamplesPerFrame, mSamplesPerSecond, mChannels);
+          mTotalFrameLen, mSamplesPerFrame, mSamplesPerSecond, mChannels,
+          mIsVBR);
 
   return { frameHeaderOffset, frameHeaderOffset + mParser.CurrentFrame().Length() };
 }

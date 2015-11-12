@@ -396,6 +396,9 @@ private:
   // Returns whether it's safe to use FastSeek for seeking.
   bool UseFastSeek(const media::TimeUnit& aTime) const;
 
+  // Returns whether the stream is certainly a VBR stream, false otherwise.
+  bool IsVBR() const;
+
   // Fast approximate seeking to given time.
   media::TimeUnit FastSeek(const media::TimeUnit& aTime);
 
@@ -459,6 +462,9 @@ private:
 
   // Audio track config info.
   UniquePtr<AudioInfo> mInfo;
+
+  // True is stream is certainly VBR, false if uncertain.
+  bool mIsVBR;
 };
 
 } // namespace mp3
