@@ -186,12 +186,21 @@ MP3TrackDemuxer::GetInfo() const {
   return mInfo->Clone();
 }
 
+bool
+MP3TrackDemuxer::UseFastSeek(const media::TimeUnit& aTime) const {
+  return true;
+}
+
 RefPtr<MP3TrackDemuxer::SeekPromise>
 MP3TrackDemuxer::Seek(TimeUnit aTime) {
-  // Efficiently seek to the position.
-  FastSeek(aTime);
-  // Correct seek position by scanning the next frames.
-  const TimeUnit seekTime = ScanUntil(aTime);
+  TimeUnit seekTime;
+  if (UseFastSeek(aTime)) {
+    // Efficiently seek to the position.
+    seekTime = FastSeek(aTime);
+  } else {
+    // Seek by forward scanning.
+    seekTime = ScanUntil(aTime);
+  }
 
   MP3LOG("Seek(%" PRId64 ") -> mFrameIndex=%" PRId64 " mOffset=%" PRId64,
          aTime, mFrameIndex, mOffset);

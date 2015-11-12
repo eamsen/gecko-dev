@@ -393,6 +393,9 @@ private:
   // Destructor.
   ~MP3TrackDemuxer() {}
 
+  // Returns whether it's safe to use FastSeek for seeking.
+  bool UseFastSeek(const media::TimeUnit& aTime) const;
+
   // Fast approximate seeking to given time.
   media::TimeUnit FastSeek(const media::TimeUnit& aTime);
 
