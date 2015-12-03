@@ -93,7 +93,6 @@ nssrwlk.h
 nssrwlkt.h
 nssutil.h
 ocsp.h
-ocspt.h
 p12.h
 p12plcy.h
 p12t.h

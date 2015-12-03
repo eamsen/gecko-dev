@@ -11,7 +11,6 @@
 #include "nsCOMPtr.h"
 #include "pk11func.h"
 #include "nspr.h"
-#include "ocspt.h"
 #include "nsIStreamLoader.h"
 #include "mozilla/CondVar.h"
 #include "mozilla/Mutex.h"

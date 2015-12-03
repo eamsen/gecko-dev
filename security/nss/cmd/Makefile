@@ -10,10 +10,6 @@ DEPTH = ..
 include manifest.mn
 include $(CORE_DEPTH)/coreconf/config.mk
 
-ifdef BUILD_LIBPKIX_TESTS
-DIRS += libpkix
-endif
-
 ifeq ($(NSS_BUILD_WITHOUT_SOFTOKEN),1)
 BLTEST_SRCDIR =
 FIPSTEST_SRCDIR =

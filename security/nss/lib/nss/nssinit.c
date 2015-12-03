@@ -20,9 +20,9 @@
 #include "secerr.h"
 #include "nssbase.h"
 #include "nssutil.h"
-#include "pkixt.h"
-#include "pkix.h"
-#include "pkix_tools.h"
+// #include "pkixt.h"
+// #include "pkix.h"
+// #include "pkix_tools.h"
 
 #include "pki3hack.h"
 #include "certi.h"
@@ -526,8 +526,8 @@ nss_Init(const char *configdir, const char *certPrefix, const char *keyPrefix,
 		 PRBool dontFinalizeModules)
 {
     SECStatus rv = SECFailure;
-    PKIX_UInt32 actualMinorVersion = 0;
-    PKIX_Error *pkixError = NULL;
+    // PKIX_UInt32 actualMinorVersion = 0;
+    // PKIX_Error *pkixError = NULL;
     PRBool isReallyInitted;
     char *configStrings = NULL;
     char *configName = NULL;
@@ -684,18 +684,18 @@ nss_Init(const char *configdir, const char *certPrefix, const char *keyPrefix,
 	pk11sdr_Init();
 	cert_CreateSubjectKeyIDHashTable();
 
-	pkixError = PKIX_Initialize
-	    (PKIX_FALSE, PKIX_MAJOR_VERSION, PKIX_MINOR_VERSION,
-	    PKIX_MINOR_VERSION, &actualMinorVersion, &plContext);
+	// pkixError = PKIX_Initialize
+	    // (PKIX_FALSE, PKIX_MAJOR_VERSION, PKIX_MINOR_VERSION,
+	    // PKIX_MINOR_VERSION, &actualMinorVersion, &plContext);
 
-	if (pkixError != NULL) {
-	    goto loser;
-	} else {
-            char *ev = getenv("NSS_ENABLE_PKIX_VERIFY");
-            if (ev && ev[0]) {
-                CERT_SetUsePKIXForValidation(PR_TRUE);
-            }
-        }
+	// if (pkixError != NULL) {
+	    // goto loser;
+	// } else {
+            // char *ev = getenv("NSS_ENABLE_PKIX_VERIFY");
+            // if (ev && ev[0]) {
+                // CERT_SetUsePKIXForValidation(PR_TRUE);
+            // }
+        // }
 
 
     }
@@ -1080,7 +1080,7 @@ nss_Shutdown(void)
     cert_DestroyLocks();
     ShutdownCRLCache();
     OCSP_ShutdownGlobal();
-    PKIX_Shutdown(plContext);
+    // PKIX_Shutdown(plContext);
     SECOID_Shutdown();
     status = STAN_Shutdown();
     cert_DestroySubjectKeyIDHashTable();

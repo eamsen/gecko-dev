@@ -23,8 +23,6 @@ CSRCS = \
 	ocsp.c \
 	ocspsig.c \
 	certhigh.c \
- 	certvfy.c \
- 	certvfypkix.c \
  	xcrldist.c \
 	$(NULL)
 

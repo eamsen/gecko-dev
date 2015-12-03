@@ -23,8 +23,7 @@ DIRS = \
 	$(DBM_SRCDIR) \
 	$(SOFTOKEN_SRCDIR) \
 	base dev pki \
-	libpkix \
-	certdb certhigh pk11wrap cryptohi nss \
+	certdb pk11wrap cryptohi nss \
 	$(ZLIB_SRCDIR) ssl \
 	pkcs7 pkcs12 smime \
 	crmf jar \

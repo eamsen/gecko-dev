@@ -72,24 +72,12 @@ SHARED_LIBRARY_LIBS = \
 	$(NULL)
 
 SHARED_LIBRARY_DIRS = \
-	../certhigh \
 	../cryptohi \
 	../pk11wrap \
 	../certdb \
 	../pki \
 	../dev \
 	../base \
-	../libpkix/pkix/certsel \
-	../libpkix/pkix/checker \
-	../libpkix/pkix/params \
-	../libpkix/pkix/results \
-	../libpkix/pkix/top \
-	../libpkix/pkix/util \
-	../libpkix/pkix/crlsel \
-	../libpkix/pkix/store \
-	../libpkix/pkix_pl_nss/pki \
-	../libpkix/pkix_pl_nss/system \
-	../libpkix/pkix_pl_nss/module \
 	$(NULL)
 
 ifeq (,$(filter-out WINNT WIN95,$(OS_TARGET)))
