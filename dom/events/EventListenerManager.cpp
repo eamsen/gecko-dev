@@ -455,7 +455,7 @@ EventListenerManager::EnableDevice(EventMessage aEventMessage)
 
   switch (aEventMessage) {
     case eDeviceOrientation:
-      window->EnableDeviceSensor(SENSOR_ORIENTATION);
+      window->EnableDeviceSensor(SENSOR_ROTATION_VECTOR);
       break;
     case eDeviceProximity:
     case eUserProximity:
@@ -490,7 +490,7 @@ EventListenerManager::DisableDevice(EventMessage aEventMessage)
 
   switch (aEventMessage) {
     case eDeviceOrientation:
-      window->DisableDeviceSensor(SENSOR_ORIENTATION);
+      window->DisableDeviceSensor(SENSOR_ROTATION_VECTOR);
       break;
     case eDeviceMotion:
       window->DisableDeviceSensor(SENSOR_ACCELERATION);
