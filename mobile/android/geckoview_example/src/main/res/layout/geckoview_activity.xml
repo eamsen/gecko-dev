@@ -5,15 +5,35 @@
     android:layout_height="match_parent">
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="fill_parent"
-              android:layout_height="fill_parent"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
               android:orientation="vertical">
 
     <org.mozilla.gecko.GeckoView
         android:id="@+id/gecko_view"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_weight="1"
         android:scrollbars="none"
+        />
+
+    <EditText
+        android:id="@+id/searchbox"
+        android:layout_width="match_parent"
+        android:layout_height="36dp"
+        android:layout_gravity="bottom"
+        android:layout_weight="0"
+        android:hint="Search"
+        android:textSize="22dp"
+        android:textStyle="bold"
+        android:textColor="#FFF"
+        android:typeface="monospace"
+        android:background="#000"
+        android:singleLine="true"
+        android:selectAllOnFocus="true"
+        android:scrollHorizontally="true"
+        android:textAlignment="center"
+        android:imeOptions="actionSearch"
         />
 
 </LinearLayout>

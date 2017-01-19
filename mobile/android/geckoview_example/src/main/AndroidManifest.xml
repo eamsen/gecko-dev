@@ -9,7 +9,8 @@
 
         <activity android:name="org.mozilla.geckoview_example.GeckoViewActivity"
                   android:label="GeckoViewActivity"
-                  android:launchMode="singleTop">
+                  android:launchMode="singleTop"
+                  android:theme="@android:style/Theme.NoTitleBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
