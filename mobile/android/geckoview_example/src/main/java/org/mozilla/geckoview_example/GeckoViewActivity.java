@@ -15,6 +15,15 @@ import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.WindowManager;
+import android.widget.Toast;
+import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.TextView.OnEditorActionListener;
+import android.view.KeyEvent;
+import android.view.inputmethod.EditorInfo;
+import android.view.View;
+import android.util.Patterns;
+import android.net.Uri;
 
 import java.util.Locale;
 
@@ -36,6 +45,8 @@ public class GeckoViewActivity extends Activity {
 
     private GeckoView mGeckoView;
     private SwipeRefreshLayout mSwipeLayout;
+    private EditText mSearchBox;
+    private Navigation mNavigation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,6 +83,27 @@ public class GeckoViewActivity extends Activity {
 
         mSwipeLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh);
         mGeckoView.setScrollListener(new ScrollListener(mSwipeLayout));
+
+        mSearchBox = (EditText) findViewById(R.id.searchbox);
+        mSearchBox.setOnEditorActionListener(new OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView view, int actionId, KeyEvent event) {
+                Log.d(LOGTAG, "action " + actionId + ", event " + event);
+                if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                    String text = view.getText().toString();
+                    Log.d(LOGTAG, "search " + text);
+                    if (Patterns.WEB_URL.matcher(text).matches()) {
+                        mGeckoView.loadUri(Uri.parse(text));
+                    } else {
+                        mGeckoView.loadUri(Uri.parse("https://duckduckgo.com?kae=d&q=!g " + text));
+                    }
+                }
+                return false;
+            }
+        });
+
+        mNavigation = new Navigation(this, mSearchBox);
+        mGeckoView.setNavigationListener(mNavigation);
 
         final BasicGeckoViewPrompt prompt = new BasicGeckoViewPrompt();
         prompt.filePickerRequestCode = REQUEST_FILE_PICKER;
@@ -132,6 +164,17 @@ public class GeckoViewActivity extends Activity {
         } else {
             super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         }
+
+    }
+
+    public void onBackPressed() {
+        Log.d(LOGTAG, "onBackPressed");
+        if (!mNavigation.canGoBack()) {
+            super.onBackPressed();
+            return;
+        }
+
+        mGeckoView.goBack();
     }
 
     private class MyGeckoViewContent implements GeckoView.ContentListener {
@@ -344,6 +387,38 @@ public class GeckoViewActivity extends Activity {
                     }
                 }, 1500);
             }
+        }
+    }
+
+    private class Navigation implements GeckoView.NavigationListener {
+        private Activity mActivity;
+        private EditText mSearchBox;
+        private boolean mCanGoBack;
+
+        Navigation(Activity activity, EditText searchBox) {
+            this.mActivity = activity;
+            this.mSearchBox = searchBox;
+        }
+
+        @Override
+        public void onLocationChange(GeckoView view, final String url) {
+            Log.d(LOGTAG, "onLocationChange " + url);
+            this.mSearchBox.setText(url);
+        }
+
+        @Override
+        public void onCanGoBack(GeckoView view, boolean canGoBack) {
+            Log.d(LOGTAG, "onCanGoBack " + canGoBack);
+            mCanGoBack = canGoBack;
+        }
+
+        @Override
+        public void onCanGoForward(GeckoView view, boolean value) {
+            Log.d(LOGTAG, "onCanGoForward " + value);
+        }
+
+        public boolean canGoBack() {
+            return mCanGoBack;
         }
     }
 }
