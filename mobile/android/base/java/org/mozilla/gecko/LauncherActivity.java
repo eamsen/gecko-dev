@@ -54,12 +54,14 @@ public class LauncherActivity extends Activity {
         GeckoAppShell.ensureCrashHandling();
 
         final SafeIntent safeIntent = new SafeIntent(getIntent());
+        Log.d(TAG, "rabbit onCreate " + safeIntent.toString());
 
         // Is this deep link?
         if (isDeepLink(safeIntent)) {
             dispatchDeepLink(safeIntent);
 
         } else if (isShutdownIntent(safeIntent)) {
+            Log.d(TAG, "rabbit shutdown");
             dispatchShutdownIntent();
         // Is this web app?
         } else if (isWebAppIntent(safeIntent)) {

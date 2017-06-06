@@ -1265,6 +1265,7 @@ public abstract class GeckoApp extends GeckoActivity
         }
 
         final SafeIntent intent = new SafeIntent(getIntent());
+        Log.d("GeckoApp", "rabbit onCreate " + intent.toString());
 
         earlyStartJavaSampler(intent);
 
@@ -2118,6 +2119,8 @@ public abstract class GeckoApp extends GeckoActivity
     protected void onNewIntent(Intent externalIntent) {
         final SafeIntent intent = new SafeIntent(externalIntent);
         final String action = intent.getAction();
+
+        Log.d("GeckoApp", "rabbit onNewIntent " + action + " " + intent.toString());
 
         if (ACTION_SHUTDOWN.equals(action)) {
             mShutdownOnDestroy = true;
