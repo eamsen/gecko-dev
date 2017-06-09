@@ -13,6 +13,9 @@ import android.os.SystemClock;
 import android.util.Log;
 import android.view.WindowManager;
 
+import android.support.v4.widget.SwipeRefreshLayout;
+import android.os.Handler;
+
 import org.mozilla.gecko.GeckoView;
 import org.mozilla.gecko.GeckoViewSettings;
 
@@ -24,6 +27,7 @@ public class GeckoViewActivity extends Activity {
     /* package */ static final int REQUEST_FILE_PICKER = 1;
 
     private GeckoView mGeckoView;
+    private SwipeRefreshLayout mSwipeLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +45,9 @@ public class GeckoViewActivity extends Activity {
         mGeckoView = (GeckoView) findViewById(R.id.gecko_view);
         mGeckoView.setContentListener(new MyGeckoViewContent());
         mGeckoView.setProgressListener(new MyGeckoViewProgress());
+
+        mSwipeLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh);
+        mGeckoView.setScrollListener(new ScrollListener(mSwipeLayout));
 
         final BasicGeckoViewPrompt prompt = new BasicGeckoViewPrompt();
         prompt.filePickerRequestCode = REQUEST_FILE_PICKER;
@@ -126,6 +133,42 @@ public class GeckoViewActivity extends Activity {
                 statusString = "unknown";
             }
             Log.i(LOGTAG, "Security status changed to " + statusString);
+        }
+    }
+
+    private class ScrollListener implements GeckoView.ScrollListener {
+        public int mScrollY;
+
+        private SwipeRefreshLayout mLayout;
+
+        public ScrollListener(SwipeRefreshLayout layout) {
+            mLayout = layout;
+            mLayout.setOnRefreshListener(new RefreshListener());
+        }
+
+        /**
+        * @param view The GeckoView that initiated the callback.
+        */
+        public void onScrollChanged(GeckoView view, int scrollX, int scrollY) {
+            Log.d(LOGTAG, "onScrollChanged x" + scrollX + ", y=" + scrollY);
+            mScrollY = scrollY;
+
+            mLayout.setEnabled(mScrollY < 1);
+        }
+
+        private class RefreshListener implements SwipeRefreshLayout.OnRefreshListener {
+            @Override
+            public void onRefresh() {
+                GeckoViewActivity.this.mGeckoView.reload();
+
+                final Handler handler = new Handler();
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        ScrollListener.this.mLayout.setRefreshing(false);
+                    }
+                }, 1500);
+            }
         }
     }
 }
