@@ -23,6 +23,7 @@ class GeckoViewContent extends GeckoViewModule {
     this.messageManager.addMessageListener("GeckoView:DOMFullscreenExit", this);
     this.messageManager.addMessageListener("GeckoView:DOMFullscreenRequest", this);
     this.messageManager.addMessageListener("GeckoView:DOMTitleChanged", this);
+    this.messageManager.addMessageListener("GeckoView:ScrollChanged", this);
 
     this.window.addEventListener("MozDOMFullscreen:Entered", this,
                                  /* capture */ true, /* untrusted */ false);
