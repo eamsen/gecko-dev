@@ -21,6 +21,7 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.InputDevice;
+import android.util.Log;
 
 class NativePanZoomController extends JNIObject implements PanZoomController {
     private final LayerView mView;
@@ -88,6 +89,7 @@ class NativePanZoomController extends JNIObject implements PanZoomController {
             toolMinor[i] = coords.toolMinor;
         }
 
+        // Log.d("GeckoView NPZC handleMotionEvent", "x=" + x + ", y=" + y);
         return handleMotionEvent(action, event.getActionIndex(), event.getEventTime(),
                 event.getMetaState(), pointerId, x, y, orientation, pressure,
                 toolMajor, toolMinor);
@@ -113,6 +115,8 @@ class NativePanZoomController extends JNIObject implements PanZoomController {
         final float flipFactor = mNegateWheelScroll ? -1.0f : 1.0f;
         final float hScroll = event.getAxisValue(MotionEvent.AXIS_HSCROLL) * flipFactor * mPointerScrollFactor;
         final float vScroll = event.getAxisValue(MotionEvent.AXIS_VSCROLL) * flipFactor * mPointerScrollFactor;
+
+        Log.d("GeckoView NPZC handleScrollEvent", "x=" + x + ", y=" + y);
 
         return handleScrollEvent(event.getEventTime(), event.getMetaState(), x, y, hScroll, vScroll);
     }
@@ -181,14 +185,17 @@ class NativePanZoomController extends JNIObject implements PanZoomController {
             if (event.getDownTime() >= mLastDownTime) {
                 mLastDownTime = event.getDownTime();
             } else if ((InputDevice.getDevice(event.getDeviceId()).getSources() & InputDevice.SOURCE_TOUCHPAD) == InputDevice.SOURCE_TOUCHPAD) {
+                Log.d("GeckoView NPZC onMotionEvent", "1");
                 return false;
             }
             return handleScrollEvent(event);
         } else if ((action == MotionEvent.ACTION_HOVER_MOVE) ||
                    (action == MotionEvent.ACTION_HOVER_ENTER) ||
                    (action == MotionEvent.ACTION_HOVER_EXIT)) {
+            Log.d("GeckoView NPZC onMotionEvent", "2");
             return handleMouseEvent(event);
         } else {
+            Log.d("GeckoView NPZC onMotionEvent", "3");
             return false;
         }
     }

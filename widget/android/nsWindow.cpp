@@ -447,6 +447,7 @@ public:
                            float aX, float aY,
                            float aHScroll, float aVScroll)
     {
+        // rabbit("HandleScrollEvent x=%f, y=%f", aX, aY);
         MOZ_ASSERT(AndroidBridge::IsJavaUiThread());
 
         RefPtr<IAPZCTreeManager> controller;
@@ -611,6 +612,7 @@ public:
                            jni::FloatArray::Param aToolMinor)
     {
         MOZ_ASSERT(AndroidBridge::IsJavaUiThread());
+        // rabbit("HandleMotionEvent");
 
         RefPtr<IAPZCTreeManager> controller;
 

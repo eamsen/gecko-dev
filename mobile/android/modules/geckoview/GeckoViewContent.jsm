@@ -14,7 +14,7 @@ var dump = Cu.import("resource://gre/modules/AndroidLog.jsm", {})
            .AndroidLog.d.bind(null, "ViewContent");
 
 function debug(aMsg) {
-  // dump(aMsg);
+  dump(aMsg);
 }
 
 class GeckoViewContent extends GeckoViewModule {

@@ -8,7 +8,7 @@ var { classes: Cc, interfaces: Ci, utils: Cu } = Components;
 var dump = Cu.import("resource://gre/modules/AndroidLog.jsm", {}).AndroidLog.d.bind(null, "ViewContent");
 
 function debug(aMsg) {
-  // dump(aMsg);
+  dump(aMsg);
 }
 
 // This is copied from desktop's tab-content.js. See bug 1153485 about sharing this code somehow.

@@ -18,7 +18,7 @@ var dump = Cu.import("resource://gre/modules/AndroidLog.jsm", {})
            .AndroidLog.d.bind(null, "ViewNavigation");
 
 function debug(aMsg) {
-  // dump(aMsg);
+  dump(aMsg);
 }
 
 // Handles navigation requests between Gecko and a GeckoView.
