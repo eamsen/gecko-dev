@@ -38,6 +38,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.InputDevice;
 import android.widget.FrameLayout;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -405,16 +406,20 @@ public class LayerView extends FrameLayout {
     @Override
     public boolean onGenericMotionEvent(MotionEvent event) {
         if (AndroidGamepadManager.handleMotionEvent(event)) {
+            Log.d("GeckoView LayerView", "onGenericMotionEvent 1");
             return true;
         }
         if (!mLayerClient.isGeckoReady()) {
             // If gecko isn't loaded yet, don't try sending events to the
             // native code because it's just going to crash
+            Log.d("GeckoView LayerView", "onGenericMotionEvent 2");
             return true;
         }
         if (mPanZoomController != null && mPanZoomController.onMotionEvent(event)) {
+            Log.d("GeckoView LayerView", "onGenericMotionEvent 3");
             return true;
         }
+        Log.d("GeckoView LayerView", "onGenericMotionEvent 4");
         return false;
     }
 

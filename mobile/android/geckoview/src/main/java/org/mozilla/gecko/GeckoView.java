@@ -48,7 +48,7 @@ public class GeckoView extends LayerView {
     private static final String DEFAULT_SHARED_PREFERENCES_FILE = "GeckoView";
     private static final String LOGTAG = "GeckoView";
 
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
 
     /* package */ enum State implements NativeQueue.State {
         @WrapForJNI INITIAL(0),
