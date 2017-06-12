@@ -19,16 +19,31 @@ function debug(aMsg) {
 
 class GeckoViewContent extends GeckoViewModule {
   init() {
-    this.messageManager.loadFrameScript("chrome://geckoview/content/GeckoViewContent.js", true);
-    this.messageManager.addMessageListener("GeckoView:DOMFullscreenExit", this);
-    this.messageManager.addMessageListener("GeckoView:DOMFullscreenRequest", this);
-    this.messageManager.addMessageListener("GeckoView:DOMTitleChanged", this);
-    this.messageManager.addMessageListener("GeckoView:ScrollChanged", this);
+    this.messageManager.loadFrameScript(
+      "chrome://geckoview/content/GeckoViewContent.js", true);
+  }
 
-    this.window.addEventListener("MozDOMFullscreen:Entered", this,
+  register(aData) {
+    this.window.addEventListener("MozDOMFullScreen:Entered", this,
                                  /* capture */ true, /* untrusted */ false);
-    this.window.addEventListener("MozDOMFullscreen:Exited", this,
+    this.window.addEventListener("MozDOMFullScreen:Exited", this,
                                  /* capture */ true, /* untrusted */ false);
+    this.messageManager.addMessageListener("GeckoView:DOMFullscreenExit", this);
+    this.messageManager.addMessageListener("GeckoView:DOMFullscreenRequest",
+                                           this);
+    this.messageManager.addMessageListener("GeckoView:DOMTitleChanged", this);
+  }
+
+  unregister(aData) {
+    this.window.removeEventListener("MozDOMFullScreen:Entered", this,
+                                    /* capture */ true);
+    this.window.removeEventListener("MozDOMFullScreen:Exited", this,
+                                    /* capture */ true);
+    this.messageManager.removeMessageListener("GeckoView:DOMFullscreenExit",
+                                              this);
+    this.messageManager.removeMessageListener("GeckoView:DOMFullscreenRequest",
+                                              this);
+    this.messageManager.removeMessageListener("GeckoView:DOMTitleChanged", this);
   }
 
   handleEvent(aEvent) {

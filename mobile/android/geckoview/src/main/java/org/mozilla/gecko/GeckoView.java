@@ -92,7 +92,7 @@ public class GeckoView extends LayerView {
     private final EventDispatcher mEventDispatcher =
         new EventDispatcher(mNativeQueue);
 
-    /* package */ ContentListener mContentListener;
+    /* package */ GeckoViewContentHandler mContentHandler;
     /* package */ NavigationListener mNavigationListener;
     /* package */ ProgressListener mProgressListener;
     /* package */ ScrollListener mScrollListener;
@@ -200,9 +200,6 @@ public class GeckoView extends LayerView {
     private class Listener implements BundleEventListener {
         /* package */ void registerListeners() {
             getEventDispatcher().registerUiThreadListener(this,
-                "GeckoView:DOMTitleChanged",
-                "GeckoView:FullScreenEnter",
-                "GeckoView:FullScreenExit",
                 "GeckoView:LocationChange",
                 "GeckoView:PageStart",
                 "GeckoView:PageStop",
@@ -219,19 +216,7 @@ public class GeckoView extends LayerView {
                 Log.d(LOGTAG, "handleMessage: event = " + event);
             }
 
-            if ("GeckoView:DOMTitleChanged".equals(event)) {
-                if (mContentListener != null) {
-                    mContentListener.onTitleChange(GeckoView.this, message.getString("title"));
-                }
-            } else if ("GeckoView:FullScreenEnter".equals(event)) {
-                if (mContentListener != null) {
-                    mContentListener.onFullScreen(GeckoView.this, true);
-                }
-            } else if ("GeckoView:FullScreenExit".equals(event)) {
-                if (mContentListener != null) {
-                    mContentListener.onFullScreen(GeckoView.this, false);
-                }
-            } else if ("GeckoView:LocationChange".equals(event)) {
+            if ("GeckoView:LocationChange".equals(event)) {
                 if (mNavigationListener == null) {
                     // We shouldn't be getting this event.
                     mEventDispatcher.dispatch("GeckoViewNavigation:Inactive", null);
@@ -610,10 +595,13 @@ public class GeckoView extends LayerView {
     /**
     * Set the content callback handler.
     * This will replace the current handler.
-    * @param content An implementation of ContentListener.
+    * @param listener An implementation of ContentListener.
     */
-    public void setContentListener(ContentListener content) {
-        mContentListener = content;
+    public void setContentListener(ContentListener listener) {
+        if (mContentHandler != null) {
+            mContentHandler.unregister();
+        }
+        mContentHandler = new GeckoViewContentHandler(this, listener);
     }
 
     /**
@@ -621,7 +609,7 @@ public class GeckoView extends LayerView {
     * @return The current content callback handler.
     */
     public ContentListener getContentListener() {
-        return mContentListener;
+        return mContentHandler.mListener;
     }
 
     /**
