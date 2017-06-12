@@ -224,6 +224,8 @@
 #endif
 #endif
 
+#define rabbit(args...)  __android_log_print(ANDROID_LOG_INFO, "rabbit" , ## args)
+
 extern uint32_t gRestartMode;
 extern void InstallSignalHandlers(const char *ProgramName);
 
@@ -988,6 +990,7 @@ nsXULAppInfo::EnsureContentProcess()
 NS_IMETHODIMP
 nsXULAppInfo::InvalidateCachesOnRestart()
 {
+  rabbit("InvalidateCachesOnRestart\n");
   nsCOMPtr<nsIFile> file;
   nsresult rv = NS_GetSpecialDirectory(NS_APP_PROFILE_DIR_STARTUP,
                                        getter_AddRefs(file));
@@ -4186,6 +4189,8 @@ XREMain::XRE_mainStartup(bool* aExitFlag)
     flagFile->Remove(true);
   }
 
+  rabbit("versionOK=%d cachesOK=%d startupCacheValid=%d\n",
+         versionOK, cachesOK, startupCacheValid);
   return 0;
 }
 
