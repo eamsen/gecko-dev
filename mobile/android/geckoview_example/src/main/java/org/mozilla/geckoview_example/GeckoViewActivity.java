@@ -37,7 +37,7 @@ public class GeckoViewActivity extends Activity {
 
         if (BuildConfig.DEBUG) {
             // In debug builds, we want to load JavaScript resources fresh with each build.
-            GeckoView.preload(this, "-purgecaches");
+            // GeckoView.preload(this, "-purgecaches");
         }
 
         setContentView(R.layout.geckoview_activity);

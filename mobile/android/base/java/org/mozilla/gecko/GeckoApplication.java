@@ -101,7 +101,7 @@ public class GeckoApplication extends Application {
             // buildid, so we purge here instead.
             Log.w(LOG_TAG, "STARTUP PERFORMANCE WARNING: un-official build: purging the " +
                            "startup (JavaScript) caches.");
-            args = (args != null) ? (args + " -purgecaches") : "-purgecaches";
+            // args = (args != null) ? (args + " -purgecaches") : "-purgecaches";
         }
         return args;
     }
