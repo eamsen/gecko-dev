@@ -368,7 +368,7 @@ public class GeckoViewActivity extends Activity {
         * @param view The GeckoView that initiated the callback.
         */
         public void onScrollChanged(GeckoView view, int scrollX, int scrollY) {
-            Log.d(LOGTAG, "onScrollChanged x" + scrollX + ", y=" + scrollY);
+            Log.d(LOGTAG, "onScrollChanged x=" + view.getScrollY() + ", y=" + scrollY);
             mScrollY = scrollY;
 
             mLayout.setEnabled(mScrollY < 1);
