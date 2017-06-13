@@ -95,7 +95,7 @@ public class GeckoView extends LayerView {
     /* package */ GeckoViewContentHandler mContentHandler;
     /* package */ GeckoViewNavigationHandler mNavigationHandler;
     /* package */ GeckoViewProgressHandler mProgressHandler;
-    /* package */ ScrollListener mScrollListener;
+    /* package */ GeckoViewScrollHandler mScrollHandler;
     private PromptDelegate mPromptDelegate;
     private InputConnectionListener mInputConnectionListener;
 
@@ -201,7 +201,6 @@ public class GeckoView extends LayerView {
         /* package */ void registerListeners() {
             getEventDispatcher().registerUiThreadListener(this,
                 "GeckoView:Prompt",
-                "GeckoView:ScrollChanged",
                 null);
         }
 
@@ -214,12 +213,6 @@ public class GeckoView extends LayerView {
 
             if ("GeckoView:Prompt".equals(event)) {
                 handlePromptEvent(GeckoView.this, message, callback);
-            } else if ("GeckoView:ScrollChanged".equals(event)) {
-                if (mScrollListener != null) {
-                    mScrollListener.onScrollChanged(GeckoView.this,
-                                                    message.getInt("scrollX"),
-                                                    message.getInt("scrollY"));
-                }
             }
         }
     }
@@ -643,10 +636,10 @@ public class GeckoView extends LayerView {
     * @param listener An implementation of ScrollListener.
     */
     public void setScrollListener(ScrollListener listener) {
-        if (mScrollListener == listener) {
-            return;
+        if (mScrollHandler != null) {
+            mScrollHandler.unregister();
         }
-        mScrollListener = listener;
+        mScrollHandler = new GeckoViewScrollHandler(this, listener);
     }
 
     /**

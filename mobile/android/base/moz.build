@@ -391,6 +391,7 @@ gvjar.sources += [geckoview_source_dir + 'java/org/mozilla/gecko/' + x
     'GeckoViewHandler.java',
     'GeckoViewNavigationHandler.java',
     'GeckoViewProgressHandler.java',
+    'GeckoViewScrollHandler.java',
     'GeckoViewSettings.java',
     'gfx/BitmapUtils.java',
     'gfx/BufferedImage.java',
