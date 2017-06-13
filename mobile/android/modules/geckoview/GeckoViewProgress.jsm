@@ -15,21 +15,18 @@ XPCOMUtils.defineLazyModuleGetter(this, "EventDispatcher",
   "resource://gre/modules/Messaging.jsm");
 
 var dump = Cu.import("resource://gre/modules/AndroidLog.jsm", {})
-           .AndroidLog.d.bind(null, "ViewNavigation");
+           .AndroidLog.d.bind(null, "ViewProgress");
 
 function debug(aMsg) {
   dump(aMsg);
 }
 
 class GeckoViewProgress extends GeckoViewModule {
-  init() {
-    this.registerProgressListener();
-  }
+  register() {
+    debug("register");
 
-  registerProgressListener() {
-    debug("registerProgressListeners()");
-
-    let flags = Ci.nsIWebProgress.NOTIFY_STATE_NETWORK | Ci.nsIWebProgress.NOTIFY_SECURITY;
+    let flags = Ci.nsIWebProgress.NOTIFY_STATE_NETWORK |
+                Ci.nsIWebProgress.NOTIFY_SECURITY;
     this.progressFilter =
       Cc["@mozilla.org/appshell/component/browser-status-filter;1"]
       .createInstance(Ci.nsIWebProgress);

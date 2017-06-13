@@ -94,7 +94,7 @@ public class GeckoView extends LayerView {
 
     /* package */ GeckoViewContentHandler mContentHandler;
     /* package */ NavigationListener mNavigationListener;
-    /* package */ ProgressListener mProgressListener;
+    /* package */ GeckoViewProgressHandler mProgressHandler;
     /* package */ ScrollListener mScrollListener;
     private PromptDelegate mPromptDelegate;
     private InputConnectionListener mInputConnectionListener;
@@ -201,10 +201,7 @@ public class GeckoView extends LayerView {
         /* package */ void registerListeners() {
             getEventDispatcher().registerUiThreadListener(this,
                 "GeckoView:LocationChange",
-                "GeckoView:PageStart",
-                "GeckoView:PageStop",
                 "GeckoView:Prompt",
-                "GeckoView:SecurityChanged",
                 "GeckoView:ScrollChanged",
                 null);
         }
@@ -225,21 +222,8 @@ public class GeckoView extends LayerView {
                     mNavigationListener.onCanGoBack(GeckoView.this, message.getBoolean("canGoBack"));
                     mNavigationListener.onCanGoForward(GeckoView.this, message.getBoolean("canGoForward"));
                 }
-            } else if ("GeckoView:PageStart".equals(event)) {
-                if (mProgressListener != null) {
-                    mProgressListener.onPageStart(GeckoView.this, message.getString("uri"));
-                }
-            } else if ("GeckoView:PageStop".equals(event)) {
-                if (mProgressListener != null) {
-                    mProgressListener.onPageStop(GeckoView.this, message.getBoolean("success"));
-                }
             } else if ("GeckoView:Prompt".equals(event)) {
                 handlePromptEvent(GeckoView.this, message, callback);
-            } else if ("GeckoView:SecurityChanged".equals(event)) {
-                if (mProgressListener != null) {
-                    int state = message.getInt("status") & ProgressListener.STATE_ALL;
-                    mProgressListener.onSecurityChange(GeckoView.this, state);
-                }
             } else if ("GeckoView:ScrollChanged".equals(event)) {
                 if (mScrollListener != null) {
                     mScrollListener.onScrollChanged(GeckoView.this,
@@ -615,10 +599,13 @@ public class GeckoView extends LayerView {
     /**
     * Set the progress callback handler.
     * This will replace the current handler.
-    * @param progress An implementation of ProgressListener.
+    * @param listener An implementation of ProgressListener.
     */
-    public void setProgressListener(ProgressListener progress) {
-        mProgressListener = progress;
+    public void setProgressListener(ProgressListener listener) {
+        if (mProgressHandler != null) {
+            mProgressHandler.unregister();
+        }
+        mProgressHandler = new GeckoViewProgressHandler(this, listener);
     }
 
     /**
@@ -626,7 +613,7 @@ public class GeckoView extends LayerView {
     * @return The current progress callback handler.
     */
     public ProgressListener getProgressListener() {
-        return mProgressListener;
+        return mProgressHandler.mListener;
     }
 
     /**
