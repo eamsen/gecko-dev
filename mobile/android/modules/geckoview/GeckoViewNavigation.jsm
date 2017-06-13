@@ -33,13 +33,7 @@ class GeckoViewNavigation extends GeckoViewModule {
   init() {
     this.window.QueryInterface(Ci.nsIDOMChromeWindow).browserDOMWindow = this;
 
-    // We need to listen initially because the "GeckoViewNavigation:Active"
-    // event may be dispatched before this object is constructed.
-    this.registerProgressListener();
-
     this.eventDispatcher.registerListener(this, [
-      "GeckoViewNavigation:Active",
-      "GeckoViewNavigation:Inactive",
       "GeckoView:GoBack",
       "GeckoView:GoForward",
       "GeckoView:LoadUri",
@@ -52,12 +46,6 @@ class GeckoViewNavigation extends GeckoViewModule {
     debug("onEvent: aEvent=" + aEvent + ", aData=" + JSON.stringify(aData));
 
     switch (aEvent) {
-      case "GeckoViewNavigation:Active":
-        this.registerProgressListener();
-        break;
-      case "GeckoViewNavigation:Inactive":
-        this.unregisterProgressListener();
-        break;
       case "GeckoView:GoBack":
         this.browser.goBack();
         break;
@@ -91,8 +79,9 @@ class GeckoViewNavigation extends GeckoViewModule {
     return false;
   }
 
-  registerProgressListener() {
-    debug("registerProgressListener");
+  register() {
+    debug("register");
+
     let flags = Ci.nsIWebProgress.NOTIFY_LOCATION;
     this.progressFilter =
       Cc["@mozilla.org/appshell/component/browser-status-filter;1"]
@@ -101,8 +90,9 @@ class GeckoViewNavigation extends GeckoViewModule {
     this.browser.addProgressListener(this.progressFilter, flags);
   }
 
-  unregisterProgressListener() {
-    debug("unregisterProgressListener");
+  unregister() {
+    debug("unregister");
+
     if (!this.progressFilter) {
       return;
     }

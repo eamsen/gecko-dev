@@ -93,7 +93,7 @@ public class GeckoView extends LayerView {
         new EventDispatcher(mNativeQueue);
 
     /* package */ GeckoViewContentHandler mContentHandler;
-    /* package */ NavigationListener mNavigationListener;
+    /* package */ GeckoViewNavigationHandler mNavigationHandler;
     /* package */ GeckoViewProgressHandler mProgressHandler;
     /* package */ ScrollListener mScrollListener;
     private PromptDelegate mPromptDelegate;
@@ -200,7 +200,6 @@ public class GeckoView extends LayerView {
     private class Listener implements BundleEventListener {
         /* package */ void registerListeners() {
             getEventDispatcher().registerUiThreadListener(this,
-                "GeckoView:LocationChange",
                 "GeckoView:Prompt",
                 "GeckoView:ScrollChanged",
                 null);
@@ -213,16 +212,7 @@ public class GeckoView extends LayerView {
                 Log.d(LOGTAG, "handleMessage: event = " + event);
             }
 
-            if ("GeckoView:LocationChange".equals(event)) {
-                if (mNavigationListener == null) {
-                    // We shouldn't be getting this event.
-                    mEventDispatcher.dispatch("GeckoViewNavigation:Inactive", null);
-                } else {
-                    mNavigationListener.onLocationChange(GeckoView.this, message.getString("uri"));
-                    mNavigationListener.onCanGoBack(GeckoView.this, message.getBoolean("canGoBack"));
-                    mNavigationListener.onCanGoForward(GeckoView.this, message.getBoolean("canGoForward"));
-                }
-            } else if ("GeckoView:Prompt".equals(event)) {
+            if ("GeckoView:Prompt".equals(event)) {
                 handlePromptEvent(GeckoView.this, message, callback);
             } else if ("GeckoView:ScrollChanged".equals(event)) {
                 if (mScrollListener != null) {
@@ -619,19 +609,13 @@ public class GeckoView extends LayerView {
     /**
     * Set the navigation callback handler.
     * This will replace the current handler.
-    * @param navigation An implementation of NavigationListener.
+    * @param listener An implementation of NavigationListener.
     */
     public void setNavigationListener(NavigationListener listener) {
-        if (mNavigationListener == listener) {
-            return;
+        if (mNavigationHandler != null) {
+            mNavigationHandler.unregister();
         }
-        if (listener == null) {
-            mEventDispatcher.dispatch("GeckoViewNavigation:Inactive", null);
-        } else if (mNavigationListener == null) {
-            mEventDispatcher.dispatch("GeckoViewNavigation:Active", null);
-        }
-
-        mNavigationListener = listener;
+        mNavigationHandler = new GeckoViewNavigationHandler(this, listener);
     }
 
     /**
@@ -639,7 +623,7 @@ public class GeckoView extends LayerView {
     * @return The current navigation callback handler.
     */
     public NavigationListener getNavigationListener() {
-        return mNavigationListener;
+        return mNavigationHandler.mListener;
     }
 
     /**
