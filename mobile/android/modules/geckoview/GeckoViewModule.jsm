@@ -16,14 +16,23 @@ function debug(aMsg) {
 }
 
 class GeckoViewModule {
-  constructor(aWindow, aBrowser, aEventDispatcher) {
+  constructor(aModuleName, aWindow, aBrowser, aEventDispatcher) {
     this.window = aWindow;
     this.browser = aBrowser;
     this.eventDispatcher = aEventDispatcher;
+    this.moduleName = aModuleName;
 
     this.eventDispatcher.registerListener(
       () => this.onSettingsUpdate(),
       "GeckoView:UpdateSettings");
+
+    this.eventDispatcher.registerListener(
+      (aEvent, aData, aCallback) => this.register(aData),
+      this.moduleName + ":Register");
+
+    this.eventDispatcher.registerListener(
+      (aEvent, aData, aCallback) => this.unregister(aData),
+      this.moduleName + ":Unregister");
 
     this.init();
     this.onSettingsUpdate();
@@ -34,6 +43,9 @@ class GeckoViewModule {
 
   // Called when settings have changed. Access settings via this.settings.
   onSettingsUpdate() {}
+
+  register(aData) {}
+  unregister(aData) {}
 
   get settings() {
     let view = this.window.arguments[0].QueryInterface(Ci.nsIAndroidView);
