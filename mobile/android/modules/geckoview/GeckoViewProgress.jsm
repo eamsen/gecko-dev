@@ -20,7 +20,7 @@ XPCOMUtils.defineLazyGetter(this, "dump", () =>
               {}).AndroidLog.d.bind(null, "ViewProgress"));
 
 function debug(aMsg) {
-  // dump(aMsg);
+  dump(aMsg);
 }
 
 var IdentityHandler = {
