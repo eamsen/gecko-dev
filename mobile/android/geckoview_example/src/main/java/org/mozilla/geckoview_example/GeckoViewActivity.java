@@ -67,6 +67,9 @@ public class GeckoViewActivity extends Activity {
         super.onNewIntent(intent);
 
         if (ACTION_SHUTDOWN.equals(intent.getAction())) {
+            // Context context = getApplicationContext();
+            // ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+            Log.d("rabbit", "pid " + getApplication() + " " + getCallingActivity() + " " + getCallingPackage());
             mKillProcessOnDestroy = true;
             GeckoThread.forceQuit();
             mGeckoView.onDetachedFromWindow();

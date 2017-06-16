@@ -2123,6 +2123,11 @@ public abstract class GeckoApp extends GeckoActivity
         Log.d("GeckoApp", "rabbit onNewIntent " + action + " " + intent.toString());
 
         if (ACTION_SHUTDOWN.equals(action)) {
+            // Intent in = new Intent();
+            // in.setAction("android.intent.action.MAIN");
+            // in.setAction("org.mozilla.geckoview_example.SHUTDOWN");
+            // in.setClassName("org.mozilla.geckoview_example", "org.mozilla.geckoview_example.GeckoViewActivity");
+            // startActivity(in);
             mShutdownOnDestroy = true;
             GeckoThread.forceQuit();
             return;
