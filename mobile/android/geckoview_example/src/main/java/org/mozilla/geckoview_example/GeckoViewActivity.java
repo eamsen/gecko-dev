@@ -102,6 +102,8 @@ public class GeckoViewActivity extends Activity {
         mGeckoView.getSettings().setBoolean(
             GeckoViewSettings.USE_MULTIPROCESS,
             intent.getBooleanExtra(USE_MULTIPROCESS_EXTRA, true));
+        mGeckoView.getSettings().setBoolean(
+            GeckoViewSettings.USE_TRACKING_PROTECTION, true);
 
         final Uri uri = intent.getData();
         mGeckoView.loadUri(uri != null ? uri.toString() : DEFAULT_URL);
