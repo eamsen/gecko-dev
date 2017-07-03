@@ -4722,6 +4722,7 @@ ContentParent::RecvCreateWindow(PBrowserParent* aThisTab,
   if (sNextTabParents.GetAndRemove(nextTabParentId).valueOr(nullptr)) {
     cwi.windowOpened() = false;
   }
+  // rabbit
   MOZ_ASSERT(TabParent::GetFrom(newRemoteTab) == newTab);
 
   newTab->SwapFrameScriptsFrom(cwi.frameScripts());

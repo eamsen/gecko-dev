@@ -286,6 +286,10 @@ static mozilla::LazyLogModule gDocShellLeakLog("nsDocShellLeak");;
 const char kBrandBundleURL[]      = "chrome://branding/locale/brand.properties";
 const char kAppstringsBundleURL[] = "chrome://global/locale/appstrings.properties";
 
+#include <android/log.h>
+#define rabbit(msg, ...) __android_log_print(ANDROID_LOG_INFO, "rabbit", "%s at %s:%d " msg, __PRETTY_FUNCTION__, __FILE__, __LINE__, ##__VA_ARGS__)
+
+
 static void
 FavorPerformanceHint(bool aPerfOverStarvation)
 {
@@ -14787,7 +14791,8 @@ nsDocShell::CanSetOriginAttributes()
         return false;
       }
       nsCString uriSpec = uri->GetSpecOrDefault();
-      MOZ_ASSERT(uriSpec.EqualsLiteral("about:blank"));
+      rabbit("%s", uriSpec.get());
+      // MOZ_ASSERT(uriSpec.EqualsLiteral("about:blank"));
       if (!uriSpec.EqualsLiteral("about:blank")) {
         return false;
       }
