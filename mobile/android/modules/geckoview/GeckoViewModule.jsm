@@ -15,7 +15,7 @@ XPCOMUtils.defineLazyGetter(this, "dump", () =>
               {}).AndroidLog.d.bind(null, "ViewModule"));
 
 function debug(aMsg) {
-  // dump(aMsg);
+  dump(aMsg);
 }
 
 class GeckoViewModule {
