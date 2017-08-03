@@ -48,6 +48,7 @@ var ModuleManager = {
 };
 
 function startup() {
+  dump("rabbit startup");
   ModuleManager.init();
 
   // GeckoViewNavigation needs to go first because nsIDOMBrowserWindow must set up

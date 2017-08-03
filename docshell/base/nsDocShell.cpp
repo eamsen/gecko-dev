@@ -2323,6 +2323,7 @@ nsDocShell::SetUsePrivateBrowsing(bool aUsePrivateBrowsing)
     NS_LITERAL_CSTRING("Internal API Used"),
     mContentViewer ? mContentViewer->GetDocument() : nullptr);
 
+  rabbit("");
   if (!CanSetOriginAttributes()) {
     bool changed = aUsePrivateBrowsing != (mPrivateBrowsingId > 0);
 
@@ -11210,6 +11211,7 @@ nsDocShell::DoURILoad(nsIURI* aURI,
     attrs.SetFirstPartyDomain(isTopLevelDoc, aURI);
   }
 
+  rabbit("");
   rv = loadInfo->SetOriginAttributes(attrs);
   if (NS_WARN_IF(NS_FAILED(rv))) {
     return rv;
@@ -14758,6 +14760,7 @@ nsDocShell::CanSetOriginAttributes()
 {
   MOZ_ASSERT(mChildList.IsEmpty());
   if (!mChildList.IsEmpty()) {
+    rabbit("r1 false");
     return false;
   }
 
@@ -14768,23 +14771,27 @@ nsDocShell::CanSetOriginAttributes()
     if (doc) {
       nsIURI* uri = doc->GetDocumentURI();
       if (!uri) {
+        rabbit("r2 false");
         return false;
       }
       nsCString uriSpec = uri->GetSpecOrDefault();
       rabbit("%s", uriSpec.get());
       // MOZ_ASSERT(uriSpec.EqualsLiteral("about:blank"));
       if (!uriSpec.EqualsLiteral("about:blank")) {
+        rabbit("r3 false");
         return false;
       }
     }
   }
 
+  rabbit("r4 true");
   return true;
 }
 
 nsresult
 nsDocShell::SetOriginAttributes(const OriginAttributes& aAttrs)
 {
+  rabbit("");
   if (!CanSetOriginAttributes()) {
     return NS_ERROR_FAILURE;
   }
@@ -14826,6 +14833,7 @@ nsDocShell::SetOriginAttributesBeforeLoading(JS::Handle<JS::Value> aOriginAttrib
     return NS_ERROR_INVALID_ARG;
   }
 
+  rabbit("");
   return SetOriginAttributes(attrs);
 }
 
@@ -14838,6 +14846,7 @@ nsDocShell::SetOriginAttributes(JS::Handle<JS::Value> aOriginAttributes,
     return NS_ERROR_INVALID_ARG;
   }
 
+  rabbit("");
   return SetOriginAttributes(attrs);
 }
 

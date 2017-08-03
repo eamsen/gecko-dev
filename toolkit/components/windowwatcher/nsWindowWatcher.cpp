@@ -77,6 +77,10 @@
 #include "nsIWeakReference.h"
 #endif
 
+#include <android/log.h>
+#define rabbit(msg, ...) __android_log_print(ANDROID_LOG_INFO, "rabbit", "%s at %s:%d " msg, __PRETTY_FUNCTION__, __FILE__, __LINE__, ##__VA_ARGS__)
+
+
 using namespace mozilla;
 using namespace mozilla::dom;
 
@@ -1080,6 +1084,7 @@ nsWindowWatcher::OpenWindowInternal(mozIDOMWindowProxy* aParent,
         docShell->ItemType() != nsIDocShellTreeItem::typeChrome) {
       isPrivateBrowsingWindow =
         !!subjectPrincipal->OriginAttributesRef().mPrivateBrowsingId;
+      rabbit("");
       docShell->SetOriginAttributes(subjectPrincipal->OriginAttributesRef());
     } else {
       nsCOMPtr<nsIDocShellTreeItem> parentItem;

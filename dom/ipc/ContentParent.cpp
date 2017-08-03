@@ -262,6 +262,8 @@
 #include "mozilla/CodeCoverageHandler.h"
 #endif
 
+#define rabbit(msg, ...) __android_log_print(ANDROID_LOG_INFO, "rabbit", "%s at %s:%d " msg, __PRETTY_FUNCTION__, __FILE__, __LINE__, ##__VA_ARGS__)
+
 // For VP9Benchmark::sBenchmarkFpsPref
 #include "Benchmark.h"
 
@@ -4803,6 +4805,8 @@ ContentParent::RecvCreateWindow(PBrowserParent* aThisTab,
     cwi.windowOpened() = false;
   }
   // rabbit
+  rabbit("TabParent::GetFrom=%p newTab=%p", TabParent::GetFrom(newRemoteTab),
+         newTab);
   MOZ_ASSERT(TabParent::GetFrom(newRemoteTab) == newTab);
 
   newTab->SwapFrameScriptsFrom(cwi.frameScripts());

@@ -101,6 +101,9 @@
 #include "mozilla/dom/BoxObject.h"
 #include "mozilla/dom/HTMLIFrameElement.h"
 
+#include <android/log.h>
+#define rabbit(msg, ...) __android_log_print(ANDROID_LOG_INFO, "rabbit", "%s at %s:%d " msg, __PRETTY_FUNCTION__, __FILE__, __LINE__, ##__VA_ARGS__)
+
 using namespace mozilla;
 using namespace mozilla::dom;
 
@@ -821,6 +824,7 @@ nsXULElement::BindToTree(nsIDocument* aDocument,
       NS_ASSERTION(!nsContentUtils::IsSafeToRunScript(),
                    "Missing a script blocker!");
       // We're in a document now.  Kick off the frame load.
+      // rabbit("");
       LoadSrc();
   }
 
@@ -1106,6 +1110,7 @@ nsXULElement::AfterSetAttr(int32_t aNamespaceID, nsIAtom* aName,
             }
 
             if (aName == nsGkAtoms::src && document) {
+                rabbit("");
                 LoadSrc();
             }
         } else {
@@ -1443,6 +1448,7 @@ nsXULElement::GetBoxObject(ErrorResult& rv)
 nsresult
 nsXULElement::LoadSrc()
 {
+  // rabbit("");
     // Allow frame loader only on objects for which a container box object
     // can be obtained.
     if (!IsAnyOfXULElements(nsGkAtoms::browser, nsGkAtoms::editor,
@@ -1491,6 +1497,7 @@ nsXULElement::LoadSrc()
         }
     }
 
+    rabbit("");
     return frameLoader->LoadFrame();
 }
 

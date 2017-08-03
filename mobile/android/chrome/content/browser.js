@@ -1211,6 +1211,7 @@ var BrowserApp = {
        }
     }
 
+    dump("rabbit browser.js BrowserApp.addTab 1");
     let newTab = new Tab(aURI, aParams);
 
     if (fullscreenState) {
@@ -1224,6 +1225,7 @@ var BrowserApp = {
       this._tabs.push(newTab);
     }
 
+    dump("rabbit browser.js BrowserApp.addTab 2");
     let selected = "selected" in aParams ? aParams.selected : true;
     if (selected)
       this.selectedTab = newTab;
@@ -1234,10 +1236,12 @@ var BrowserApp = {
       ss.setTabValue(newTab, "appOrigin", aURI);
     }
 
+    dump("rabbit browser.js BrowserApp.addTab 3");
     let evt = document.createEvent("UIEvents");
     evt.initUIEvent("TabOpen", true, false, window, null);
     newTab.browser.dispatchEvent(evt);
 
+    dump("rabbit browser.js BrowserApp.addTab 4");
     return newTab;
   },
 
@@ -3365,8 +3369,10 @@ nsBrowserAccess.prototype = {
 
   _getBrowser: function _getBrowser(aURI, aOpener, aWhere, aFlags, aTriggeringPrincipal) {
     let isExternal = !!(aFlags & Ci.nsIBrowserDOMWindow.OPEN_EXTERNAL);
-    if (isExternal && aURI && aURI.schemeIs("chrome"))
+    if (isExternal && aURI && aURI.schemeIs("chrome")) {
+      dump("rabbit browser.js _getBrowser r1");
       return null;
+    }
 
     let loadflags = isExternal ?
                       Ci.nsIWebNavigation.LOAD_FLAGS_FROM_EXTERNAL :
@@ -3401,6 +3407,7 @@ nsBrowserAccess.prototype = {
         if (appOrigin == spec) {
           let tab = tabs[i];
           BrowserApp.selectTab(tab);
+          dump("rabbit browser.js _getBrowser r2");
           return tab.browser;
         }
       }
@@ -3435,6 +3442,7 @@ nsBrowserAccess.prototype = {
                                                                       pinned: pinned,
                                                                       triggeringPrincipal: aTriggeringPrincipal});
 
+      dump("rabbit browser.js _getBrowser r3");
       return tab.browser;
     }
 
@@ -3448,11 +3456,13 @@ nsBrowserAccess.prototype = {
       });
     }
 
+    dump("rabbit browser.js _getBrowser r4");
     return browser;
   },
 
   openURI: function browser_openURI(aURI, aOpener, aWhere, aFlags,
                                     aTriggeringPrincipal) {
+    dump("rabbit browser.js openURI " + aURI);
     if (!aURI) {
       throw "Can't open an empty uri";
     }
@@ -3464,6 +3474,7 @@ nsBrowserAccess.prototype = {
   createContentWindow: function browser_createContentWindow(
                                 aURI, aOpener, aWhere, aFlags,
                                 aTriggeringPrincipal) {
+    dump("rabbit browser.js createContentWindow " + aURI);
     let browser = this._getBrowser(null, aOpener, aWhere, aFlags,
                                    aTriggeringPrincipal);
     return browser && browser.contentWindow;
@@ -3471,7 +3482,7 @@ nsBrowserAccess.prototype = {
 
   openURIInFrame: function browser_openURIInFrame(aURI, aParams, aWhere, aFlags,
                                                   aNextTabParentId, aName) {
-    // We currently ignore aNextTabParentId on mobile.  This needs to change
+    dump("rabbit browser.js openURIInFrame " + aURI); // We currently ignore aNextTabParentId on mobile.  This needs to change
     // when Fennec starts to support e10s.  Assertions will fire if this code
     // isn't fixed by then.
     //

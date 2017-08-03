@@ -119,6 +119,9 @@
 #include "nsIWebBrowserPrint.h"
 #endif
 
+#include <android/log.h>
+#define rabbit(msg, ...) __android_log_print(ANDROID_LOG_INFO, "rabbit", "%s at %s:%d " msg, __PRETTY_FUNCTION__, __FILE__, __LINE__, ##__VA_ARGS__)
+
 using namespace mozilla;
 using namespace mozilla::hal;
 using namespace mozilla::dom;
@@ -245,6 +248,7 @@ nsFrameLoader::LoadFrame(ErrorResult& aRv)
 NS_IMETHODIMP
 nsFrameLoader::LoadFrame()
 {
+  rabbit("");
   NS_ENSURE_TRUE(mOwnerContent, NS_ERROR_NOT_INITIALIZED);
 
   nsAutoString src;
@@ -295,6 +299,7 @@ nsFrameLoader::LoadFrame()
   }
 
   if (NS_SUCCEEDED(rv)) {
+    rabbit("");
     rv = LoadURI(uri);
   }
 
@@ -344,6 +349,7 @@ nsFrameLoader::LoadURI(nsIURI* aURI)
   // that's under our control. We will already have done the security checks for
   // loading the plugin content itself in the object/embed loading code.
   if (!IsForJSPlugin()) {
+    rabbit("");
     rv = CheckURILoad(aURI);
     NS_ENSURE_SUCCESS(rv, rv);
   }
@@ -898,6 +904,7 @@ nsFrameLoader::ReallyStartLoadingInternal()
     return NS_OK;
   }
 
+  rabbit("");
   nsresult rv = MaybeCreateDocShell();
   if (NS_FAILED(rv)) {
     return rv;
@@ -906,6 +913,7 @@ nsFrameLoader::ReallyStartLoadingInternal()
                "MaybeCreateDocShell succeeded with a null mDocShell");
 
   // Just to be safe, recheck uri.
+  rabbit("");
   rv = CheckURILoad(mURIToLoad);
   NS_ENSURE_SUCCESS(rv, rv);
 
@@ -993,6 +1001,7 @@ nsFrameLoader::ReallyStartLoadingInternal()
 nsresult
 nsFrameLoader::CheckURILoad(nsIURI* aURI)
 {
+  rabbit("");
   // Check for security.  The fun part is trying to figure out what principals
   // to use.  The way I figure it, if we're doing a LoadFrame() accidentally
   // (eg someone created a frame/iframe node, we're being parsed, XUL iframes
@@ -1052,6 +1061,7 @@ nsFrameLoader::GetDocShell(nsIDocShell **aDocShell)
   // that. If not, we're most likely in the middle of being torn down,
   // then we just return null.
   if (mOwnerContent) {
+    rabbit("");
     nsresult rv = MaybeCreateDocShell();
     if (NS_FAILED(rv)) {
       return rv;
@@ -1236,6 +1246,7 @@ nsFrameLoader::Show(int32_t marginWidth, int32_t marginHeight,
     return ShowRemoteFrame(size, frame);
   }
 
+  rabbit("");
   nsresult rv = MaybeCreateDocShell();
   if (NS_FAILED(rv)) {
     return false;
@@ -2708,6 +2719,7 @@ nsFrameLoader::MaybeCreateDocShell()
     }
   }
 
+  rabbit("");
   nsDocShell::Cast(mDocShell)->SetOriginAttributes(attrs);
 
   ReallyLoadFrameScripts();
@@ -2743,6 +2755,7 @@ nsFrameLoader::CheckForRecursiveLoad(nsIURI* aURI)
              "Shouldn't call CheckForRecursiveLoad on remote frames.");
 
   mDepthTooGreat = false;
+  rabbit("");
   rv = MaybeCreateDocShell();
   if (NS_FAILED(rv)) {
     return rv;
@@ -3353,6 +3366,7 @@ nsresult
 nsFrameLoader::CreateStaticClone(nsIFrameLoader* aDest)
 {
   nsFrameLoader* dest = static_cast<nsFrameLoader*>(aDest);
+  rabbit("");
   dest->MaybeCreateDocShell();
   NS_ENSURE_STATE(dest->mDocShell);
 
@@ -3530,6 +3544,7 @@ nsFrameLoader::EnsureMessageManager()
                                               static_cast<nsFrameMessageManager*>(parentManager.get()),
                                               MM_CHROME);
   if (!IsRemoteFrame()) {
+    rabbit("");
     nsresult rv = MaybeCreateDocShell();
     if (NS_FAILED(rv)) {
       return rv;

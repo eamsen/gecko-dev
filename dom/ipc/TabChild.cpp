@@ -144,6 +144,10 @@
 #define TABC_LOG(...)
 // #define TABC_LOG(...) printf_stderr("TABC: " __VA_ARGS__)
 
+#include <android/log.h>
+#define rabbit(msg, ...) __android_log_print(ANDROID_LOG_INFO, "rabbit", "%s at %s:%d " msg, __PRETTY_FUNCTION__, __FILE__, __LINE__, ##__VA_ARGS__)
+
+
 using namespace mozilla;
 using namespace mozilla::dom;
 using namespace mozilla::dom::ipc;
@@ -555,6 +559,7 @@ TabChild::Init()
   }
 
   webBrowser->SetContainerWindow(this);
+  rabbit("");
   webBrowser->SetOriginAttributes(OriginAttributesRef());
   mWebNav = do_QueryInterface(webBrowser);
   NS_ASSERTION(mWebNav, "nsWebBrowser doesn't implement nsIWebNavigation?");
@@ -681,6 +686,7 @@ TabChild::NotifyTabContextUpdated(bool aIsPreallocated)
   UpdateFrameType();
 
   if (aIsPreallocated)  {
+    rabbit("");
     nsDocShell::Cast(docShell)->SetOriginAttributes(OriginAttributesRef());
   }
 
@@ -1226,6 +1232,7 @@ TabChild::ApplyShowInfo(const ShowInfo& aInfo)
         } else {
           OriginAttributes attrs(nsDocShell::Cast(docShell)->GetOriginAttributes());
           attrs.SyncAttributesWithPrivateBrowsing(true);
+          rabbit("");
           nsDocShell::Cast(docShell)->SetOriginAttributes(attrs);
         }
       }
@@ -3331,6 +3338,7 @@ mozilla::ipc::IPCResult
 TabChild::RecvSetOriginAttributes(const OriginAttributes& aOriginAttributes)
 {
   nsCOMPtr<nsIDocShell> docShell = do_GetInterface(WebNavigation());
+  rabbit("");
   nsDocShell::Cast(docShell)->SetOriginAttributes(aOriginAttributes);
 
   return IPC_OK();
