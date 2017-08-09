@@ -421,5 +421,13 @@ public class GeckoViewActivity extends Activity {
         public boolean canGoBack() {
             return mCanGoBack;
         }
+
+        @Override
+        public void onLoadUriExternal(final GeckoView view, final String uri,
+                                      final TargetWindow where) {
+            Log.d(LOGTAG, "onLoadUriExternal=" + uri +
+                          " where=" + where);
+            view.loadUri(uri);
+        }
     }
 }
