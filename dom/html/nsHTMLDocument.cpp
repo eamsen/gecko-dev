@@ -122,6 +122,9 @@ using namespace mozilla::dom;
 
 #include "prtime.h"
 
+#include <android/log.h>
+#define rabbit(msg, ...) __android_log_print(ANDROID_LOG_INFO, "rabbit", "%s at %s:%d " msg, __PRETTY_FUNCTION__, __FILE__, __LINE__, ##__VA_ARGS__)
+
 //#define DEBUG_charset
 
 static NS_DEFINE_CID(kCParserCID, NS_PARSER_CID);
@@ -1481,6 +1484,7 @@ nsHTMLDocument::Open(JSContext* /* unused */,
   RefPtr<nsGlobalWindow> win = nsGlobalWindow::Cast(outer);
   nsCOMPtr<nsPIDOMWindowOuter> newWindow;
   // XXXbz We ignore aReplace for now.
+  rabbit("");
   rv = win->OpenJS(aURL, aName, aFeatures, getter_AddRefs(newWindow));
   return newWindow.forget();
 }
