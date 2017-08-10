@@ -277,6 +277,9 @@ class nsIScriptTimeoutHandler;
 #include <unistd.h> // for getpid()
 #endif
 
+#include <android/log.h>
+#define rabbit(msg, ...) __android_log_print(ANDROID_LOG_INFO, "rabbit", "%s at %s:%d " msg, __PRETTY_FUNCTION__, __FILE__, __LINE__, ##__VA_ARGS__)
+
 static const char kStorageEnabled[] = "dom.storage.enabled";
 
 using namespace mozilla;
@@ -8945,6 +8948,7 @@ nsGlobalWindow::OpenOuter(const nsAString& aUrl, const nsAString& aName,
 {
   MOZ_RELEASE_ASSERT(IsOuterWindow());
   nsCOMPtr<nsPIDOMWindowOuter> window;
+  rabbit("aUrl=%s", NS_ConvertUTF16toUTF8(aUrl).get());
   aError = OpenJS(aUrl, aName, aOptions, getter_AddRefs(window));
   return window.forget();
 }
@@ -8966,6 +8970,7 @@ nsGlobalWindow::Open(const nsAString& aUrl, const nsAString& aName,
   FORWARD_TO_OUTER(Open, (aUrl, aName, aOptions, aLoadInfo, aForceNoOpener,
                           _retval),
                    NS_ERROR_NOT_INITIALIZED);
+  rabbit("aUrl=%s", NS_ConvertUTF16toUTF8(aUrl).get());
   return OpenInternal(aUrl, aName, aOptions,
                       false,          // aDialog
                       false,          // aContentModal
@@ -8983,6 +8988,7 @@ nsGlobalWindow::OpenJS(const nsAString& aUrl, const nsAString& aName,
                        const nsAString& aOptions, nsPIDOMWindowOuter **_retval)
 {
   MOZ_ASSERT(IsOuterWindow());
+  rabbit("aUrl=%s", NS_ConvertUTF16toUTF8(aUrl).get());
   return OpenInternal(aUrl, aName, aOptions,
                       false,          // aDialog
                       false,          // aContentModal
@@ -9004,6 +9010,7 @@ nsGlobalWindow::OpenDialog(const nsAString& aUrl, const nsAString& aName,
                            nsPIDOMWindowOuter** _retval)
 {
   MOZ_ASSERT(IsOuterWindow());
+  rabbit("");
   return OpenInternal(aUrl, aName, aOptions,
                       true,                    // aDialog
                       false,                   // aContentModal
@@ -9024,6 +9031,7 @@ nsGlobalWindow::OpenNoNavigate(const nsAString& aUrl,
                                nsPIDOMWindowOuter **_retval)
 {
   MOZ_ASSERT(IsOuterWindow());
+  rabbit("");
   return OpenInternal(aUrl, aName, aOptions,
                       false,          // aDialog
                       false,          // aContentModal
@@ -9054,6 +9062,7 @@ nsGlobalWindow::OpenDialogOuter(JSContext* aCx, const nsAString& aUrl,
   }
 
   nsCOMPtr<nsPIDOMWindowOuter> dialog;
+  rabbit("");
   aError = OpenInternal(aUrl, aName, aOptions,
                         true,             // aDialog
                         false,            // aContentModal
@@ -12868,6 +12877,8 @@ nsGlobalWindow::OpenInternal(const nsAString& aUrl, const nsAString& aName,
     if (!url.IsVoid() && !aDialog && aNavigate)
       rv = SecurityCheckURL(url.get());
   }
+
+  rabbit("url=%s", url.get());
 
   if (NS_FAILED(rv))
     return rv;

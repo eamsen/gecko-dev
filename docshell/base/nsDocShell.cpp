@@ -9834,6 +9834,7 @@ nsDocShell::InternalLoad(nsIURI* aURI,
                          nsIDocShell** aDocShell,
                          nsIRequest** aRequest)
 {
+  rabbit("aURI=%s", aURI->GetSpecOrDefault().get());
   MOZ_ASSERT(aTriggeringPrincipal, "need a valid TriggeringPrincipal");
 
   nsresult rv = NS_OK;
@@ -14261,6 +14262,10 @@ nsDocShell::OnLinkClick(nsIContent* aContent,
                         bool aIsTrusted,
                         nsIPrincipal* aTriggeringPrincipal)
 {
+  nsAutoCString spec;
+  aURI->GetSpec(spec);
+  rabbit("aUri=%s", spec.get());
+
   NS_ASSERTION(NS_IsMainThread(), "wrong thread");
 
   if (!IsNavigationAllowed() || !IsOKToLoadURI(aURI)) {
@@ -14319,6 +14324,9 @@ nsDocShell::OnLinkClickSync(nsIContent* aContent,
                             nsIRequest** aRequest,
                             nsIPrincipal* aTriggeringPrincipal)
 {
+  nsAutoCString spec;
+  aURI->GetSpec(spec);
+  rabbit("aUri=%s", spec.get());
   // Initialize the DocShell / Request
   if (aDocShell) {
     *aDocShell = nullptr;

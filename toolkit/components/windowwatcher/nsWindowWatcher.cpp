@@ -676,6 +676,7 @@ nsWindowWatcher::OpenWindowInternal(mozIDOMWindowProxy* aParent,
                                     nsIDocShellLoadInfo* aLoadInfo,
                                     mozIDOMWindowProxy** aResult)
 {
+  rabbit("aUrl=%s", aUrl);
   nsresult rv = NS_OK;
   bool isNewToplevelWindow = false;
   bool windowIsNew = false;
