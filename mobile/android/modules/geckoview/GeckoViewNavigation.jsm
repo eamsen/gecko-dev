@@ -129,14 +129,9 @@ class GeckoViewNavigation extends GeckoViewModule {
     throw Cr.NS_ERROR_ABORT;
   }
 
-  // nsIBrowserDOMWindow::openURI implementation.
-  openURI(aUri, aOpener, aWhere, aFlags, aTriggeringPrincipal) {
-    return this.createContentWindow(aUri, aOpener, aWhere, aFlags,
-                                    aTriggeringPrincipal);
-  }
-
-  // nsIBrowserDOMWindow::openURIInFrame implementation.
-  openURIInFrame(aUri, aParams, aWhere, aFlags, aNextTabParentId, aName) {
+  // nsIBrowserDOMWindow.
+  createContentWindowInFrame(aUri, aParams, aWhere, aFlags, aNextTabParentId,
+                             aName) {
     debug("openURIInFrame: aUri=" + (aUri && aUri.spec) +
           " aParams=" + aParams +
           " aWhere=" + aWhere +
@@ -144,20 +139,53 @@ class GeckoViewNavigation extends GeckoViewModule {
           " aNextTabParentId=" + aNextTabParentId +
           " aName=" + aName);
 
-    if (aWhere === Ci.nsIBrowserDOMWindow.OPEN_DEFAULTWINDOW ||
-        aWhere === Ci.nsIBrowserDOMWindow.OPEN_CURRENTWINDOW) {
-      return this.browser;
+    if (!aUri) {
+      throw Cr.NS_ERROR_ABORT;
+    }
+
+    let message = {
+      type: "GeckoView:OnLoadUri",
+      uri: aUri.spec,
+      where: aWhere,
+      flags: aFlags
+    };
+
+    debug("dispatch " + JSON.stringify(message));
+
+    let handled = undefined;
+    this.eventDispatcher.sendRequestForResult(message).then(response => {
+      handled = response;
+    });
+    Services.tm.spinEventLoopUntil(() => handled !== undefined);
+
+    if (!handled &&
+        (aWhere === Ci.nsIBrowserDOMWindow.OPEN_DEFAULTWINDOW ||
+         aWhere === Ci.nsIBrowserDOMWindow.OPEN_CURRENTWINDOW)) {
+      return this.browser.QueryInterface(Ci.nsIFrameLoaderOwner);
     }
 
     throw Cr.NS_ERROR_ABORT;
   }
 
+  // nsIBrowserDOMWindow.
+  openURI(aUri, aOpener, aWhere, aFlags, aTriggeringPrincipal) {
+    return this.createContentWindow(aUri, aOpener, aWhere, aFlags,
+                                    aTriggeringPrincipal);
+  }
+
+  // nsIBrowserDOMWindow.
+  openURIInFrame(aUri, aParams, aWhere, aFlags, aNextTabParentId, aName) {
+    return this.createContentWindowInFrame(aUri, aParams, aWhere, aFlags,
+                                           aNextTabParentId, aName);
+  }
+
+  // nsIBrowserDOMWindow.
   isTabContentWindow(aWindow) {
     debug("isTabContentWindow " + this.browser.contentWindow === aWindow);
     return this.browser.contentWindow === aWindow;
   }
 
-  // nsIBrowserDOMWindow::canClose implementation.
+  // nsIBrowserDOMWindow.
   canClose() {
     debug("canClose");
     return false;
