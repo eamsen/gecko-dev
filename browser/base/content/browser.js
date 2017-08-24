@@ -5366,11 +5366,6 @@ nsBrowserAccess.prototype = {
 
   openURIInFrame: function browser_openURIInFrame(aURI, aParams, aWhere, aFlags,
                                                   aNextTabParentId, aName) {
-    if (!aURI) {
-      Cu.reportError("openURIInFrame should only be called with a valid URI");
-      throw Cr.NS_ERROR_FAILURE;
-    }
-
     if (aWhere != Ci.nsIBrowserDOMWindow.OPEN_NEWTAB) {
       dump("Error: openURIInFrame can only open in new tabs");
       return null;
