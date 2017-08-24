@@ -3488,7 +3488,23 @@ nsBrowserAccess.prototype = {
     //
     // We also ignore aName if it is set, as it is currently only used on the
     // e10s codepath.
-    return this._getBrowser(aURI, null, aWhere, aFlags, null);
+    if (!aURI) {
+      throw "Can't open an empty uri";
+    }
+    let browser = this._getBrowser(aURI, null, aWhere, aFlags, null);
+    if (browser) {
+      return browser.QueryInterface(Ci.nsIFrameLoaderOwner);
+    return null;
+  },
+
+  createContentWindowInFrame: function browser_createContentWindowInFrame(
+                              aURI, aParams, aWhere, aFlags,
+                              aNextTabParentId, aName) {
+    let browser = this._getBrowser(null, null, aWhere, aFlags, null);
+    if (browser) {
+      return browser.QueryInterface(Ci.nsIFrameLoaderOwner);
+    }
+    return null;
   },
 
   isTabContentWindow: function(aWindow) {

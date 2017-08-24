@@ -126,7 +126,7 @@ public class GeckoViewActivity extends Activity {
     private void loadFromIntent(final Intent intent) {
         mGeckoView.getSettings().setBoolean(
             GeckoViewSettings.USE_MULTIPROCESS,
-            intent.getBooleanExtra(USE_MULTIPROCESS_EXTRA, false));
+            intent.getBooleanExtra(USE_MULTIPROCESS_EXTRA, true));
         mGeckoView.getSettings().setBoolean(
             GeckoViewSettings.USE_TRACKING_PROTECTION, false);
 

@@ -527,6 +527,7 @@ public:
                    const bool& aCalledFromJS,
                    const bool& aPositionSpecified,
                    const bool& aSizeSpecified,
+                   const URIParams& aURIToLoad,
                    const nsCString& aFeatures,
                    const nsCString& aBaseURI,
                    const float& aFullZoom,
@@ -698,7 +699,8 @@ private:
                      nsresult& aResult,
                      nsCOMPtr<nsITabParent>& aNewTabParent,
                      bool* aWindowIsNew,
-                     nsIPrincipal* aTriggeringPrincipal);
+                     nsIPrincipal* aTriggeringPrincipal,
+                     bool aLoadUri);
 
   FORWARD_SHMEM_ALLOCATOR_TO(PContentParent)
 
