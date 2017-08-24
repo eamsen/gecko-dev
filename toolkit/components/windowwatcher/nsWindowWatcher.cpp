@@ -696,6 +696,7 @@ nsWindowWatcher::OpenWindowInternal(mozIDOMWindowProxy* aParent,
 
   if (!nsContentUtils::IsSafeToRunScript()) {
     nsContentUtils::WarnScriptWasIgnored(nullptr);
+    rabbit("r1");
     return NS_ERROR_FAILURE;
   }
 
@@ -707,6 +708,7 @@ nsWindowWatcher::OpenWindowInternal(mozIDOMWindowProxy* aParent,
   if (aUrl) {
     rv = URIfromURL(aUrl, aParent, getter_AddRefs(uriToLoad));
     if (NS_FAILED(rv)) {
+      rabbit("r2");
       return rv;
     }
     uriToLoad->SchemeIs("chrome", &uriToLoadIsChrome);
@@ -743,6 +745,7 @@ nsWindowWatcher::OpenWindowInternal(mozIDOMWindowProxy* aParent,
     if (parentDocShell) {
       nsCOMPtr<nsIDocShell> foundDocShell = do_QueryInterface(newDocShellItem);
       if (parentDocShell->IsSandboxedFrom(foundDocShell)) {
+        rabbit("r3");
         return NS_ERROR_DOM_INVALID_ACCESS_ERR;
       }
     }
@@ -808,6 +811,7 @@ nsWindowWatcher::OpenWindowInternal(mozIDOMWindowProxy* aParent,
     if (!aParent) {
       jsapiChromeGuard.Init();
     } else if (NS_WARN_IF(!jsapiChromeGuard.Init(parentGlobalObject))) {
+      rabbit("r4");
       return NS_ERROR_UNEXPECTED;
     }
   }
@@ -826,6 +830,7 @@ nsWindowWatcher::OpenWindowInternal(mozIDOMWindowProxy* aParent,
         // Save sandbox flags for copying to new browsing context (docShell).
         activeDocsSandboxFlags = doc->GetSandboxFlags();
         if (activeDocsSandboxFlags & SANDBOXED_AUXILIARY_NAVIGATION) {
+          rabbit("r5");
           return NS_ERROR_DOM_INVALID_ACCESS_ERR;
         }
       }
@@ -886,6 +891,8 @@ nsWindowWatcher::OpenWindowInternal(mozIDOMWindowProxy* aParent,
           // here, because our caller may propagate that error, which might
           // cause e.g. window.open to throw!  Just return null for our out
           // param.
+          // rabbit
+          rabbit("r6");
           return NS_OK;
         }
       }
@@ -930,6 +937,7 @@ nsWindowWatcher::OpenWindowInternal(mozIDOMWindowProxy* aParent,
       // how a window is determined "visible" in this context then we should
       // also adjust that attribute and/or any consumers of it...
       if (parentWidget && !parentWidget->IsVisible()) {
+        rabbit("r7");
         return NS_ERROR_NOT_AVAILABLE;
       }
     }
@@ -1005,6 +1013,7 @@ nsWindowWatcher::OpenWindowInternal(mozIDOMWindowProxy* aParent,
 
   // better have a window to use by this point
   if (!newDocShellItem) {
+    rabbit("r7");
     return rv;
   }
 
@@ -1029,6 +1038,7 @@ nsWindowWatcher::OpenWindowInternal(mozIDOMWindowProxy* aParent,
   rv = ReadyOpenedDocShellItem(newDocShellItem, parentWindow, windowIsNew,
                                aForceNoOpener, aResult);
   if (NS_FAILED(rv)) {
+    rabbit("r8");
     return rv;
   }
 
@@ -1273,6 +1283,7 @@ nsWindowWatcher::OpenWindowInternal(mozIDOMWindowProxy* aParent,
       // Default to cancel not opening the modal window.
       NS_RELEASE(*aResult);
 
+      rabbit("r9");
       return NS_OK;
     }
 
@@ -1302,6 +1313,7 @@ nsWindowWatcher::OpenWindowInternal(mozIDOMWindowProxy* aParent,
     NS_RELEASE(*aResult);
   }
 
+  rabbit("rE");
   return NS_OK;
 }
 

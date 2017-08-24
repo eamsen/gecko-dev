@@ -235,6 +235,9 @@
 #include "mozilla/CodeCoverageHandler.h"
 #endif
 
+#include <android/log.h>
+#define rabbit(msg, ...) __android_log_print(ANDROID_LOG_INFO, "rabbit", "%s at %s:%d " msg, __PRETTY_FUNCTION__, __FILE__, __LINE__, ##__VA_ARGS__)
+
 using namespace mozilla;
 using namespace mozilla::docshell;
 using namespace mozilla::dom::ipc;
@@ -790,6 +793,7 @@ ContentChild::ProvideWindowCommon(TabChild* aTabOpener,
                                   bool* aWindowIsNew,
                                   mozIDOMWindowProxy** aReturn)
 {
+  rabbit("aURI=%s", aURI->GetSpecOrDefault().get());
   *aReturn = nullptr;
 
   nsAutoPtr<IPCTabContext> ipcContext;
@@ -817,6 +821,7 @@ ContentChild::ProvideWindowCommon(TabChild* aTabOpener,
   // load in the current process.
   bool loadInDifferentProcess = aForceNoOpener && sNoopenerNewProcess;
   if (aTabOpener && !loadInDifferentProcess && aURI) {
+    rabbit("b1");
     nsCOMPtr<nsIWebBrowserChrome3> browserChrome3;
     rv = aTabOpener->GetWebBrowserChrome(getter_AddRefs(browserChrome3));
     if (NS_SUCCEEDED(rv) && browserChrome3) {
@@ -829,6 +834,7 @@ ContentChild::ProvideWindowCommon(TabChild* aTabOpener,
   // If we're in a content process and we have noopener set, there's no reason
   // to load in our process, so let's load it elsewhere!
   if (loadInDifferentProcess) {
+    rabbit("b2");
     nsAutoCString baseURIString;
     float fullZoom;
     nsCOMPtr<nsIPrincipal> triggeringPrincipal;
@@ -858,12 +864,14 @@ ContentChild::ProvideWindowCommon(TabChild* aTabOpener,
   }
 
   if (aTabOpener) {
+    rabbit("b3");
     PopupIPCTabContext context;
     openerTabId = aTabOpener->GetTabId();
     context.opener() = openerTabId;
     context.isMozBrowserElement() = aTabOpener->IsMozBrowserElement();
     ipcContext = new IPCTabContext(context);
   } else {
+    rabbit("b4");
     // It's possible to not have a TabChild opener in the case
     // of ServiceWorker::OpenWindow.
     UnsafeIPCTabContext unsafeTabContext;
@@ -878,9 +886,11 @@ ContentChild::ProvideWindowCommon(TabChild* aTabOpener,
   // proper TabGroup for that actor.
   RefPtr<TabGroup> tabGroup;
   if (aTabOpener && !aForceNoOpener) {
+    rabbit("b5");
     // The new actor will use the same tab group as the opener.
     tabGroup = aTabOpener->TabGroup();
   } else {
+    rabbit("b6");
     tabGroup = new TabGroup();
   }
 
@@ -892,6 +902,7 @@ ContentChild::ProvideWindowCommon(TabChild* aTabOpener,
   }
 
   if (aTabOpener) {
+    rabbit("b7");
     MOZ_ASSERT(ipcContext->type() == IPCTabContext::TPopupIPCTabContext);
     ipcContext->get_PopupIPCTabContext().opener() = aTabOpener;
   }
@@ -917,6 +928,7 @@ ContentChild::ProvideWindowCommon(TabChild* aTabOpener,
 
   nsCOMPtr<nsPIDOMWindowInner> parentTopInnerWindow;
   if (aParent) {
+    rabbit("b8");
     nsCOMPtr<nsPIDOMWindowOuter> parentTopWindow =
       nsPIDOMWindowOuter::From(aParent)->GetTop();
     if (parentTopWindow) {
@@ -927,6 +939,7 @@ ContentChild::ProvideWindowCommon(TabChild* aTabOpener,
   // Send down the request to open the window.
   RefPtr<CreateWindowPromise> windowCreated;
   if (aIframeMoz) {
+    rabbit("b9");
     MOZ_ASSERT(aTabOpener);
     nsAutoCString url;
     if (aURI) {
@@ -1023,6 +1036,7 @@ ContentChild::ProvideWindowCommon(TabChild* aTabOpener,
 
   // Suspend our window if we have one to make sure we don't re-enter it.
   if (parentTopInnerWindow) {
+    rabbit("b11");
     parentTopInnerWindow->Suspend();
   }
 
@@ -1040,6 +1054,7 @@ ContentChild::ProvideWindowCommon(TabChild* aTabOpener,
   }
 
   if (parentTopInnerWindow) {
+    rabbit("b12");
     parentTopInnerWindow->Resume();
   }
 
@@ -1070,6 +1085,7 @@ ContentChild::ProvideWindowCommon(TabChild* aTabOpener,
   auto* opener = nsPIDOMWindowOuter::From(aParent);
   nsIDocShell* openerShell;
   if (opener && (openerShell = opener->GetDocShell())) {
+    rabbit("b14");
     nsCOMPtr<nsILoadContext> context = do_QueryInterface(openerShell);
     showInfo = ShowInfo(EmptyString(), false,
                         context->UsePrivateBrowsing(), true, false,
@@ -1086,6 +1102,7 @@ ContentChild::ProvideWindowCommon(TabChild* aTabOpener,
   // the openerwindow
   nsCOMPtr<mozIDOMWindowProxy> windowProxy = do_GetInterface(newChild->WebNavigation());
   if (!aForceNoOpener && windowProxy && aParent) {
+    rabbit("b15");
     nsPIDOMWindowOuter* outer = nsPIDOMWindowOuter::From(windowProxy);
     nsPIDOMWindowOuter* parent = nsPIDOMWindowOuter::From(aParent);
     outer->SetOpenerWindow(parent, *aWindowIsNew);
@@ -1106,6 +1123,7 @@ ContentChild::ProvideWindowCommon(TabChild* aTabOpener,
   }
 
   if (!urlToLoad.IsEmpty()) {
+    rabbit("b16");
     newChild->RecvLoadURL(urlToLoad, showInfo);
   }
 
