@@ -330,16 +330,34 @@ public class GeckoViewActivity extends Activity {
     }
 
     private class Navigation implements GeckoView.NavigationListener {
+        private Activity mActivity;
+        private EditText mSearchBox;
+        private boolean mCanGoBack;
+
+        Navigation(Activity activity, EditText searchBox) {
+            this.mActivity = activity;
+            this.mSearchBox = searchBox;
+        }
+
         @Override
         public void onLocationChange(GeckoView view, final String url) {
+            Log.d(LOGTAG, "onLocationChange " + url);
+            this.mSearchBox.setText(url);
         }
 
         @Override
         public void onCanGoBack(GeckoView view, boolean canGoBack) {
+            Log.d(LOGTAG, "onCanGoBack " + canGoBack);
+            mCanGoBack = canGoBack;
         }
 
         @Override
         public void onCanGoForward(GeckoView view, boolean value) {
+            Log.d(LOGTAG, "onCanGoForward " + value);
+        }
+
+        public boolean canGoBack() {
+            return mCanGoBack;
         }
 
         @Override
@@ -391,43 +409,4 @@ public class GeckoViewActivity extends Activity {
         }
     }
 
-    private class Navigation implements GeckoView.NavigationListener {
-        private Activity mActivity;
-        private EditText mSearchBox;
-        private boolean mCanGoBack;
-
-        Navigation(Activity activity, EditText searchBox) {
-            this.mActivity = activity;
-            this.mSearchBox = searchBox;
-        }
-
-        @Override
-        public void onLocationChange(GeckoView view, final String url) {
-            Log.d(LOGTAG, "onLocationChange " + url);
-            this.mSearchBox.setText(url);
-        }
-
-        @Override
-        public void onCanGoBack(GeckoView view, boolean canGoBack) {
-            Log.d(LOGTAG, "onCanGoBack " + canGoBack);
-            mCanGoBack = canGoBack;
-        }
-
-        @Override
-        public void onCanGoForward(GeckoView view, boolean value) {
-            Log.d(LOGTAG, "onCanGoForward " + value);
-        }
-
-        public boolean canGoBack() {
-            return mCanGoBack;
-        }
-
-        @Override
-        public void onLoadUriExternal(final GeckoView view, final String uri,
-                                      final TargetWindow where) {
-            Log.d(LOGTAG, "onLoadUriExternal=" + uri +
-                          " where=" + where);
-            view.loadUri(uri);
-        }
-    }
 }
