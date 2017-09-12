@@ -76,7 +76,7 @@
           <![CDATA[
             const nsIWebNavigation = Components.interfaces.nsIWebNavigation;
             const flags = nsIWebNavigation.LOAD_FLAGS_NONE;
-            dump("rabbit browser.xml:reload");
+            // dump("rabbit browser.xml:reload");
             this.reloadWithFlags(flags);
           ]]>
         </body>
@@ -108,7 +108,7 @@
         <parameter name="aCharset"/>
         <body>
           <![CDATA[
-            dump("rabbit browser.xml:loadURI " + aURI);
+          // dump("rabbit browser.xml:loadURI " + aURI);
             const nsIWebNavigation = Components.interfaces.nsIWebNavigation;
             const flags = nsIWebNavigation.LOAD_FLAGS_NONE;
             this._wrapURIChangeCall(() =>
@@ -129,8 +129,8 @@
             if (!aURI)
               aURI = "about:blank";
 
-            dump("rabbit browser.xml:loadURIWithFlags " + aURI +
-                 " " + aFlags);
+              // dump("rabbit browser.xml:loadURIWithFlags " + aURI +
+              // " " + aFlags);
 
             var aReferrerPolicy = Components.interfaces.nsIHttpChannel.REFERRER_POLICY_UNSET;
             var aTriggeringPrincipal;
@@ -367,8 +367,8 @@
                 readonly="true">
         <getter>
         <![CDATA[
-          dump("rabbit browser.xml:webNavigation " + !!this._webNavigation);
-          dump("rabbit browser.xml:docShell " + !!this.docShell);
+        // dump("rabbit browser.xml:webNavigation " + !!this._webNavigation);
+        // dump("rabbit browser.xml:docShell " + !!this.docShell);
           if (!this._webNavigation) {
             if (!this.docShell) {
               return null;

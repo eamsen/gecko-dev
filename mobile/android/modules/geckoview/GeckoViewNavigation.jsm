@@ -74,7 +74,7 @@ class GeckoViewNavigation extends GeckoViewModule {
   }
 
   handleLoadUri(aUri, aOpener, aWhere, aFlags, aTriggeringPrincipal) {
-    debug("handleOpenURI: aUri=" + (aUri && aUri.spec) +
+    debug("handleLoadUri: aUri=" + (aUri && aUri.spec) +
           " aWhere=" + aWhere +
           " aFlags=" + aFlags);
 

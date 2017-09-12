@@ -443,6 +443,7 @@ class TabTracker extends TabTrackerBase {
       }
     }
 
+    dump(`rabbaddon getBrowserData ${browser} result=${JSON.stringify(result)}`);
     return result;
   }
 
