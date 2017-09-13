@@ -16,7 +16,7 @@ XPCOMUtils.defineLazyGetter(this, "dump", () =>
               {}).AndroidLog.d.bind(null, "ViewTab"));
 
 function debug(aMsg) {
-  // dump(aMsg);
+  dump(aMsg);
 }
 
 // Stub BrowserApp implementation for WebExtensions support.
@@ -24,6 +24,14 @@ class GeckoViewTab extends GeckoViewModule {
   init() {
     this.browser.tab = { id: 0, browser: this.browser };
 
+    let root = this.window.QueryInterface(Ci.nsIInterfaceRequestor)
+                          .getInterface(Ci.nsIDocShell)
+                          .QueryInterface(Ci.nsIDocShellTreeItem)
+                          .rootTreeItem.QueryInterface(Ci.nsIInterfaceRequestor)
+                          .getInterface(Ci.nsIDOMWindow);
+
+    debug(`root=${!!root} same=${root == this.window}`);
+    debug(`windowtype=${root.document.documentElement.getAttribute("windowtype")}`);
     this.window.gBrowser = this.window.BrowserApp = {
       selectedBrowser: this.browser,
       tabs: [this.browser.tab],
