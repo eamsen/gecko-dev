@@ -62,10 +62,10 @@ if (isWorker) {
   const LOG_PREF = "devtools.debugger.log";
   const VERBOSE_PREF = "devtools.debugger.log.verbose";
 
-  flags.wantLogging = Services.prefs.getBoolPref(LOG_PREF);
-  flags.wantVerbose =
-    Services.prefs.getPrefType(VERBOSE_PREF) !== Services.prefs.PREF_INVALID &&
-    Services.prefs.getBoolPref(VERBOSE_PREF);
+  flags.wantLogging = true;//Services.prefs.getBoolPref(LOG_PREF);
+  flags.wantVerbose = true;
+    //Services.prefs.getPrefType(VERBOSE_PREF) !== Services.prefs.PREF_INVALID &&
+    //Services.prefs.getBoolPref(VERBOSE_PREF);
 }
 
 const CONTENT_PROCESS_DBG_SERVER_SCRIPT =
@@ -187,6 +187,7 @@ var DebuggerServer = {
    * Initialize the debugger server.
    */
   init() {
+    dump("devtools DebuggerServer.init");
     if (this.initialized) {
       return;
     }
@@ -293,6 +294,7 @@ var DebuggerServer = {
    *        server's root actor.
    */
   addActors(url) {
+    dump("devtools DebuggerServer.addActors " + url);
     loadSubScript.call(this, url);
   },
 
@@ -332,6 +334,7 @@ var DebuggerServer = {
    *            A new actor will be created for each tab and each app.
    */
   registerModule(id, options) {
+    dump("devtools DebuggerServer.registerModuel " + id);
     if (id in gRegisteredModules) {
       return;
     }
@@ -390,6 +393,7 @@ var DebuggerServer = {
    * Unregister a previously-loaded CommonJS module from the debugger server.
    */
   unregisterModule(id) {
+    dump("devtools DebuggerServer.unregisterModuel " + id);
     let mod = gRegisteredModules[id];
     if (!mod) {
       throw new Error("Tried to unregister a module that was not previously registered.");
@@ -422,10 +426,16 @@ var DebuggerServer = {
    * restrictPrivileges=true, to prevent exposing them on b2g parent process's
    * root actor.
    */
+<<<<<<< 67a3ebd6b5c022cdfd763304643fd8d91f4be3f1
   addBrowserActors(windowType = null, restrictPrivileges = false) {
     if (windowType) {
       this.chromeWindowType = windowType;
     }
+=======
+  addBrowserActors(windowType = "navigator:browser", restrictPrivileges = false) {
+    dump("devtools DebuggerServer.addBrowserActors " + windowType);
+    this.chromeWindowType = windowType;
+>>>>>>> devtools logs
     this.registerModule("devtools/server/actors/webbrowser");
 
     if (!restrictPrivileges) {
@@ -462,6 +472,7 @@ var DebuggerServer = {
    * Install tab actors.
    */
   addTabActors() {
+    dump("devtools DebuggerServer.addTabActors");
     this.registerModule("devtools/server/actors/webconsole", {
       prefix: "console",
       constructor: "WebConsoleActor",
@@ -591,6 +602,7 @@ var DebuggerServer = {
    * @return a promise that will be resolved when complete.
    */
   setAddonOptions(id, options) {
+    dump("devtools DebuggerServer.setAddonOptions " + id);
     if (!this._initialized) {
       return Promise.resolve();
     }
@@ -606,6 +618,7 @@ var DebuggerServer = {
   },
 
   get listeningSockets() {
+    dump("devtools DebuggerServer.listeneringSockets " + this._listeners.length);
     return this._listeners.length;
   },
 
@@ -625,6 +638,7 @@ var DebuggerServer = {
    *         connections are disabled, an error is thrown.
    */
   createListener() {
+    dump("devtools DebuggerServer.createListener");
     if (!Services.prefs.getBoolPref("devtools.debugger.remote-enabled")) {
       throw new Error("Can't create listener, remote debugging disabled");
     }
@@ -655,6 +669,7 @@ var DebuggerServer = {
    *         Whether any listeners were actually closed.
    */
   closeAllListeners() {
+    dump("devtools DebuggerServer.closeAllListeners");
     if (!this.listeningSockets) {
       return false;
     }
@@ -678,6 +693,7 @@ var DebuggerServer = {
    *    the newly-created connection.
    */
   connectPipe(prefix) {
+    dump("devtools DebuggerServer.connectPipe " + prefix);
     this._checkInit();
 
     let serverTransport = new LocalDebuggerTransport();
@@ -716,6 +732,7 @@ var DebuggerServer = {
    *    beginning with "<prefix>/".
    */
   connectToParent(prefix, scopeOrManager) {
+    dump("devtools DebuggerServer.connectToParent " + prefix);
     this._checkInit();
 
     let transport = isWorker ?
@@ -726,6 +743,7 @@ var DebuggerServer = {
   },
 
   connectToContent(connection, mm, onDestroy) {
+    dump("devtools DebuggerServer.connectToContent ");
     let deferred = SyncPromise.defer();
 
     let prefix = connection.allocID("content-process");
@@ -804,6 +822,7 @@ var DebuggerServer = {
   },
 
   connectToWorker(connection, dbg, id, options) {
+    dump("devtools DebuggerServer.connectToWorker ");
     return new Promise((resolve, reject) => {
       // Step 1: Ensure the worker debugger is initialized.
       if (!dbg.isInitialized) {
@@ -938,6 +957,7 @@ var DebuggerServer = {
    * Check if the server is running in the child process.
    */
   get isInChildProcess() {
+    dump("devtools DebuggerServer.isInChildProcess ");
     return Services.appinfo.processType != Ci.nsIXULRuntime.PROCESS_TYPE_DEFAULT;
   },
 
@@ -955,6 +975,7 @@ var DebuggerServer = {
    *        is evaluated
    */
   setupInChild({ module, setupChild, args, waitForEval }) {
+    dump("devtools DebuggerServer.setupInChild ");
     if (this._childMessageManagers.size == 0) {
       return Promise.resolve();
     }
@@ -1016,6 +1037,7 @@ var DebuggerServer = {
    *         established.
    */
   connectToChild(connection, frame, onDestroy, {addonId} = {}) {
+    dump("devtools DebuggerServer.connectToChild ");
     let deferred = SyncPromise.defer();
 
     // Get messageManager from XUL browser (which might be a specialized tunnel for RDM)
@@ -1253,6 +1275,7 @@ var DebuggerServer = {
   // DebuggerServer extension API.
 
   setRootActor(actorFactory) {
+    dump("devtools DebuggerServer.setRootActor ");
     this.createRootActor = actorFactory;
   },
 
@@ -1279,6 +1302,7 @@ var DebuggerServer = {
    *        actorPrefix property of the constructor prototype is used.
    */
   addTabActor(actor, name = actor.prototype.actorPrefix) {
+    dump("devtools DebuggerServer.addTabActor ");
     if (["title", "url", "actor"].indexOf(name) != -1) {
       throw Error(name + " is not allowed");
     }
@@ -1301,6 +1325,7 @@ var DebuggerServer = {
    *        Same object being given to related addTabActor call.
    */
   removeTabActor(actor) {
+    dump("devtools DebuggerServer.removeTabActor ");
     for (let name in DebuggerServer.tabActorFactories) {
       let handler = DebuggerServer.tabActorFactories[name];
       if ((handler.name && handler.name == actor.name) ||
@@ -1340,6 +1365,7 @@ var DebuggerServer = {
    *        actorPrefix property of the constructor prototype is used.
    */
   addGlobalActor(actor, name = actor.prototype.actorPrefix) {
+    dump("devtools DebuggerServer.addGlobalActor ");
     if (["from", "tabs", "selected"].indexOf(name) != -1) {
       throw Error(name + " is not allowed");
     }
@@ -1362,6 +1388,7 @@ var DebuggerServer = {
    *        Same object being given to related addGlobalActor call.
    */
   removeGlobalActor(actor) {
+    dump("devtools DebuggerServer.removeGlobalActor ");
     for (let name in DebuggerServer.globalActorFactories) {
       let handler = DebuggerServer.globalActorFactories[name];
       if ((handler.name && handler.name == actor.name) ||
@@ -1380,6 +1407,7 @@ var DebuggerServer = {
    * listeners from already loaded scripts.
    */
   removeContentServerScript() {
+    dump("devtools DebuggerServer.removeContentServerScript ");
     Services.ppmm.removeDelayedProcessScript(CONTENT_PROCESS_DBG_SERVER_SCRIPT);
     try {
       Services.ppmm.broadcastAsyncMessage("debug:close-content-server");
@@ -1399,6 +1427,7 @@ var DebuggerServer = {
    * panels natively provided by the DevTools Toolbox.
    */
   searchAllConnectionsForActor(actorID) {
+    dump("devtools DebuggerServer.searchAllConnectionsForActor ");
     // NOTE: the actor IDs are generated with the following format:
     //
     //   `server${loaderID}.conn${ConnectionID}${ActorPrefix}${ActorID}`

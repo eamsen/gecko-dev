@@ -62,6 +62,7 @@ window.addEventListener("unload", function () {
 
 var UI = {
   init: function () {
+    dump("devtools webide UI.init");
     this._telemetry = new Telemetry();
     this._telemetry.toolOpened("webide");
 

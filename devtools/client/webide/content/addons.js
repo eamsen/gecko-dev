@@ -10,6 +10,7 @@ const {GetAvailableAddons, ForgetAddonsList} = require("devtools/client/webide/m
 const Strings = Services.strings.createBundle("chrome://devtools/locale/webide.properties");
 
 window.addEventListener("load", function () {
+  dump("devtools load");
   document.querySelector("#aboutaddons").onclick = function () {
     let browserWin = Services.wm.getMostRecentWindow(gDevTools.chromeWindowType);
     if (browserWin && browserWin.BrowserOpenAddonsMgr) {
@@ -29,6 +30,7 @@ function CloseUI() {
 }
 
 function BuildUI(addons) {
+  dump("devtools BuildUI " + JSON.stringify(addons));
   BuildItem(addons.adb, "adb");
 }
 
@@ -72,6 +74,7 @@ function BuildItem(addon, type) {
 
   switch (type) {
     case "adb":
+      dump("devtools addons adb");
       li.setAttribute("addon", type);
       name.textContent = Strings.GetStringFromName("addons_adb_label");
       break;
@@ -100,6 +103,7 @@ function BuildItem(addon, type) {
   li.appendChild(progress);
 
   if (type == "adb") {
+    dump("devtools addons adb");
     let warning = document.createElement("p");
     warning.textContent = Strings.GetStringFromName("addons_adb_warning");
     warning.className = "warning";

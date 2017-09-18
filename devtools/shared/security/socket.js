@@ -76,6 +76,7 @@ var DebuggerSocket = {};
  *         Resolved to a DebuggerTransport instance.
  */
 DebuggerSocket.connect = Task.async(function* (settings) {
+  dump("devtools DebuggerSocket.connect");
   // Default to PROMPT |Authenticator| instance if not supplied
   if (!settings.authenticator) {
     settings.authenticator = new (Authenticators.get().Client)();
@@ -404,6 +405,7 @@ SocketListener.prototype = {
    * Validate that all options have been set to a supported configuration.
    */
   _validateOptions: function () {
+    dump("devtools DebuggerSocket._validateOptions ");
     if (this.portOrPath === null) {
       throw new Error("Must set a port / path to listen on.");
     }
@@ -414,12 +416,14 @@ SocketListener.prototype = {
       throw new Error("Encryption not supported on WebSocket transport");
     }
     this.authenticator.validateOptions(this);
+    dump("devtools DebuggerSocket._validateOptions OK");
   },
 
   /**
    * Listens on the given port or socket file for remote debugger connections.
    */
   open: function () {
+    dump("devtools DebuggerSocket.open");
     this._validateOptions();
     DebuggerServer._addListener(this);
 
@@ -433,6 +437,7 @@ SocketListener.prototype = {
     return Task.spawn(function* () {
       let backlog = 4;
       self._socket = self._createSocketInstance();
+      dump("devtools DebuggerSocket.open " + self.portOrPath);
       if (self.isPortBased) {
         let port = Number(self.portOrPath);
         self._socket.initSpecialConnection(port, flags, backlog);
@@ -445,11 +450,11 @@ SocketListener.prototype = {
       }
       yield self._setAdditionalSocketOptions();
       self._socket.asyncListen(self);
-      dumpn("Socket listening on: " + (self.port || self.portOrPath));
+      dumpn("devtools Socket listening on: " + (self.port || self.portOrPath));
     }).then(() => {
       this._advertise();
     }).catch(e => {
-      dumpn("Could not start debugging listener on '" + this.portOrPath +
+      dumpn("devtools Could not start debugging listener on '" + this.portOrPath +
             "': " + e);
       this.close();
     });
@@ -495,6 +500,7 @@ SocketListener.prototype = {
    * the set of active SocketListeners.
    */
   close: function () {
+    dump("devtools DebuggerSocket.close");
     if (this.discoverable && this.port) {
       discovery.removeService("devtools");
     }
@@ -506,6 +512,7 @@ SocketListener.prototype = {
   },
 
   get host() {
+    dump("devtools DebuggerSocket.host");
     if (!this._socket) {
       return null;
     }
@@ -519,6 +526,7 @@ SocketListener.prototype = {
    * Gets whether this listener uses a port number vs. a path.
    */
   get isPortBased() {
+    dump("devtools DebuggerSocket.isPortBased");
     return !!Number(this.portOrPath);
   },
 
@@ -527,6 +535,7 @@ SocketListener.prototype = {
    * is not a TCP socket (so there is no port).
    */
   get port() {
+    dump("devtools DebuggerSocket.port");
     if (!this.isPortBased || !this._socket) {
       return null;
     }
@@ -534,6 +543,7 @@ SocketListener.prototype = {
   },
 
   get cert() {
+    dump("devtools DebuggerSocket.cert");
     if (!this._socket || !this._socket.serverCert) {
       return null;
     }
@@ -546,10 +556,12 @@ SocketListener.prototype = {
 
   onSocketAccepted:
   DevToolsUtils.makeInfallible(function (socket, socketTransport) {
+    dump("devtools DebuggerSocket.onSocketAccepted");
     new ServerSocketConnection(this, socketTransport);
   }, "SocketListener.onSocketAccepted"),
 
   onStopListening: function (socket, status) {
+    dump("devtools DebuggerSocket.onStopListing");
     dumpn("onStopListening, status: " + status);
   }
 
@@ -789,6 +801,7 @@ ServerSocketConnection.prototype = {
 };
 
 DebuggerSocket.createListener = function () {
+  dump("devtools DebuggerSocket.createListener");
   return new SocketListener();
 };
 

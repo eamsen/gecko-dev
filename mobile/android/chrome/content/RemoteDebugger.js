@@ -13,6 +13,7 @@ XPCOMUtils.defineLazyGetter(this, "DebuggerServer", () => {
 
 var RemoteDebugger = {
   init() {
+    dump("RemoteDebugger.init");
     USBRemoteDebugger.init();
     WiFiRemoteDebugger.init();
   },
@@ -44,6 +45,7 @@ var RemoteDebugger = {
    *         A promise that will be resolved to the above is also allowed.
    */
   allowConnection(session) {
+    dump("RemoteDebugger allowConnection");
     if (this._promptingForAllow) {
       // Don't stack connection prompts if one is already open
       return DebuggerServer.AuthenticationResult.DENY;
@@ -147,6 +149,7 @@ var RemoteDebugger = {
    *         A promise that will be resolved to the above is also allowed.
    */
   receiveOOB() {
+    dump("RemoteDebugger receiveOOB");
     if (this._receivingOOB) {
       return this._receivingOOB;
     }
@@ -176,6 +179,7 @@ var RemoteDebugger = {
   },
 
   initServer: function() {
+    dump("RemoteDebugger initServer");
     if (DebuggerServer.initialized) {
       return;
     }
@@ -314,6 +318,7 @@ var WiFiRemoteDebugger = {
   },
 
   start: function() {
+    dump("RemoteDebugger start");
     if (this._listener) {
       return;
     }
