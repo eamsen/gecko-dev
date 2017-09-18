@@ -30,6 +30,7 @@ class GeckoViewTab extends GeckoViewModule {
                           .rootTreeItem.QueryInterface(Ci.nsIInterfaceRequestor)
                           .getInterface(Ci.nsIDOMWindow);
 
+    debug("window=" + this.window);
     debug(`root=${!!root} same=${root == this.window}`);
     debug(`windowtype=${root.document.documentElement.getAttribute("windowtype")}`);
     this.window.gBrowser = this.window.BrowserApp = {

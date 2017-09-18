@@ -59,8 +59,7 @@ MobileTabList.prototype = Object.create(BrowserTabList.prototype);
 MobileTabList.prototype.constructor = MobileTabList;
 
 MobileTabList.prototype._getSelectedBrowser = function(aWindow) {
-  dump("RemoteDebugger getSelectedBrowser " +
-       aWindow.BrowserApp.selectedBrowser);
+  dump(`RemoteDebugger getSelectedBrowser aWindow=${aWindow} BrowserApp=${aWindow.BrowserApp} selectedBrowser=${aWindow.BrowserApp.selectedBrowser}`);
   return aWindow.BrowserApp.selectedBrowser;
 };
 
