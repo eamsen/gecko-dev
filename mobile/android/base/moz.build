@@ -433,6 +433,7 @@ gvjar.sources += [geckoview_source_dir + 'java/org/mozilla/gecko/' + x
     'media/GeckoMediaDrmBridgeV23.java',
     'media/GeckoPlayerFactory.java',
     'media/GeckoVideoInfo.java',
+    'media/GeckoViewMediaControlService.java',
     'media/JellyBeanAsyncCodec.java',
     'media/LollipopAsyncCodec.java',
     'media/MediaDrmProxy.java',
