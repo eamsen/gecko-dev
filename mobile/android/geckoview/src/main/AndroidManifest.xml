@@ -70,6 +70,13 @@
             android:exported="false"
             android:isolatedProcess="false">
         </service>
+
+        <service
+            android:name="org.mozilla.gecko.media.GeckoViewMediaControlService"
+            android:enabled="true"
+            android:exported="false"
+            android:stopWithTask="true">
+        </service>
    </application>
 
 </manifest>
