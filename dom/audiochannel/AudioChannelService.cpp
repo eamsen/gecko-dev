@@ -24,6 +24,11 @@
 
 #include "mozilla/Preferences.h"
 
+
+#include <android/log.h>
+#include <string.h>
+#define rabbit(fmt, ...) __android_log_print(ANDROID_LOG_INFO, "rabbit", "%s:%d " fmt, strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__, __LINE__, ##__VA_ARGS__)
+
 using namespace mozilla;
 using namespace mozilla::dom;
 
@@ -587,6 +592,7 @@ AudioChannelService::RefreshAgentsAudioFocusChanged(AudioChannelAgent* aAgent)
     AudioChannelWindow* winData = iter.GetNext();
     if (winData->mOwningAudioFocus) {
       // rabbit
+      rabbit("");
       winData->AudioFocusChanged(aAgent);
     }
   }
@@ -782,9 +788,10 @@ AudioChannelService::AudioChannelWindow::AppendAgent(AudioChannelAgent* aAgent,
   } else if (IsEnableAudioCompetingForAllAgents() &&
              aAudible != AudibleState::eAudible) {
     // rabbit
+    rabbit("");
     NotifyAudioCompetingChanged(aAgent);
   }
-  MOZ_ASSERT(false);
+  rabbit("");
 }
 
 void
