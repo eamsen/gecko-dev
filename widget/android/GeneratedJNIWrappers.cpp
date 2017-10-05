@@ -2277,6 +2277,25 @@ auto GeckoVideoInfo::StereoMode() const -> int32_t
     return mozilla::jni::Field<StereoMode_t>::Get(GeckoVideoInfo::mCtx, nullptr);
 }
 
+const char GeckoViewAudioFocusAgent::name[] =
+        "org/mozilla/gecko/media/GeckoViewAudioFocusAgent";
+
+constexpr char GeckoViewAudioFocusAgent::NotifyStartedPlaying_t::name[];
+constexpr char GeckoViewAudioFocusAgent::NotifyStartedPlaying_t::signature[];
+
+auto GeckoViewAudioFocusAgent::NotifyStartedPlaying() -> void
+{
+    return mozilla::jni::Method<NotifyStartedPlaying_t>::Call(GeckoViewAudioFocusAgent::Context(), nullptr);
+}
+
+constexpr char GeckoViewAudioFocusAgent::NotifyStoppedPlaying_t::name[];
+constexpr char GeckoViewAudioFocusAgent::NotifyStoppedPlaying_t::signature[];
+
+auto GeckoViewAudioFocusAgent::NotifyStoppedPlaying() -> void
+{
+    return mozilla::jni::Method<NotifyStoppedPlaying_t>::Call(GeckoViewAudioFocusAgent::Context(), nullptr);
+}
+
 const char MediaDrmProxy::name[] =
         "org/mozilla/gecko/media/MediaDrmProxy";
 

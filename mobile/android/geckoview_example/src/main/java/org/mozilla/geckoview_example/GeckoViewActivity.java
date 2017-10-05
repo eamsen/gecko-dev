@@ -24,7 +24,7 @@ import org.mozilla.gecko.util.GeckoBundle;
 
 public class GeckoViewActivity extends Activity {
     private static final String LOGTAG = "GeckoViewActivity";
-    private static final String DEFAULT_URL = "https://mozilla.org";
+    private static final String DEFAULT_URL = "http://me73.com/media/";
     private static final String USE_MULTIPROCESS_EXTRA = "use_multiprocess";
     private static final String USE_REMOTE_DEBUGGER_EXTRA = "use_remote_debugger";
 
