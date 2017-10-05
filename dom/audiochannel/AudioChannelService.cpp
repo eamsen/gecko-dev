@@ -586,6 +586,7 @@ AudioChannelService::RefreshAgentsAudioFocusChanged(AudioChannelAgent* aAgent)
   while (iter.HasMore()) {
     AudioChannelWindow* winData = iter.GetNext();
     if (winData->mOwningAudioFocus) {
+      // rabbit
       winData->AudioFocusChanged(aAgent);
     }
   }
@@ -729,6 +730,7 @@ AudioChannelService::AudioChannelWindow::AudioFocusChanged(AudioChannelAgent* aN
       switch (type) {
         case nsISuspendedTypes::NONE_SUSPENDED:
         case nsISuspendedTypes::SUSPENDED_STOP_DISPOSABLE:
+        MOZ_ASSERT(false);
           agent->WindowSuspendChanged(type);
           break;
       }
@@ -773,13 +775,16 @@ AudioChannelService::AudioChannelWindow::AppendAgent(AudioChannelAgent* aAgent,
   AppendAgentAndIncreaseAgentsNum(aAgent);
   AudioCapturedChanged(aAgent, AudioCaptureState::eCapturing);
   if (aAudible == AudibleState::eAudible) {
+    MOZ_ASSERT(false);
     AudioAudibleChanged(aAgent,
                         AudibleState::eAudible,
                         AudibleChangedReasons::eDataAudibleChanged);
   } else if (IsEnableAudioCompetingForAllAgents() &&
              aAudible != AudibleState::eAudible) {
+    // rabbit
     NotifyAudioCompetingChanged(aAgent);
   }
+  MOZ_ASSERT(false);
 }
 
 void

@@ -805,10 +805,11 @@ nsAndroidBridge::UpdateAudioPlayingWindows(bool aPlaying)
 void
 nsAndroidBridge::AddObservers()
 {
+  ALOG_BRIDGE("nsAndroidBridge::AddObservers.");
   nsCOMPtr<nsIObserverService> obs = mozilla::services::GetObserverService();
   if (obs) {
     obs->AddObserver(this, "xpcom-shutdown", false);
-    if (jni::IsFennec()) { // No AudioFocusAgent in non-Fennec environment.
+    if (true) { // No AudioFocusAgent in non-Fennec environment.
         obs->AddObserver(this, "audio-playback", false);
     }
   }
@@ -820,7 +821,7 @@ nsAndroidBridge::RemoveObservers()
   nsCOMPtr<nsIObserverService> obs = mozilla::services::GetObserverService();
   if (obs) {
     obs->RemoveObserver(this, "xpcom-shutdown");
-    if (jni::IsFennec()) { // No AudioFocusAgent in non-Fennec environment.
+    if (true) { // No AudioFocusAgent in non-Fennec environment.
         obs->RemoveObserver(this, "audio-playback");
     }
   }

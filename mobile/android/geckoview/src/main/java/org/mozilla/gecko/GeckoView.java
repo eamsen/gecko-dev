@@ -43,6 +43,8 @@ import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 
+import org.mozilla.gecko.media.GeckoViewAudioFocusAgent;
+
 public class GeckoView extends LayerView {
 
     private static final String DEFAULT_SHARED_PREFERENCES_FILE = "GeckoView";
@@ -477,6 +479,7 @@ public class GeckoView extends LayerView {
         if (GeckoAppShell.getApplicationContext() == null) {
             GeckoAppShell.setApplicationContext(appContext);
         }
+        GeckoViewAudioFocusAgent.getInstance().attachToContext(appContext);
 
         if (GeckoThread.initMainProcess(/* profile */ null,
                                         geckoArgs,
