@@ -106,6 +106,7 @@ public:
     nsAutoString state;
     GetActiveState(state);
 
+    rabbit("mWindow=%p", mWindow.get());
     observerService->NotifyObservers(ToSupports(mWindow),
                                      "audio-playback",
                                      state.get());
@@ -820,6 +821,7 @@ AudioChannelService::AudioChannelWindow::NotifyMediaBlockStop(nsPIDOMWindowOuter
         return;
       }
 
+      rabbit("");
       observerService->NotifyObservers(ToSupports(window),
                                        "audio-playback",
                                        u"mediaBlockStop");
@@ -837,6 +839,7 @@ AudioChannelService::AudioChannelWindow::NotifyMediaBlockStop(nsPIDOMWindowOuter
           return;
         }
 
+        rabbit("");
         observerService->NotifyObservers(ToSupports(window),
                                          "audio-playback",
                                          u"activeMediaBlockStop");
@@ -1014,6 +1017,7 @@ AudioChannelService::AudioChannelWindow::MaybeNotifyMediaBlockStart(AudioChannel
             return;
           }
 
+          rabbit("");
           observerService->NotifyObservers(
             ToSupports(window), "audio-playback", u"activeMediaBlockStart");
         }));
