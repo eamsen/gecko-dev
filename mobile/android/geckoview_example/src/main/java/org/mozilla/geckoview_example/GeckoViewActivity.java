@@ -22,6 +22,8 @@ import org.mozilla.gecko.GeckoView;
 import org.mozilla.gecko.GeckoViewSettings;
 import org.mozilla.gecko.util.GeckoBundle;
 
+import org.mozilla.gecko.media.AudioFocusAgent;
+
 public class GeckoViewActivity extends Activity {
     private static final String LOGTAG = "GeckoViewActivity";
     private static final String DEFAULT_URL = "http://me73.com/media/";
@@ -55,8 +57,9 @@ public class GeckoViewActivity extends Activity {
             }
         }
 
-        final boolean useMultiprocess = getIntent().getBooleanExtra(USE_MULTIPROCESS_EXTRA,
-                                                                    true);
+        // final boolean useMultiprocess = getIntent().getBooleanExtra(USE_MULTIPROCESS_EXTRA,
+                                                                    //true);
+        final boolean useMultiprocess = false;
         GeckoView.preload(this, geckoArgs, useMultiprocess);
 
         setContentView(R.layout.geckoview_activity);
@@ -78,6 +81,7 @@ public class GeckoViewActivity extends Activity {
                                             useMultiprocess);
         loadSettings(getIntent());
         loadFromIntent(getIntent());
+        AudioFocusAgent.getInstance().attachToContext(this);
     }
 
     @Override

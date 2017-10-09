@@ -57,7 +57,8 @@
 
 #include <android/log.h>
 #include <string.h>
-#define rabbit(fmt, ...) __android_log_print(ANDROID_LOG_INFO, "rabbit", "%s:%d " fmt, strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__, __LINE__, ##__VA_ARGS__)
+//#define rabbit(fmt, ...) __android_log_print(ANDROID_LOG_INFO, "rabbit", "%s:%d " fmt, strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__, __LINE__, ##__VA_ARGS__)
+#define rabbit(fmt, ...) __android_log_print(ANDROID_LOG_INFO, "rabbit", "%s " fmt, __func__, ##__VA_ARGS__)
 
 using namespace mozilla;
 using namespace mozilla::gfx;

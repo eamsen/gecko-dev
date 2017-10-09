@@ -306,6 +306,7 @@ BrowserElementChild.prototype = {
 
   _paintFrozenTimer: null,
   observe: function(subject, topic, data) {
+    dump("rabbit BrowserElementChildPreload observe " + topic);
     // Ignore notifications not about our document.  (Note that |content| /can/
     // be null; see bug 874900.)
 

@@ -62,6 +62,7 @@ public class GeckoViewMediaControlService extends Service {
 
     @Override
     public void onCreate() {
+        Log.d(LOGTAG, "onCreate");
         initialize();
         mHeadSetStateReceiver = new HeadSetStateReceiver()
                                 .registerReceiver(getApplicationContext());
@@ -75,6 +76,7 @@ public class GeckoViewMediaControlService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.d(LOGTAG, "onStartCommand");
         handleIntent(intent);
         return START_NOT_STICKY;
     }
@@ -132,6 +134,7 @@ public class GeckoViewMediaControlService extends Service {
     }
 
     private void handleIntent(Intent intent) {
+        Log.d(LOGTAG, "handleIntent");
         if (intent == null || intent.getAction() == null || !mInitialize) {
             return;
         }
@@ -291,6 +294,7 @@ public class GeckoViewMediaControlService extends Service {
     }
 
     protected void updateNotification() {
+        Log.d(LOGTAG, "updateNotification");
         ThreadUtils.assertNotOnUiThread();
 
         final Notification.MediaStyle style = new Notification.MediaStyle();
@@ -301,25 +305,24 @@ public class GeckoViewMediaControlService extends Service {
             // Notification.VISIBILITY_PRIVATE : Notification.VISIBILITY_PUBLIC;
 
         final Notification notification = new Notification.Builder(this)
-            // .setSmallIcon(R.drawable.flat_icon)
+            .setSmallIcon(android.R.drawable.ic_notification_overlay)
             .setContentTitle("WOOTTitle")
             .setContentText("WOOTURL")
-            // .setContentIntent(createContentIntent(tab))
-            .setDeleteIntent(createDeleteIntent())
-            .setStyle(style)
+            // .setContentIntent(createContentIntent())
+            // .setDeleteIntent(createDeleteIntent())
+            setStyle(style)
             .addAction(createNotificationAction())
-            .setOngoing(isPlaying)
-            .setShowWhen(false)
-            .setWhen(0)
+            setOngoing(isPlaying)
+            setShowWhen(false)
+            setWhen(0)
             // .setVisibility(visibility)
             .build();
 
         if (isPlaying) {
-            // startForeground(R.id.mediaControlNotification, notification);
+            startForeground(233, notification);
         } else {
             stopForeground(false);
-            // NotificationManagerCompat.from(this)
-                // .notify(R.id.mediaControlNotification, notification);
+            NotificationManagerCompat.from(this).notify(233, notification);
         }
     }
 
@@ -327,8 +330,8 @@ public class GeckoViewMediaControlService extends Service {
         final Intent intent = createIntentUponState(mMediaState);
         boolean isPlayAction = intent.getAction().equals(ACTION_RESUME);
 
-        // int icon = isPlayAction ? R.drawable.ic_media_play : R.drawable.ic_media_pause;
-        // String title = getString(isPlayAction ? R.string.media_play : R.string.media_pause);
+        int icon = isPlayAction ? android.R.drawable.ic_media_play : android.R.drawable.ic_media_pause;
+        String title = getString(isPlayAction ? android.R.string.media_play : android.R.string.media_pause);
 
         final PendingIntent pendingIntent = PendingIntent.getService(getApplicationContext(), 1, intent, 0);
 
@@ -350,9 +353,10 @@ public class GeckoViewMediaControlService extends Service {
     }
 
     private PendingIntent createContentIntent() {
+        Intent intent = new Intent();
         // Intent intent = IntentHelper.getTabSwitchIntent(tab);
-        // return PendingIntent.getActivity(getApplicationContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        return null;
+        return PendingIntent.getActivity(getApplicationContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        // return null;
     }
 
     private PendingIntent createDeleteIntent() {

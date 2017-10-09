@@ -12,7 +12,7 @@ import android.media.AudioManager.OnAudioFocusChangeListener;
 import android.support.annotation.VisibleForTesting;
 import android.util.Log;
 
-public class GeckoViewAudioFocusAgent {
+public class AudioFocusAgent {
     private static final String LOGTAG = "GV AudioFocusAgent";
 
     private static Context mContext;
@@ -34,7 +34,7 @@ public class GeckoViewAudioFocusAgent {
             return;
         }
         Log.d(LOGTAG, "NotifyStartedPlaying");
-        GeckoViewAudioFocusAgent.getInstance().requestAudioFocusIfNeeded();
+        AudioFocusAgent.getInstance().requestAudioFocusIfNeeded();
     }
 
     @WrapForJNI(calledFrom = "gecko")
@@ -43,7 +43,7 @@ public class GeckoViewAudioFocusAgent {
             return;
         }
         Log.d(LOGTAG, "NotifyStoppedPlaying");
-        GeckoViewAudioFocusAgent.getInstance().abandonAudioFocusIfNeeded();
+        AudioFocusAgent.getInstance().abandonAudioFocusIfNeeded();
     }
 
     public synchronized void attachToContext(Context context) {
@@ -51,6 +51,7 @@ public class GeckoViewAudioFocusAgent {
             return;
         }
 
+        Log.d(LOGTAG, "attachToContext");
         mContext = context;
         mAudioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
 
@@ -95,12 +96,12 @@ public class GeckoViewAudioFocusAgent {
     }
 
     @RobocopTarget
-    public static GeckoViewAudioFocusAgent getInstance() {
-        return GeckoViewAudioFocusAgent.SingletonHolder.INSTANCE;
+    public static AudioFocusAgent getInstance() {
+        return AudioFocusAgent.SingletonHolder.INSTANCE;
     }
 
     private static class SingletonHolder {
-        private static final GeckoViewAudioFocusAgent INSTANCE = new GeckoViewAudioFocusAgent();
+        private static final AudioFocusAgent INSTANCE = new AudioFocusAgent();
     }
 
     private static boolean isAttachedToContext() {
@@ -111,7 +112,7 @@ public class GeckoViewAudioFocusAgent {
         GeckoAppShell.notifyObservers(topic, data);
     }
 
-    private GeckoViewAudioFocusAgent() {}
+    private AudioFocusAgent() {}
 
     private void requestAudioFocusIfNeeded() {
         if (mAudioFocusState.equals(State.OWN_FOCUS)) {

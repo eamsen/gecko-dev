@@ -36,6 +36,8 @@ class GeckoViewNavigation extends GeckoViewModule {
     this.window.QueryInterface(Ci.nsIDOMChromeWindow).browserDOMWindow = this;
     this.browser.docShell.loadURIDelegate = this;
 
+    // Services.obs.addObserver(this, "audio-playback");
+
     this.eventDispatcher.registerListener(this, [
       "GeckoView:GoBack",
       "GeckoView:GoForward",
@@ -43,6 +45,10 @@ class GeckoViewNavigation extends GeckoViewModule {
       "GeckoView:Reload",
       "GeckoView:Stop"
     ]);
+  }
+
+  observe(aSubject, aTopic, aData) {
+    dump("rabbit observe " + aTopic);
   }
 
   // Bundle event handler.

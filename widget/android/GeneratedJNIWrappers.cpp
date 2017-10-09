@@ -1789,6 +1789,25 @@ auto VsyncSource::INSTANCE() -> VsyncSource::LocalRef
     return mozilla::jni::Field<INSTANCE_t>::Get(VsyncSource::Context(), nullptr);
 }
 
+const char AudioFocusAgent::name[] =
+        "org/mozilla/gecko/media/AudioFocusAgent";
+
+constexpr char AudioFocusAgent::NotifyStartedPlaying_t::name[];
+constexpr char AudioFocusAgent::NotifyStartedPlaying_t::signature[];
+
+auto AudioFocusAgent::NotifyStartedPlaying() -> void
+{
+    return mozilla::jni::Method<NotifyStartedPlaying_t>::Call(AudioFocusAgent::Context(), nullptr);
+}
+
+constexpr char AudioFocusAgent::NotifyStoppedPlaying_t::name[];
+constexpr char AudioFocusAgent::NotifyStoppedPlaying_t::signature[];
+
+auto AudioFocusAgent::NotifyStoppedPlaying() -> void
+{
+    return mozilla::jni::Method<NotifyStoppedPlaying_t>::Call(AudioFocusAgent::Context(), nullptr);
+}
+
 const char CodecProxy::name[] =
         "org/mozilla/gecko/media/CodecProxy";
 
@@ -2275,25 +2294,6 @@ constexpr char GeckoVideoInfo::StereoMode_t::signature[];
 auto GeckoVideoInfo::StereoMode() const -> int32_t
 {
     return mozilla::jni::Field<StereoMode_t>::Get(GeckoVideoInfo::mCtx, nullptr);
-}
-
-const char GeckoViewAudioFocusAgent::name[] =
-        "org/mozilla/gecko/media/GeckoViewAudioFocusAgent";
-
-constexpr char GeckoViewAudioFocusAgent::NotifyStartedPlaying_t::name[];
-constexpr char GeckoViewAudioFocusAgent::NotifyStartedPlaying_t::signature[];
-
-auto GeckoViewAudioFocusAgent::NotifyStartedPlaying() -> void
-{
-    return mozilla::jni::Method<NotifyStartedPlaying_t>::Call(GeckoViewAudioFocusAgent::Context(), nullptr);
-}
-
-constexpr char GeckoViewAudioFocusAgent::NotifyStoppedPlaying_t::name[];
-constexpr char GeckoViewAudioFocusAgent::NotifyStoppedPlaying_t::signature[];
-
-auto GeckoViewAudioFocusAgent::NotifyStoppedPlaying() -> void
-{
-    return mozilla::jni::Method<NotifyStoppedPlaying_t>::Call(GeckoViewAudioFocusAgent::Context(), nullptr);
 }
 
 const char MediaDrmProxy::name[] =

@@ -44,7 +44,7 @@ import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 
-import org.mozilla.gecko.media.GeckoViewAudioFocusAgent;
+import org.mozilla.gecko.media.AudioFocusAgent;
 
 public class GeckoView extends LayerView {
 
@@ -482,7 +482,6 @@ public class GeckoView extends LayerView {
         if (GeckoAppShell.getApplicationContext() == null) {
             GeckoAppShell.setApplicationContext(appContext);
         }
-        GeckoViewAudioFocusAgent.getInstance().attachToContext(appContext);
 
         final int flags = multiprocess ? GeckoThread.FLAG_PRELOAD_CHILD : 0;
         if (GeckoThread.initMainProcess(/* profile */ null, geckoArgs, flags)) {
@@ -505,7 +504,6 @@ public class GeckoView extends LayerView {
         }
         mSettings.setString(GeckoViewSettings.DEBUGGER_SOCKET_DIR,
                             context.getApplicationInfo().dataDir);
-
     }
 
     @Override

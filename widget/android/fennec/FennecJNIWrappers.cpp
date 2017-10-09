@@ -204,25 +204,6 @@ auto ThumbnailHelper::NotifyThumbnail(mozilla::jni::ByteBuffer::Param a0, mozill
 constexpr char ThumbnailHelper::RequestThumbnail_t::name[];
 constexpr char ThumbnailHelper::RequestThumbnail_t::signature[];
 
-const char AudioFocusAgent::name[] =
-        "org/mozilla/gecko/media/AudioFocusAgent";
-
-constexpr char AudioFocusAgent::NotifyStartedPlaying_t::name[];
-constexpr char AudioFocusAgent::NotifyStartedPlaying_t::signature[];
-
-auto AudioFocusAgent::NotifyStartedPlaying() -> void
-{
-    return mozilla::jni::Method<NotifyStartedPlaying_t>::Call(AudioFocusAgent::Context(), nullptr);
-}
-
-constexpr char AudioFocusAgent::NotifyStoppedPlaying_t::name[];
-constexpr char AudioFocusAgent::NotifyStoppedPlaying_t::signature[];
-
-auto AudioFocusAgent::NotifyStoppedPlaying() -> void
-{
-    return mozilla::jni::Method<NotifyStoppedPlaying_t>::Call(AudioFocusAgent::Context(), nullptr);
-}
-
 const char Restrictions::name[] =
         "org/mozilla/gecko/restrictions/Restrictions";
 

@@ -706,56 +706,6 @@ public:
     template<class Impl> class Natives;
 };
 
-class AudioFocusAgent : public mozilla::jni::ObjectBase<AudioFocusAgent>
-{
-public:
-    static const char name[];
-
-    explicit AudioFocusAgent(const Context& ctx) : ObjectBase<AudioFocusAgent>(ctx) {}
-
-    struct NotifyStartedPlaying_t {
-        typedef AudioFocusAgent Owner;
-        typedef void ReturnType;
-        typedef void SetterType;
-        typedef mozilla::jni::Args<> Args;
-        static constexpr char name[] = "notifyStartedPlaying";
-        static constexpr char signature[] =
-                "()V";
-        static const bool isStatic = true;
-        static const mozilla::jni::ExceptionMode exceptionMode =
-                mozilla::jni::ExceptionMode::ABORT;
-        static const mozilla::jni::CallingThread callingThread =
-                mozilla::jni::CallingThread::GECKO;
-        static const mozilla::jni::DispatchTarget dispatchTarget =
-                mozilla::jni::DispatchTarget::CURRENT;
-    };
-
-    static auto NotifyStartedPlaying() -> void;
-
-    struct NotifyStoppedPlaying_t {
-        typedef AudioFocusAgent Owner;
-        typedef void ReturnType;
-        typedef void SetterType;
-        typedef mozilla::jni::Args<> Args;
-        static constexpr char name[] = "notifyStoppedPlaying";
-        static constexpr char signature[] =
-                "()V";
-        static const bool isStatic = true;
-        static const mozilla::jni::ExceptionMode exceptionMode =
-                mozilla::jni::ExceptionMode::ABORT;
-        static const mozilla::jni::CallingThread callingThread =
-                mozilla::jni::CallingThread::GECKO;
-        static const mozilla::jni::DispatchTarget dispatchTarget =
-                mozilla::jni::DispatchTarget::CURRENT;
-    };
-
-    static auto NotifyStoppedPlaying() -> void;
-
-    static const mozilla::jni::CallingThread callingThread =
-            mozilla::jni::CallingThread::GECKO;
-
-};
-
 class Restrictions : public mozilla::jni::ObjectBase<Restrictions>
 {
 public:
