@@ -63,36 +63,36 @@ public class AudioFocusAgent {
                         Log.d(LOGTAG, "onAudioFocusChange, AUDIOFOCUS_LOSS");
                         mAudioFocusState = State.LOST_FOCUS;
                         notifyObservers("audioFocusChanged", "lostAudioFocus");
-                        notifyMediaControlService(GeckoViewMediaControlService.ACTION_PAUSE_BY_AUDIO_FOCUS);
+                        notifyMediaControlService(MediaControlService.ACTION_PAUSE_BY_AUDIO_FOCUS);
                         break;
                     case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
                         Log.d(LOGTAG, "onAudioFocusChange, AUDIOFOCUS_LOSS_TRANSIENT");
                         mAudioFocusState = State.LOST_FOCUS_TRANSIENT;
                         notifyObservers("audioFocusChanged", "lostAudioFocusTransiently");
-                        notifyMediaControlService(GeckoViewMediaControlService.ACTION_PAUSE_BY_AUDIO_FOCUS);
+                        notifyMediaControlService(MediaControlService.ACTION_PAUSE_BY_AUDIO_FOCUS);
                         break;
                     case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
                         Log.d(LOGTAG, "onAudioFocusChange, AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK");
                         mAudioFocusState = State.LOST_FOCUS_TRANSIENT_CAN_DUCK;
-                        notifyMediaControlService(GeckoViewMediaControlService.ACTION_START_AUDIO_DUCK);
+                        notifyMediaControlService(MediaControlService.ACTION_START_AUDIO_DUCK);
                         break;
                     case AudioManager.AUDIOFOCUS_GAIN:
                         State state = mAudioFocusState;
                         mAudioFocusState = State.OWN_FOCUS;
                         if (state.equals(State.LOST_FOCUS_TRANSIENT_CAN_DUCK)) {
                             Log.d(LOGTAG, "onAudioFocusChange, AUDIOFOCUS_GAIN (from DUCKING)");
-                            notifyMediaControlService(GeckoViewMediaControlService.ACTION_STOP_AUDIO_DUCK);
+                            notifyMediaControlService(MediaControlService.ACTION_STOP_AUDIO_DUCK);
                         } else if (state.equals(State.LOST_FOCUS_TRANSIENT)) {
                             Log.d(LOGTAG, "onAudioFocusChange, AUDIOFOCUS_GAIN");
                             notifyObservers("audioFocusChanged", "gainAudioFocus");
-                            notifyMediaControlService(GeckoViewMediaControlService.ACTION_RESUME_BY_AUDIO_FOCUS);
+                            notifyMediaControlService(MediaControlService.ACTION_RESUME_BY_AUDIO_FOCUS);
                         }
                         break;
                     default:
                 }
             }
         };
-        notifyMediaControlService(GeckoViewMediaControlService.ACTION_INIT);
+        notifyMediaControlService(MediaControlService.ACTION_INIT);
     }
 
     @RobocopTarget
@@ -142,7 +142,7 @@ public class AudioFocusAgent {
     }
 
     private void notifyMediaControlService(String action) {
-        Intent intent = new Intent(mContext, GeckoViewMediaControlService.class);
+        Intent intent = new Intent(mContext, MediaControlService.class);
         intent.setAction(action);
         mContext.startService(intent);
     }

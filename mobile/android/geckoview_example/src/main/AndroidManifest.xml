@@ -28,8 +28,8 @@
                 <data android:scheme="javascript" />
             </intent-filter>
         </activity>
-        
-        <service android:name="org.mozilla.gecko.media.GeckoViewMediaControlService"
+
+        <service android:name="org.mozilla.gecko.media.MediaControlService"
                  android:exported="false"
                  android:stopWithTask="true">
         </service>
