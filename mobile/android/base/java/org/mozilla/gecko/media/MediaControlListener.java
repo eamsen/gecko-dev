@@ -71,7 +71,7 @@ public class MediaControlListener implements Tabs.OnTabsChangedListener {
     private int coverSize;
 
     /**
-     * Internal state of MediaControlListener, to indicate it is playing media, or paused...etc.
+     * Internal state of MediaControlService, to indicate it is playing media, or paused...etc.
      */
     private State mMediaState = State.STOPPED;
 
@@ -274,7 +274,7 @@ public class MediaControlListener implements Tabs.OnTabsChangedListener {
                     // gecko about that.
                     if (mMediaState.equals(State.PAUSED) &&
                         !mIsMediaControlPrefOn) {
-                        Intent intent = new Intent(getApplicationContext(), MediaControlListener.class);
+                        Intent intent = new Intent(getApplicationContext(), MediaControlService.class);
                         intent.setAction(ACTION_STOP);
                         handleIntent(intent);
                     }
@@ -446,13 +446,13 @@ public class MediaControlListener implements Tabs.OnTabsChangedListener {
 
     /**
      * This method encapsulated UI logic. For PLAYING state, UI should display a PAUSE icon.
-     * @param state The expected current state of MediaControlListener
+     * @param state The expected current state of MediaControlService
      * @return corresponding Intent to be used for Notification
      */
     @VisibleForTesting
     protected Intent createIntentUponState(State state) {
         String action = state.equals(State.PLAYING) ? ACTION_PAUSE : ACTION_RESUME;
-        final Intent intent = new Intent(getApplicationContext(), MediaControlListener.class);
+        final Intent intent = new Intent(getApplicationContext(), MediaControlService.class);
         intent.setAction(action);
         return intent;
     }
@@ -463,7 +463,7 @@ public class MediaControlListener implements Tabs.OnTabsChangedListener {
     }
 
     private PendingIntent createDeleteIntent() {
-        Intent intent = new Intent(getApplicationContext(), MediaControlListener.class);
+        Intent intent = new Intent(getApplicationContext(), MediaControlService.class);
         intent.setAction(ACTION_STOP);
         return  PendingIntent.getService(getApplicationContext(), 1, intent, 0);
     }
@@ -517,7 +517,7 @@ public class MediaControlListener implements Tabs.OnTabsChangedListener {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (isMediaPlaying()) {
-                Intent pauseIntent = new Intent(getApplicationContext(), MediaControlListener.class);
+                Intent pauseIntent = new Intent(getApplicationContext(), MediaControlService.class);
                 pauseIntent.setAction(ACTION_PAUSE);
                 handleIntent(pauseIntent);
             }
