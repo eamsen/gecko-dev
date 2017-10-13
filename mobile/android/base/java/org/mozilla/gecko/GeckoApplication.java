@@ -329,7 +329,7 @@ public class GeckoApplication extends Application
 
         GeckoAccessibility.setAccessibilityManagerListeners(this);
 
-        AudioFocusAgent.getInstance().attachToContext(this);
+        AudioFocusAgent.getInstance().attachToContext(this, false);
 
         RemoteManager.setCrashReporter(new RemoteManager.ICrashReporter() {
             public void reportDecodingProcessCrash() {

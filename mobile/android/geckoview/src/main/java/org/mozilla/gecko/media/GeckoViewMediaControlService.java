@@ -310,11 +310,11 @@ public class GeckoViewMediaControlService extends Service {
             .setContentText("WOOTURL")
             // .setContentIntent(createContentIntent())
             // .setDeleteIntent(createDeleteIntent())
-            setStyle(style)
+            .setStyle(style)
             .addAction(createNotificationAction())
-            setOngoing(isPlaying)
-            setShowWhen(false)
-            setWhen(0)
+            .setOngoing(isPlaying)
+            .setShowWhen(false)
+            .setWhen(0)
             // .setVisibility(visibility)
             .build();
 
@@ -331,7 +331,7 @@ public class GeckoViewMediaControlService extends Service {
         boolean isPlayAction = intent.getAction().equals(ACTION_RESUME);
 
         int icon = isPlayAction ? android.R.drawable.ic_media_play : android.R.drawable.ic_media_pause;
-        String title = getString(isPlayAction ? android.R.string.media_play : android.R.string.media_pause);
+        String title = isPlayAction ? "Play" : "Pause";
 
         final PendingIntent pendingIntent = PendingIntent.getService(getApplicationContext(), 1, intent, 0);
 

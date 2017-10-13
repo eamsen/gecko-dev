@@ -29,7 +29,7 @@
             </intent-filter>
         </activity>
 
-        <service android:name="org.mozilla.gecko.media.MediaControlService"
+        <service android:name="org.mozilla.gecko.media.GeckoViewMediaControlService"
                  android:exported="false"
                  android:stopWithTask="true">
         </service>

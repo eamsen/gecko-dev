@@ -234,7 +234,7 @@
                  android:process="@MANGLED_ANDROID_PACKAGE_NAME@.Restarter">
         </service>
 
-        <service android:name="org.mozilla.gecko.media.MediaControlService"
+        <service android:name="org.mozilla.gecko.media.FennecMediaControlService"
                  android:exported="false"
                  android:stopWithTask="true">
         </service>

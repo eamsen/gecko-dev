@@ -16,6 +16,7 @@ public class AudioFocusAgent {
     private static final String LOGTAG = "GV AudioFocusAgent";
 
     private static Context mContext;
+    private static boolean mIsGeckoView;
     private AudioManager mAudioManager;
     private OnAudioFocusChangeListener mAfChangeListener;
 
@@ -46,13 +47,18 @@ public class AudioFocusAgent {
         AudioFocusAgent.getInstance().abandonAudioFocusIfNeeded();
     }
 
-    public synchronized void attachToContext(Context context) {
+    public void attachToContext(final Context context) {
+        attachToContext(context, true /* isGeckoView */);
+    }
+
+    public synchronized void attachToContext(final Context context, boolean isGeckoView) {
         if (isAttachedToContext()) {
             return;
         }
 
         Log.d(LOGTAG, "attachToContext");
         mContext = context;
+        mIsGeckoView = isGeckoView;
         mAudioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
 
         mAfChangeListener = new OnAudioFocusChangeListener() {
@@ -142,7 +148,12 @@ public class AudioFocusAgent {
     }
 
     private void notifyMediaControlService(String action) {
-        Intent intent = new Intent(mContext, MediaControlService.class);
+        Intent intent = new Intent(mContext, MediaControlService.getType());
+        // if (mIsGeckoView) {
+            // intent = new Intent(mContext, GeckoViewMediaControlService.class);
+        // } else {
+            // intent = new Intent(mContext, MediaControlService.class);
+        // }
         intent.setAction(action);
         mContext.startService(intent);
     }
