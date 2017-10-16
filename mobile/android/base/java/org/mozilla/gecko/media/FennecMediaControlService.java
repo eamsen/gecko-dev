@@ -121,6 +121,7 @@ public class FennecMediaControlService extends Service implements Tabs.OnTabsCha
             return;
         }
 
+        Log.d(LOGTAG, "onTabChanged " + msg);
         final Tab playingTab = mTabReference.get();
         switch (msg) {
             case MEDIA_PLAYING_CHANGE:

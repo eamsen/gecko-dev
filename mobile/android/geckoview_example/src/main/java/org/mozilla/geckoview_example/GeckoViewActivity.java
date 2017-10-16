@@ -68,6 +68,7 @@ public class GeckoViewActivity extends Activity {
         mGeckoView.setContentListener(new MyGeckoViewContent());
         mGeckoView.setProgressListener(new MyGeckoViewProgress());
         mGeckoView.setNavigationListener(new Navigation());
+        mGeckoView.setMediaControlListener(new MediaControl());
 
         final BasicGeckoViewPrompt prompt = new BasicGeckoViewPrompt();
         prompt.filePickerRequestCode = REQUEST_FILE_PICKER;
@@ -305,6 +306,13 @@ public class GeckoViewActivity extends Activity {
             }
             view.loadUri(uri);
             return true;
+        }
+    }
+
+    private class MediaControl implements GeckoView.MediaControlListener {
+        @Override
+        public void onMediaPlaybackChange(GeckoView view, final String status) {
+            Log.d("rabbit", "onMediaPlaybackChange " + status);
         }
     }
 }

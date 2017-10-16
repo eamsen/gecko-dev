@@ -244,6 +244,25 @@ public class GeckoView extends LayerView {
             }
         };
 
+    private final GeckoViewHandler<MediaControlListener> mMediaControlHandler =
+        new GeckoViewHandler<MediaControlListener>(
+            "GeckoViewMediaControl", this,
+            new String[]{
+                "GeckoView:MediaPlaybackChange"
+            }
+        ) {
+            @Override
+            public void handleMessage(final MediaControlListener listener,
+                                      final String event,
+                                      final GeckoBundle message,
+                                      final EventCallback callback) {
+                if ("GeckoView:MediaPlaybackChange".equals(event)) {
+                    listener.onMediaPlaybackChange(GeckoView.this,
+                                                   message.getString("status"));
+                }
+            }
+        };
+
     private static class PermissionCallback implements
         PermissionDelegate.Callback, PermissionDelegate.MediaCallback {
 
@@ -861,6 +880,15 @@ public class GeckoView extends LayerView {
     */
     public void setScrollListener(ScrollListener listener) {
         mScrollHandler.setListener(listener, this);
+    }
+
+    /**
+    * Set the media control callback handler.
+    * This will replace the current handler.
+    * @param listener An implementation of MediaControlListener.
+    */
+    public void setMediaControlListener(MediaControlListener listener) {
+        mMediaControlHandler.setListener(listener, this);
     }
 
     /**
@@ -1837,6 +1865,14 @@ public class GeckoView extends LayerView {
         * @param scrollY The new vertical scroll position in pixels.
         */
         public void onScrollChanged(GeckoView view, int scrollX, int scrollY);
+    }
+
+    public interface MediaControlListener {
+        /**
+         *
+        * @param status The new playback status.
+        */
+        public void onMediaPlaybackChange(GeckoView view, String status);
     }
 
     /**

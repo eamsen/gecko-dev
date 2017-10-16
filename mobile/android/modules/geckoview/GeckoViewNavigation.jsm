@@ -37,6 +37,8 @@ class GeckoViewNavigation extends GeckoViewModule {
     this.browser.docShell.loadURIDelegate = this;
 
     // Services.obs.addObserver(this, "audio-playback");
+    Services.obs.addObserver(this, "media-playback", false);
+    Services.obs.addObserver(this, "media-playback-resumed", false);
 
     this.eventDispatcher.registerListener(this, [
       "GeckoView:GoBack",
@@ -49,6 +51,67 @@ class GeckoViewNavigation extends GeckoViewModule {
 
   observe(aSubject, aTopic, aData) {
     dump("rabbit observe " + aTopic);
+
+    switch (aTopic) {
+      case "media-playback":
+      case "media-playback-resumed":
+        if (!aSubject) {
+          return;
+        }
+
+        let winId = aSubject.QueryInterface(Ci.nsISupportsPRUint64).data;
+        dump(`rabbit 1=${this.browser.outerWindowID} 2=${winId}`);
+        if (this.browser.outerWindowID != winId) {
+          return;
+        }
+
+        if (!this.shouldNotifyMediaPlaybackChange(aData)) {
+          return;
+        }
+
+        let status;
+        if (aTopic == "media-playback") {
+          let isActive = !(aData === "inactive");
+          status = isActive ? "start" : "end";
+          // this.UpdateMediaPlaybackRelatedObserver(isActive);
+        } else if (aTopic == "media-playback-resumed") {
+          status = "resume";
+        }
+
+        this.eventDispatcher.sendRequest({
+          type: "GeckoView:MediaPlaybackChange",
+          status: status
+        });
+        break;
+    }
+  }
+
+  shouldNotifyMediaPlaybackChange(activeState) {
+    // If the media is active, we would check it's duration, because we don't
+    // want to show the media control interface for the short sound which
+    // duration is smaller than the threshold. The basic unit is second.
+    // Note : the streaming format's duration is infinite.
+    if (activeState === "inactive") {
+      return true;
+    }
+
+    const mediaDurationThreshold = 1.0;
+
+    let audioElements = this.browser.contentDocument.getElementsByTagName("audio");
+    for (let audio of audioElements) {
+      if (!audio.paused && audio.duration < mediaDurationThreshold) {
+        return false;
+      }
+    }
+
+    let videoElements = this.browser.contentDocument.getElementsByTagName("video");
+    for (let video of videoElements) {
+      if (!video.paused && video.duration < mediaDurationThreshold) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   // Bundle event handler.
