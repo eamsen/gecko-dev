@@ -36,7 +36,7 @@ class GeckoViewNavigation extends GeckoViewModule {
     this.window.QueryInterface(Ci.nsIDOMChromeWindow).browserDOMWindow = this;
     this.browser.docShell.loadURIDelegate = this;
 
-    // Services.obs.addObserver(this, "audio-playback");
+    Services.obs.addObserver(this, "audio-playback", false);
     Services.obs.addObserver(this, "media-playback", false);
     Services.obs.addObserver(this, "media-playback-resumed", false);
 
@@ -53,6 +53,15 @@ class GeckoViewNavigation extends GeckoViewModule {
     dump("rabbit observe " + aTopic);
 
     switch (aTopic) {
+      case "audio-playback":
+        // "active", "inactive-pause"
+        dump("rabbit audio-playback data=" + aData);
+        // notifystarted/stoppedplaying
+        this.eventDispatcher.sendRequest({
+          type: "GeckoView:AudioPlaybackChanged",
+          status: aData
+        });
+        break;
       case "media-playback":
       case "media-playback-resumed":
         if (!aSubject) {
@@ -79,7 +88,7 @@ class GeckoViewNavigation extends GeckoViewModule {
         }
 
         this.eventDispatcher.sendRequest({
-          type: "GeckoView:MediaPlaybackChange",
+          type: "GeckoView:MediaPlaybackChanged",
           status: status
         });
         break;

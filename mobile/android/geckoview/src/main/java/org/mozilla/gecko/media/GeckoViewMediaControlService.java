@@ -262,7 +262,7 @@ public class GeckoViewMediaControlService extends Service {
         return state.equals(State.STOPPED);
     }
 
-    private void setState(State newState) {
+    public void setState(State newState) {
         mMediaState = newState;
         setMediaStateForTab(mMediaState.equals(State.PLAYING));
         onStateChanged();

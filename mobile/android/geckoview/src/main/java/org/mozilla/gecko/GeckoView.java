@@ -44,7 +44,7 @@ import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 
-import org.mozilla.gecko.media.AudioFocusAgent;
+import org.mozilla.gecko.media.GeckoViewAudioFocusAgent;
 
 public class GeckoView extends LayerView {
 
@@ -244,11 +244,14 @@ public class GeckoView extends LayerView {
             }
         };
 
+    private GeckoViewAudioFocusAgent mAudioFocusAgent;
+
     private final GeckoViewHandler<MediaControlListener> mMediaControlHandler =
         new GeckoViewHandler<MediaControlListener>(
             "GeckoViewMediaControl", this,
             new String[]{
-                "GeckoView:MediaPlaybackChange"
+                "GeckoView:AudioPlaybackChanged",
+                "GeckoView:MediaPlaybackChanged"
             }
         ) {
             @Override
@@ -256,9 +259,17 @@ public class GeckoView extends LayerView {
                                       final String event,
                                       final GeckoBundle message,
                                       final EventCallback callback) {
-                if ("GeckoView:MediaPlaybackChange".equals(event)) {
+                if ("GeckoView:MediaPlaybackChanged".equals(event)) {
                     listener.onMediaPlaybackChange(GeckoView.this,
                                                    message.getString("status"));
+                } else if ("GeckoView:AudioPlaybackChanged".equals(event)) {
+                    // listener.onAudioPlaybackChanged(GeckoView.this,
+                                                   // message.getString("status"));
+                    if ("active".equals(message.getString("status"))) {
+                        mAudioFocusAgent.notifyStartedPlaying();
+                    } else {
+                        mAudioFocusAgent.notifyStoppedPlaying();
+                    }
                 }
             }
         };
@@ -889,6 +900,7 @@ public class GeckoView extends LayerView {
     */
     public void setMediaControlListener(MediaControlListener listener) {
         mMediaControlHandler.setListener(listener, this);
+        mAudioFocusAgent = new GeckoViewAudioFocusAgent(getContext());
     }
 
     /**

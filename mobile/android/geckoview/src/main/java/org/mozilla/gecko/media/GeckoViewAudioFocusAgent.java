@@ -12,11 +12,11 @@ import android.media.AudioManager.OnAudioFocusChangeListener;
 import android.support.annotation.VisibleForTesting;
 import android.util.Log;
 
-public class AudioFocusAgent {
-    private static final String LOGTAG = "GV AudioFocusAgent";
+public class GeckoViewAudioFocusAgent {
+    private static final String LOGTAG = "GV GeckoViewAudioFocusAgent";
 
-    private static Context mContext;
-    private static boolean mIsGeckoView;
+    private Context mContext;
+    private boolean mIsGeckoView;
     private AudioManager mAudioManager;
     private OnAudioFocusChangeListener mAfChangeListener;
 
@@ -29,22 +29,14 @@ public class AudioFocusAgent {
 
     private State mAudioFocusState = State.LOST_FOCUS;
 
-    @WrapForJNI(calledFrom = "gecko")
-    public static void notifyStartedPlaying() {
-        if (!isAttachedToContext()) {
-            return;
-        }
+    public void notifyStartedPlaying() {
         Log.d(LOGTAG, "NotifyStartedPlaying");
-        AudioFocusAgent.getInstance().requestAudioFocusIfNeeded();
+        requestAudioFocusIfNeeded();
     }
 
-    @WrapForJNI(calledFrom = "gecko")
-    public static void notifyStoppedPlaying() {
-        if (!isAttachedToContext()) {
-            return;
-        }
+    public void notifyStoppedPlaying() {
         Log.d(LOGTAG, "NotifyStoppedPlaying");
-        AudioFocusAgent.getInstance().abandonAudioFocusIfNeeded();
+        abandonAudioFocusIfNeeded();
     }
 
     public void attachToContext(final Context context) {
@@ -52,10 +44,6 @@ public class AudioFocusAgent {
     }
 
     public synchronized void attachToContext(final Context context, boolean isGeckoView) {
-        if (isAttachedToContext()) {
-            return;
-        }
-
         Log.d(LOGTAG, "attachToContext");
         mContext = context;
         mIsGeckoView = isGeckoView;
@@ -101,24 +89,13 @@ public class AudioFocusAgent {
         notifyMediaControlService(MediaControlService.ACTION_INIT);
     }
 
-    @RobocopTarget
-    public static AudioFocusAgent getInstance() {
-        return AudioFocusAgent.SingletonHolder.INSTANCE;
-    }
-
-    private static class SingletonHolder {
-        private static final AudioFocusAgent INSTANCE = new AudioFocusAgent();
-    }
-
-    private static boolean isAttachedToContext() {
-        return (mContext != null);
-    }
-
     private void notifyObservers(String topic, String data) {
         GeckoAppShell.notifyObservers(topic, data);
     }
 
-    private AudioFocusAgent() {}
+    public GeckoViewAudioFocusAgent(final Context context) {
+        attachToContext(context, true);
+    }
 
     private void requestAudioFocusIfNeeded() {
         if (mAudioFocusState.equals(State.OWN_FOCUS)) {
@@ -148,10 +125,7 @@ public class AudioFocusAgent {
     }
 
     private void notifyMediaControlService(String action) {
-        if (mIsGeckoView) {
-            return;
-        }
-        Intent intent = new Intent(mContext, MediaControlService.getType());
+        Intent intent = new Intent(mContext, GeckoViewMediaControlService.class);
         // if (mIsGeckoView) {
             // intent = new Intent(mContext, GeckoViewMediaControlService.class);
         // } else {
