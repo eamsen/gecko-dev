@@ -147,7 +147,7 @@ let apiManager = new class extends SchemaAPIManager {
 
   receiveMessage({name, target, sync}) {
     if (name === "Extension:GetTabAndWindowId") {
-      let result = this.global.tabTracker.getBrowserData(target);
+      let result = this.global.tabTracker.getBrowserData(target, 3);
 
       if (result.tabId) {
         if (sync) {
@@ -355,7 +355,8 @@ GlobalManager = {
       let data = {viewType};
 
       let {tabTracker} = apiManager.global;
-      Object.assign(data, tabTracker.getBrowserData(browser), additionalData);
+      // rabbit
+      Object.assign(data, tabTracker.getBrowserData(browser, 4), additionalData);
 
       browser.messageManager.sendAsyncMessage("Extension:SetFrameData",
                                               data);
@@ -507,7 +508,7 @@ class ExtensionPageContextParent extends ProxyContextParent {
 
   get tabId() {
     let {tabTracker} = apiManager.global;
-    let data = tabTracker.getBrowserData(this.xulBrowser);
+    let data = tabTracker.getBrowserData(this.xulBrowser, 5);
     if (data.tabId >= 0) {
       return data.tabId;
     }

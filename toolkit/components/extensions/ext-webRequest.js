@@ -19,7 +19,8 @@ function WebRequestEventManager(context, eventName) {
     let listener = data => {
       let browserData = {tabId: -1, windowId: -1};
       if (data.browser) {
-        browserData = tabTracker.getBrowserData(data.browser);
+        // rabbit good
+        browserData = tabTracker.getBrowserData(data.browser, 20);
       }
       if (filter.tabId != null && browserData.tabId != filter.tabId) {
         return;

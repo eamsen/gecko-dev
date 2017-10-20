@@ -427,13 +427,14 @@ class TabTracker extends TabTrackerBase {
     });
   }
 
-  getBrowserData(browser) {
+  getBrowserData(browser, xxx=0) {
     let result = {
       tabId: -1,
       windowId: -1,
     };
 
     let {BrowserApp} = browser.ownerGlobal;
+    let {gBrowser} = browser.ownerGlobal;
     if (BrowserApp) {
       result.windowId = windowTracker.getId(browser.ownerGlobal);
 
@@ -443,7 +444,8 @@ class TabTracker extends TabTrackerBase {
       }
     }
 
-    dump(`rabbaddon getBrowserData ${browser} result=${JSON.stringify(result)}`);
+    dump(`rabbaddon getBrowserData xxx=${xxx} ownerGlobal=${browser.ownerGlobal} contentWindow=${browser.contentWindow} BrowserApp=${BrowserApp} gBrowser=${gBrowser} result=${JSON.stringify(result)}`);
+    dump(`rabbaddon mostrecent=${Services.wm.getMostRecentWindow("navigator:geckoview").BrowserApp} ${browser.ownerGlobal.top.BrowserApp}`);
     return result;
   }
 

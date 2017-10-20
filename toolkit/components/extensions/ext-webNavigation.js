@@ -123,14 +123,16 @@ function WebNavigationEventManager(context, eventName) {
         data2.sourceFrameId = data.sourceFrameId;
       }
 
+      dump("rabbaddon " + eventName);
       // Fills in tabId typically.
-      Object.assign(data2, tabTracker.getBrowserData(data.browser));
+      // rabbit bad
+      Object.assign(data2, tabTracker.getBrowserData(data.browser, 10));
       if (data2.tabId < 0) {
         return;
       }
 
       if (data.sourceTabBrowser) {
-        data2.sourceTabId = tabTracker.getBrowserData(data.sourceTabBrowser).tabId;
+        data2.sourceTabId = tabTracker.getBrowserData(data.sourceTabBrowser, 11).tabId;
       }
 
       fillTransitionProperties(eventName, data, data2);

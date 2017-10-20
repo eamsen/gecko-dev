@@ -380,6 +380,7 @@ var Manager = {
     if (stateFlags & Ci.nsIWebProgressListener.STATE_IS_WINDOW) {
       let url = data.requestURL;
       if (stateFlags & Ci.nsIWebProgressListener.STATE_START) {
+        dump(`rabbaddon WebNavigation onStateChange STATE_START ${browser}`);
         this.fire("onBeforeNavigate", browser, data, {url});
       } else if (stateFlags & Ci.nsIWebProgressListener.STATE_STOP) {
         if (Components.isSuccessCode(data.status)) {

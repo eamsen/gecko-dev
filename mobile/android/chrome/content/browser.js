@@ -364,6 +364,8 @@ var BrowserApp = {
 
     BrowserEventHandler.init();
 
+
+    dump("rabbaddon browser.js startup");
     Services.androidBridge.browserApp = this;
 
     WindowEventDispatcher.registerListener(this, [

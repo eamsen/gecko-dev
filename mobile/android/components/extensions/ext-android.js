@@ -11,7 +11,7 @@ const getSender = (extension, target, sender) => {
     tabId = sender.tabId;
     delete sender.tabId;
   } else if (target instanceof Ci.nsIDOMXULElement) {
-    tabId = tabTracker.getBrowserData(target).tabId;
+    tabId = tabTracker.getBrowserData(target, 2).tabId;
   }
 
   if (tabId != null && tabId >= 0) {
