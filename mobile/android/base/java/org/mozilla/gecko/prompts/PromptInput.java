@@ -177,6 +177,7 @@ public abstract class PromptInput {
 
         @Override
         public View getView(Context context) throws UnsupportedOperationException {
+            Log.d(LOGTAG, this + " getView " + mType);
             if (mType.equals("date")) {
                 try {
                     DateTimePicker input = new DateTimePicker(context, "yyyy-MM-dd", mValue,
@@ -228,6 +229,7 @@ public abstract class PromptInput {
                                                           DateTimePicker.PickersState.MONTH, mMinValue, mMaxValue);
                 mView = (View)input;
             }
+            Log.d(LOGTAG, this + " getView return " + mView);
             return mView;
         }
 
@@ -237,6 +239,7 @@ public abstract class PromptInput {
 
         @Override
         public Object getValue() {
+            Log.d(LOGTAG, this + " getValue " + mType);
             if (mType.equals("time")) {
                 TimePicker tp = (TimePicker)mView;
                 GregorianCalendar calendar =

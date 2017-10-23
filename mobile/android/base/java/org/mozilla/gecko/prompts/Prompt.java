@@ -104,6 +104,7 @@ public class Prompt implements OnClickListener, OnCancelListener, OnItemClickLis
         }
 
         mTabId = message.getInt("tabId", Tabs.INVALID_TAB_ID);
+        Log.d(LOGTAG, "show " + message.toString());
 
         show(title, text, menuitems, choiceMode);
     }
@@ -130,6 +131,7 @@ public class Prompt implements OnClickListener, OnCancelListener, OnItemClickLis
     public void show(String title, String text, PromptListItem[] listItems, int choiceMode) {
         ThreadUtils.assertOnUiThread();
 
+        Log.d(LOGTAG, this + " show " + title + " " + mTabId);
         try {
             create(title, text, listItems, choiceMode);
         } catch (IllegalStateException ex) {
@@ -367,6 +369,7 @@ public class Prompt implements OnClickListener, OnCancelListener, OnItemClickLis
         linearLayout.setOrientation(LinearLayout.VERTICAL);
         applyInputStyle(linearLayout, input);
 
+        Log.d(LOGTAG, this + " wrapInput " + input);
         linearLayout.addView(input.getView(mContext));
 
         return linearLayout;
