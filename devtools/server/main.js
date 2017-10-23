@@ -426,16 +426,10 @@ var DebuggerServer = {
    * restrictPrivileges=true, to prevent exposing them on b2g parent process's
    * root actor.
    */
-<<<<<<< 67a3ebd6b5c022cdfd763304643fd8d91f4be3f1
   addBrowserActors(windowType = null, restrictPrivileges = false) {
     if (windowType) {
       this.chromeWindowType = windowType;
     }
-=======
-  addBrowserActors(windowType = "navigator:browser", restrictPrivileges = false) {
-    dump("devtools DebuggerServer.addBrowserActors " + windowType);
-    this.chromeWindowType = windowType;
->>>>>>> devtools logs
     this.registerModule("devtools/server/actors/webbrowser");
 
     if (!restrictPrivileges) {

@@ -445,7 +445,7 @@ class TabTracker extends TabTrackerBase {
     }
 
     dump(`rabbaddon getBrowserData xxx=${xxx} ownerGlobal=${browser.ownerGlobal} contentWindow=${browser.contentWindow} BrowserApp=${BrowserApp} gBrowser=${gBrowser} result=${JSON.stringify(result)}`);
-    dump(`rabbaddon mostrecent=${Services.wm.getMostRecentWindow("navigator:geckoview").BrowserApp} ${browser.ownerGlobal.top.BrowserApp}`);
+    // dump(`rabbaddon mostrecent=${Services.wm.getMostRecentWindow("navigator:geckoview").BrowserApp} ${browser.ownerGlobal.top.BrowserApp}`);
     return result;
   }
 

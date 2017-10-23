@@ -598,7 +598,7 @@ public class CustomTabsActivity extends AppCompatActivity
     @Override
     public boolean onLoadUri(final GeckoView view, final String urlStr,
                              final TargetWindow where) {
-        Log.d(LOGTAG, "onLoadUri " + uriStr + " " + where);
+        Log.d(LOGTAG, "onLoadUri " + urlStr + " " + where);
         if (where != TargetWindow.NEW) {
             return false;
         }
