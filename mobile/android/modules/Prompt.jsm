@@ -35,10 +35,13 @@ function Prompt(aOptions) {
 
   if (this.window) {
     let window = getRootWindow(this.window);
-    var tab = window &&
+    let tab = window &&
               window.BrowserApp &&
               window.BrowserApp.getTabForWindow(this.window);
-    if (tab) {
+    let isFennec = window &&
+                   window.document.documentElement
+                         .getAttribute("windowtype") == "navigator:browser";
+    if (tab && isFennec) {
       this.msg.tabId = tab.id;
     }
   }
