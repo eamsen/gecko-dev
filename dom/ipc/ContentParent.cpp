@@ -4490,7 +4490,7 @@ ContentParent::CommonCreateWindow(PBrowserParent* aThisTab,
                                   bool aLoadURI)
 
 {
-  rabbit("");
+  // rabbit("");
   // The content process should never be in charge of computing whether or
   // not a window should be private or remote - the parent will do that.
   const uint32_t badFlags = nsIWebBrowserChrome::CHROME_PRIVATE_WINDOW |
@@ -4667,7 +4667,7 @@ ContentParent::RecvCreateWindow(PBrowserParent* aThisTab,
                                 CreateWindowResolver&& aResolve)
 {
   // rabbit("aURI=%s", aURI->GetSpecOrDefault().get());
-  rabbit("aURI=%s", aBaseURI.get());
+  // rabbit("aURI=%s", aBaseURI.get());
   nsresult rv = NS_OK;
   CreatedWindowInfo cwi;
 
@@ -4760,7 +4760,7 @@ ContentParent::RecvCreateWindowInDifferentProcess(
   const nsString& aName,
   const IPC::Principal& aTriggeringPrincipal)
 {
-  rabbit("aURI=%s", aBaseURI.get());
+  // rabbit("aURI=%s", aBaseURI.get());
   nsCOMPtr<nsITabParent> newRemoteTab;
   bool windowIsNew;
   nsCOMPtr<nsIURI> uriToLoad = DeserializeURI(aURIToLoad);
