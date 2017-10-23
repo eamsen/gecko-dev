@@ -531,7 +531,7 @@ def current_firefox_checkout(check_output, hg=None):
         # Just check for known-good files in the checkout, to prevent attempted
         # foot-shootings.  Determining a canonical git checkout of mozilla-central
         # is...complicated
-        elif os.path.exists(git_dir):
+        if os.path.exists(git_dir):
             moz_configure = os.path.join(path, 'moz.configure')
             if os.path.exists(moz_configure):
                 return ('git', path)
