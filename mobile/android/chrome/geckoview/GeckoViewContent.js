@@ -17,7 +17,7 @@ XPCOMUtils.defineLazyGetter(this, "dump", () =>
               {}).AndroidLog.d.bind(null, "ViewContent"));
 
 function debug(aMsg) {
-  // dump(aMsg);
+  dump(aMsg);
 }
 
 class GeckoViewContent extends GeckoViewContentModule {
@@ -172,6 +172,7 @@ class GeckoViewContent extends GeckoViewContentModule {
           type: "GeckoView:DOMTitleChanged",
           title: content.document.title
         });
+        debug("blocked: " + content.document.blockedTrackingNodeCount);
         break;
     }
   }

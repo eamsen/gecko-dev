@@ -84,6 +84,7 @@ PROT_ListManager.prototype.registerTable = function(tableName,
                                                     providerName,
                                                     updateUrl,
                                                     gethashUrl) {
+  dump("rabbit registerTable " + tableName + " " + providerName);
   this.tablesData[tableName] = {};
   if (!updateUrl) {
     log("Can't register table " + tableName + " without updateUrl");

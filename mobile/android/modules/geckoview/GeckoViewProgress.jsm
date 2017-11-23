@@ -20,7 +20,7 @@ XPCOMUtils.defineLazyGetter(this, "dump", () =>
               {}).AndroidLog.d.bind(null, "ViewProgress"));
 
 function debug(aMsg) {
-  // dump(aMsg);
+  dump(aMsg);
 }
 
 var IdentityHandler = {
@@ -296,6 +296,7 @@ class GeckoViewProgress extends GeckoViewModule {
     this._hostChanged = false;
 
     let identity = IdentityHandler.checkIdentity(aState, this.browser);
+    debug(JSON.stringify(identity.mode));
 
     let message = {
       type: "GeckoView:SecurityChanged",

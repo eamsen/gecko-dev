@@ -25,7 +25,8 @@ import org.mozilla.gecko.util.GeckoBundle;
 
 public class GeckoViewActivity extends Activity {
     private static final String LOGTAG = "GeckoViewActivity";
-    private static final String DEFAULT_URL = "https://mozilla.org";
+    // private static final String DEFAULT_URL = "https://mozilla.org";
+    private static final String DEFAULT_URL = "https://cnn.com";
     private static final String USE_MULTIPROCESS_EXTRA = "use_multiprocess";
     private static final String USE_REMOTE_DEBUGGER_EXTRA = "use_remote_debugger";
 
@@ -105,6 +106,8 @@ public class GeckoViewActivity extends Activity {
         mGeckoView.getSettings().setBoolean(
             GeckoSessionSettings.USE_REMOTE_DEBUGGER,
             intent.getBooleanExtra(USE_REMOTE_DEBUGGER_EXTRA, false));
+        mGeckoView.getSettings().setBoolean(
+            GeckoSessionSettings.USE_TRACKING_PROTECTION, true);
     }
 
     @Override
@@ -176,6 +179,7 @@ public class GeckoViewActivity extends Activity {
         @Override
         public void onSecurityChange(GeckoSession session, SecurityInformation securityInfo) {
             Log.i(LOGTAG, "Security status changed to " + securityInfo.securityMode);
+            Log.d(LOGTAG, "trackingMode:" + securityInfo.trackingMode);
         }
     }
 

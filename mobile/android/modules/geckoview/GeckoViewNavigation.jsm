@@ -204,6 +204,8 @@ class GeckoViewNavigation extends GeckoViewModule {
       fixedURI = URIFixup.createExposableURI(aLocationURI);
     } catch (ex) { }
 
+    debug("blockedTrackingNodes: " + this.browser.contentWindow);
+
     let message = {
       type: "GeckoView:LocationChange",
       uri: fixedURI.displaySpec,
