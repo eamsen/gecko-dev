@@ -437,11 +437,12 @@ SocketListener.prototype = {
         let port = Number(self.portOrPath);
         self._socket.initSpecialConnection(port, flags, backlog);
       } else {
+        dump("rabbit socket.js " + self.portOrPath);
         let file = nsFile(self.portOrPath);
         if (file.exists()) {
           file.remove(false);
         }
-        self._socket.initWithFilename(file, parseInt("666", 8), backlog);
+        self._socket.initWithFilename(file, parseInt("600", 8), backlog);
       }
       yield self._setAdditionalSocketOptions();
       self._socket.asyncListen(self);

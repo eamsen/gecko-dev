@@ -41,6 +41,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 import java.util.ArrayList;
+import android.util.Log;
 
 import static org.mozilla.gecko.toolbar.PageActionLayout.PageAction.UUID_PAGE_ACTION_PWA;
 
@@ -189,6 +190,7 @@ public class PageActionLayout extends ThemedLinearLayout implements BundleEventL
     private void addPageAction(final String id, final String title, final String imageData, final boolean useTint,
                                final OnPageActionClickListeners onPageActionClickListeners, boolean important) {
         ThreadUtils.assertOnUiThread();
+        Log.d("rabbit", "addPageAction " + id + " " + title);
 
         final PageAction pageAction = new PageAction(id, title, null, onPageActionClickListeners, important);
 

@@ -9,6 +9,9 @@ package org.mozilla.gecko;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 
 import org.mozilla.gecko.annotation.WrapForJNI;
 import org.mozilla.gecko.gfx.LayerSession;
@@ -16,6 +19,7 @@ import org.mozilla.gecko.mozglue.JNIObject;
 import org.mozilla.gecko.util.BundleEventListener;
 import org.mozilla.gecko.util.EventCallback;
 import org.mozilla.gecko.util.GeckoBundle;
+import org.mozilla.gecko.permissions.Permissions;
 
 import android.content.ContentResolver;
 import android.content.Context;
@@ -25,6 +29,7 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.IInterface;
+import android.os.Environment;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
@@ -35,7 +40,7 @@ import android.util.Log;
 public class GeckoSession extends LayerSession
                           implements Parcelable {
     private static final String LOGTAG = "GeckoSession";
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
 
     /* package */ enum State implements NativeQueue.State {
         INITIAL(0),
@@ -341,6 +346,7 @@ public class GeckoSession extends LayerSession
         /* package */ void registerListeners() {
             getEventDispatcher().registerUiThreadListener(this,
                 "GeckoView:Prompt",
+                "RuntimePermissions:Check",
                 null);
         }
 
@@ -464,6 +470,40 @@ public class GeckoSession extends LayerSession
         if (GeckoThread.initMainProcess(/* profile */ null, geckoArgs, flags)) {
             GeckoThread.launch();
         }
+
+        final String[] permissions = new String[]{"android.permission.WRITE_EXTERNAL_STORAGE"};
+        // final boolean shouldPrompt = message.getBoolean("shouldPrompt", false);
+        final boolean shouldPrompt = true;
+
+        Permissions.from(context)
+                   .withPermissions(permissions)
+                   .doNotPromptIf(!shouldPrompt)
+                   .andFallback(new Runnable() {
+                       @Override
+                       public void run() {
+                           Log.d(LOGTAG, "permission denied");
+                       }
+                   })
+                   .run(new Runnable() {
+                       @Override
+                       public void run() {
+                           Log.d(LOGTAG, "permission granted");
+        final File pub = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+
+        File file = new File(pub, "test");
+        Log.d(LOGTAG, "file: " + file.toString());
+        byte[] data = new byte[]{ 1 };
+        try {
+            OutputStream os = new FileOutputStream(file);
+            os.write(data);
+            os.close();
+        } catch (Exception e) {
+        }
+
+
+                       }
+                   });
+
     }
 
     public boolean isOpen() {
@@ -575,6 +615,11 @@ public class GeckoSession extends LayerSession
     */
     public void goForward() {
         mEventDispatcher.dispatch("GeckoView:GoForward", null);
+    }
+
+    public String[] getAvailableTrackingProtectionLists() {
+        String[] lists = new String[1];
+        return lists;
     }
 
     /**

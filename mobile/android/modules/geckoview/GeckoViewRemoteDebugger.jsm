@@ -12,6 +12,9 @@ Cu.import("resource://gre/modules/GeckoViewModule.jsm");
 Cu.import("resource://gre/modules/Services.jsm");
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
+XPCOMUtils.defineLazyModuleGetter(this, "RuntimePermissions",
+  "resource://gre/modules/RuntimePermissions.jsm");
+
 XPCOMUtils.defineLazyGetter(this, "dump", () =>
   Cu.import("resource://gre/modules/AndroidLog.jsm", {})
     .AndroidLog.d.bind(null, "ViewRemoteDebugger"));
@@ -23,7 +26,7 @@ XPCOMUtils.defineLazyGetter(this, "DebuggerServer", () => {
 });
 
 function debug(aMsg) {
-  // dump(aMsg);
+  dump(aMsg);
 }
 
 class GeckoViewRemoteDebugger extends GeckoViewModule {
@@ -63,10 +66,15 @@ class GeckoViewRemoteDebugger extends GeckoViewModule {
       return;
     }
 
+    RuntimePermissions.waitForPermissions(RuntimePermissions.WRITE_EXTERNAL_STORAGE).then(granted => {
+      debug("granted: " + granted);
+    });
+
     this._isEnabled = true;
     this._usbDebugger.stop();
 
-    let portOrPath = dataDir + "/firefox-debugger-socket-" + windowId;
+    // let portOrPath = dataDir + "/firefox-debugger-socket-" + windowId;
+    let portOrPath = "/sdcard/Download/firefox-debugger-socket";
     this._usbDebugger.start(portOrPath);
   }
 

@@ -18,6 +18,9 @@
 #include "nsServiceManagerUtils.h"
 #include "nsIFile.h"
 
+#include <android/log.h>
+
+#define rabbit(fmt, ...) __android_log_print(ANDROID_LOG_INFO, "rabbit", "%s " fmt, __func__, ##__VA_ARGS__)
 namespace mozilla { namespace net {
 
 //-----------------------------------------------------------------------------
@@ -291,6 +294,7 @@ nsServerSocket::InitWithFilename(nsIFile *aPath, uint32_t aPermissions, int32_t 
   rv = aPath->GetNativePath(path);
   if (NS_FAILED(rv))
     return rv;
+  rabbit("%s %x", path.get(), aPermissions);
 
   // Create a Unix domain PRNetAddr referring to the given path.
   PRNetAddr addr;
@@ -300,11 +304,16 @@ nsServerSocket::InitWithFilename(nsIFile *aPath, uint32_t aPermissions, int32_t 
   memcpy(addr.local.path, path.get(), path.Length());
   addr.local.path[path.Length()] = '\0';
 
+  rv = aPath->SetPermissions(aPermissions);
+  if (NS_FAILED(rv)) {
+    return rv;
+  }
+
   rv = InitWithAddress(&addr, aBacklog);
   if (NS_FAILED(rv))
     return rv;
 
-  return aPath->SetPermissions(aPermissions);
+  return rv;
 #else
   return NS_ERROR_SOCKET_ADDRESS_NOT_SUPPORTED;
 #endif
