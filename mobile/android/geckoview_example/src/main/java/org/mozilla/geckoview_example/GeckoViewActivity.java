@@ -16,11 +16,14 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.WindowManager;
 
+import java.util.EnumSet;
 import java.util.Locale;
 
 import org.mozilla.gecko.GeckoSession;
 import org.mozilla.gecko.GeckoSessionSettings;
 import org.mozilla.gecko.GeckoView;
+import org.mozilla.gecko.TrackingProtection;
+import org.mozilla.gecko.TrackingProtection.Tracker;
 import org.mozilla.gecko.util.GeckoBundle;
 
 public class GeckoViewActivity extends Activity {
@@ -72,6 +75,7 @@ public class GeckoViewActivity extends Activity {
         mGeckoSession.setContentListener(new MyGeckoViewContent());
         mGeckoSession.setProgressListener(new MyGeckoViewProgress());
         mGeckoSession.setNavigationListener(new Navigation());
+        mGeckoSession.setTrackingProtectionListener(new MyTrackingProtection());
 
         final BasicGeckoViewPrompt prompt = new BasicGeckoViewPrompt(this);
         prompt.filePickerRequestCode = REQUEST_FILE_PICKER;
@@ -83,6 +87,10 @@ public class GeckoViewActivity extends Activity {
 
         mGeckoView.getSettings().setBoolean(GeckoSessionSettings.USE_MULTIPROCESS,
                                             useMultiprocess);
+
+        TrackingProtection.block(EnumSet.of(
+              Tracker.AD, Tracker.ANALYTIC, Tracker.SOCIAL, Tracker.CONTENT));
+
         loadSettings(getIntent());
         loadFromIntent(getIntent());
     }
@@ -311,6 +319,14 @@ public class GeckoViewActivity extends Activity {
             }
             session.loadUri(uri);
             return true;
+        }
+    }
+
+    private class MyTrackingProtection implements GeckoSession.TrackingProtectionListener {
+        @Override
+        public void onTrackerBlocked(final GeckoSession session, final String uri,
+                                     TrackingProtection.Tracker category, int total) {
+            Log.d(LOGTAG, "onTrackerBlocked " + uri);
         }
     }
 }
