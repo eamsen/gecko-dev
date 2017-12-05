@@ -59,6 +59,9 @@
 #include "nsToolkitCompsCID.h"
 #include "nsIClassifiedChannel.h"
 
+#include <android/log.h>
+#define rabbit(args, ...) __android_log_print(ANDROID_LOG_INFO, "rabbit", "%s:" args, __func__, ##__VA_ARGS__);
+
 namespace mozilla {
 namespace safebrowsing {
 
@@ -69,6 +72,7 @@ TablesToResponse(const nsACString& tables)
     return NS_OK;
   }
 
+  rabbit("%s", PromiseFlatCString(tables).get());
   // We don't check mCheckMalware and friends because disabled tables are
   // never included
   if (FindInReadable(NS_LITERAL_CSTRING("-malware-"), tables)) {
@@ -101,7 +105,7 @@ using namespace mozilla::safebrowsing;
 // MOZ_LOG=UrlClassifierDbService:5
 LazyLogModule gUrlClassifierDbServiceLog("UrlClassifierDbService");
 #define LOG(args) MOZ_LOG(gUrlClassifierDbServiceLog, mozilla::LogLevel::Debug, args)
-#define LOG_ENABLED() MOZ_LOG_TEST(gUrlClassifierDbServiceLog, mozilla::LogLevel::Debug)
+#define LOG_ENABLED() true
 
 #define GETHASH_NOISE_PREF      "urlclassifier.gethashnoise"
 #define GETHASH_NOISE_DEFAULT   4
@@ -1426,6 +1430,8 @@ nsUrlClassifierClassifyCallback::HandleEvent(const nsACString& tables)
   nsresult response = TablesToResponse(tables);
   ClassifyMatchedInfo* matchedInfo = nullptr;
 
+  rabbit("%s", PromiseFlatCString(tables).get());
+
   if (NS_FAILED(response)) {
     // Filter all matched info which has correct response
     // In the case multiple tables found, use the higher priority provider
@@ -1801,6 +1807,8 @@ nsUrlClassifierDBService::AsyncClassifyLocalWithTables(nsIURI *aURI,
 {
   MOZ_ASSERT(NS_IsMainThread(), "AsyncClassifyLocalWithTables must be called "
                                 "on main thread");
+
+  rabbit("%s", PromiseFlatCString(aTables).get());
 
   // We do this check no matter what process we are in to return
   // error as early as possible.

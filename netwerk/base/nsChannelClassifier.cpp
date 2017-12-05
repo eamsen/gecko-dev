@@ -45,6 +45,9 @@
 #include "mozilla/ClearOnShutdown.h"
 #include "mozilla/Unused.h"
 
+#include <android/log.h>
+#define rabbit(args, ...) __android_log_print(ANDROID_LOG_INFO, "rabbit", "%s:" args, __func__, ##__VA_ARGS__);
+
 namespace mozilla {
 namespace net {
 
@@ -939,10 +942,12 @@ TrackingURICallback::OnClassifyComplete(nsresult aErrorCode,
     mList = aLists;
     mProvider = aProvider;
     mFullHash = aFullHash;
+    rabbit("%s: %x", PromiseFlatCString(aLists).get(), status);
     return OnBlacklistResult(status);
   }
 
   nsresult status = aLists.IsEmpty() ? NS_ERROR_TRACKING_URI : NS_OK;
+  rabbit("%s: %x", PromiseFlatCString(aLists).get(), status);
   return OnWhitelistResult(status);
 }
 

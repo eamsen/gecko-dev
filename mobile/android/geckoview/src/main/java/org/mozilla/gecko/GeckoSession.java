@@ -617,11 +617,6 @@ public class GeckoSession extends LayerSession
         mEventDispatcher.dispatch("GeckoView:GoForward", null);
     }
 
-    public String[] getAvailableTrackingProtectionLists() {
-        String[] lists = new String[1];
-        return lists;
-    }
-
     /**
     * Set this GeckoSession as active or inactive. Setting a GeckoSession to inactive will
     * significantly reduce its memory footprint, but should only be done if the

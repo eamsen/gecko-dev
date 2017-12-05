@@ -172,7 +172,6 @@ class GeckoViewContent extends GeckoViewContentModule {
           type: "GeckoView:DOMTitleChanged",
           title: content.document.title
         });
-        debug("blocked: " + content.document.blockedTrackingNodeCount);
         break;
     }
   }
