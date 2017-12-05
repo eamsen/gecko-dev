@@ -3082,10 +3082,10 @@ public:
    * mBlockedTrackingNodes. Can be used later on to look up a node in it.
    * (e.g., by the UI)
    */
-  void AddBlockedTrackingNode(nsINode *node)
+  virtual bool AddBlockedTrackingNode(nsINode* node)
   {
     if (!node) {
-      return;
+      return false;
     }
 
     nsWeakPtr weakNode = do_GetWeakReference(node);
@@ -3093,6 +3093,7 @@ public:
     if (weakNode) {
       mBlockedTrackingNodes.AppendElement(weakNode);
     }
+    return !!weakNode;
   }
 
   gfxUserFontSet* GetUserFontSet(bool aFlushUserFontSet = true);

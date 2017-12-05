@@ -665,6 +665,8 @@ public:
   virtual void ResolveScheduledSVGPresAttrs() override;
   bool IsSynthesized();
 
+  bool AddBlockedTrackingNode(nsINode* node) override;
+
 private:
   void AddOnDemandBuiltInUASheet(mozilla::StyleSheet* aSheet);
   void SendToConsole(nsCOMArray<nsISecurityConsoleMessage>& aMessages);

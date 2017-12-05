@@ -2720,6 +2720,17 @@ nsDocument::IsSynthesized() {
   return synthesized;
 }
 
+bool
+nsDocument::AddBlockedTrackingNode(nsINode* node)
+{
+  if (nsIDocument::AddBlockedTrackingNode(node)) {
+    nsContentUtils::DispatchChromeEvent(this, static_cast<nsIDocument*>(this),
+      NS_LITERAL_STRING("MozTrackingProtection:Blocked"), true, true);
+    return true;
+  }
+  return false;
+}
+
 nsresult
 nsDocument::StartDocumentLoad(const char* aCommand, nsIChannel* aChannel,
                               nsILoadGroup* aLoadGroup,
