@@ -60,7 +60,7 @@ public class GeckoViewActivity extends Activity {
         }
 
         final boolean useMultiprocess = getIntent().getBooleanExtra(USE_MULTIPROCESS_EXTRA,
-                                                                    false);
+                                                                    true);
         GeckoSession.preload(this, geckoArgs, useMultiprocess);
 
         setContentView(R.layout.geckoview_activity);
