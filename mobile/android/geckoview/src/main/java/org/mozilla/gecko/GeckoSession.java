@@ -181,6 +181,28 @@ public class GeckoSession extends LayerSession
             }
         };
 
+    private final GeckoSessionHandler<TrackingProtectionListener> mTrackingProtectionHandler =
+        new GeckoSessionHandler<TrackingProtectionListener>(
+            "GeckoViewTrackingProtection", this,
+            new String[]{ "GeckoView:TrackingProtection:Blocked" }
+        ) {
+            @Override
+            public void handleMessage(final TrackingProtectionListener listener,
+                                      final String event,
+                                      final GeckoBundle message,
+                                      final EventCallback callback) {
+
+                if ("GeckoView:TrackingProtection:Blocked".equals(event)) {
+                    Log.d(LOGTAG, event + " " + message.getInt("totalBlocked"));
+                    Log.d(LOGTAG, event + " " + message.getString("src"));
+                    listener.onTrackerBlocked(GeckoSession.this,
+                                              message.getString("src"),
+                                              TrackingProtection.Tracker.AD,
+                                              message.getInt("totalBlocked"));
+                }
+            }
+        };
+
     private final GeckoSessionHandler<PermissionDelegate> mPermissionHandler =
         new GeckoSessionHandler<PermissionDelegate>(
             "GeckoViewPermission", this,
@@ -709,6 +731,15 @@ public class GeckoSession extends LayerSession
     */
     public void setScrollListener(ScrollListener listener) {
         mScrollHandler.setListener(listener, this);
+    }
+
+    /**
+    * Set the tracking protection callback handler.
+    * This will replace the current handler.
+    * @param listener An implementation of TrackingProtectionListener.
+    */
+    public void setTrackingProtectionListener(TrackingProtectionListener listener) {
+        mTrackingProtectionHandler.setListener(listener, this);
     }
 
     /**
@@ -1669,6 +1700,19 @@ public class GeckoSession extends LayerSession
         * @param scrollY The new vertical scroll position in pixels.
         */
         public void onScrollChanged(GeckoSession session, int scrollX, int scrollY);
+    }
+
+    public interface TrackingProtectionListener {
+        /**
+         * A tracking element has been blocked from loading.
+         *
+        * @param view The GeckoSession that initiated the callback.
+        * @param uri The URI of the blocked element.
+        * @param category The tracker category of the blocked element.
+        * @param total The total blocked tracker count for the current document.
+        */
+        void onTrackerBlocked(GeckoSession session, String uri,
+                              TrackingProtection.Tracker category, int total);
     }
 
     /**

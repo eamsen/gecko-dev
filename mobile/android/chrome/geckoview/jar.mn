@@ -9,3 +9,4 @@ geckoview.jar:
   content/geckoview.js
   content/GeckoViewContent.js
   content/GeckoViewScrollContent.js
+  content/GeckoViewTrackingProtectionContent.js
