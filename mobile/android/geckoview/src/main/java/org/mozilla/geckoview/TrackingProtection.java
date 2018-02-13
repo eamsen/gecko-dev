@@ -48,6 +48,7 @@ import org.mozilla.geckoview.GeckoSession.TrackingProtectionDelegate;
     }
 
     /* package */ static int listToCategory(final String list) {
+        Log.d(LOGTAG, "listToCat " + list);
         int category = 0;
         if (list.indexOf(AD) != -1) {
             category |= TrackingProtectionDelegate.CATEGORY_AD;

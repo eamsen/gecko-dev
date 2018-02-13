@@ -844,8 +844,8 @@ pref_HashTableLookupInner(const char* aPrefName)
       // If you hit this crash, you have an early access of a non-early pref.
       // Consider moving the access later or add the pref to the whitelist of
       // early prefs in ContentPrefs.cpp and get review from a DOM peer.
-      MOZ_CRASH_UNSAFE_PRINTF(
-        "accessing non-early pref %s before late prefs are set", aPrefName);
+      // MOZ_CRASH_UNSAFE_PRINTF(
+        // "accessing non-early pref %s before late prefs are set", aPrefName);
     }
   }
 #endif
