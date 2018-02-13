@@ -402,6 +402,8 @@ var Impl = {
       payload,
     };
 
+    dump("rabbit TelemetryController assemblePing " + JSON.stringify(pingData.application));
+
     if (aOptions.addClientId) {
       pingData.clientId = this._clientID;
     }

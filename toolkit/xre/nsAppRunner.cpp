@@ -230,6 +230,9 @@
 #include "mozilla/CodeCoverageHandler.h"
 #endif
 
+#include <android/log.h>
+#define rabbit(msg, ...) __android_log_print(ANDROID_LOG_INFO, "rabbit", "%s " msg, __func__, ##__VA_ARGS__)
+
 extern uint32_t gRestartMode;
 extern void InstallSignalHandlers(const char *ProgramName);
 
@@ -769,8 +772,10 @@ nsXULAppInfo::GetName(nsACString& aResult)
   if (XRE_IsContentProcess()) {
     ContentChild* cc = ContentChild::GetSingleton();
     aResult = cc->GetAppInfo().name;
+    rabbit("1 %s", cc->GetAppInfo().name.BeginReading());
     return NS_OK;
   }
+  rabbit("2 %s", nsDependentCString(gAppData->name).get());
   aResult.Assign(gAppData->name);
 
   return NS_OK;
@@ -4712,6 +4717,7 @@ XREMain::XRE_main(int argc, char* argv[], const BootstrapConfig& aConfig)
 
   if (aConfig.appData) {
       mAppData = MakeUnique<XREAppData>(*aConfig.appData);
+      rabbit("1 %s", nsDependentCString(mAppData->name).get());
   } else {
     MOZ_RELEASE_ASSERT(aConfig.appDataPath);
     nsCOMPtr<nsIFile> appini;
@@ -4729,6 +4735,7 @@ XREMain::XRE_main(int argc, char* argv[], const BootstrapConfig& aConfig)
     }
 
     appini->GetParent(getter_AddRefs(mAppData->directory));
+    rabbit("2 %s", nsDependentCString(mAppData->name).get());
   }
 
   if (!mAppData->remotingName) {
