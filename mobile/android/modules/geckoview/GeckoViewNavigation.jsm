@@ -19,7 +19,7 @@ XPCOMUtils.defineLazyGetter(this, "dump", () =>
                        {}).AndroidLog.d.bind(null, "ViewNavigation"));
 
 function debug(aMsg) {
-  // dump(aMsg);
+  dump(aMsg);
 }
 
 // Handles navigation requests between Gecko and a GeckoView.
@@ -72,7 +72,7 @@ class GeckoViewNavigation extends GeckoViewModule {
   }
 
   handleLoadUri(aUri, aOpener, aWhere, aFlags, aTriggeringPrincipal) {
-    debug("handleOpenURI: aUri=" + (aUri && aUri.spec) +
+    debug("handleLoadURI: aUri=" + (aUri && aUri.spec) +
           " aWhere=" + aWhere +
           " aFlags=" + aFlags);
 
@@ -98,6 +98,7 @@ class GeckoViewNavigation extends GeckoViewModule {
     });
     Services.tm.spinEventLoopUntil(() => handled !== undefined);
 
+    debug("handleLoadUri: handled=" + handled);
     return handled;
   }
 
