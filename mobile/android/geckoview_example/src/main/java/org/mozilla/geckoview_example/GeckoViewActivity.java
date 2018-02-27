@@ -144,6 +144,15 @@ public class GeckoViewActivity extends Activity {
     }
 
     @Override
+    public void onBackPressed() {
+      // if (mCanGoBack) {
+          mGeckoSession.reload();
+      // } else {
+          // super.onBackPressed();
+      // }
+    }
+
+    @Override
     protected void onActivityResult(final int requestCode, final int resultCode,
                                     final Intent data) {
         if (requestCode == REQUEST_FILE_PICKER) {
