@@ -7,3 +7,7 @@
 #include mobile.js
 
 pref("privacy.trackingprotection.pbmode.enabled", false);
+
+// Disable telemetry by default.
+pref("datareporting.healthreport.uploadEnabled", false);
+pref("toolkit.telemetry.enabled", false);
