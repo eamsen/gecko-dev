@@ -41,6 +41,18 @@ public class SafeIntent {
         }
     }
 
+    public Bundle getExtras() {
+        try {
+            return intent.getExtras();
+        } catch (OutOfMemoryError e) {
+            Log.w(LOGTAG, "Couldn't get intent extras: OOM. Malformed?");
+            return null;
+        } catch (RuntimeException e) {
+            Log.w(LOGTAG, "Couldn't get intent extras.", e);
+            return null;
+        }
+    }
+
     public boolean getBooleanExtra(final String name, final boolean defaultValue) {
         try {
             return intent.getBooleanExtra(name, defaultValue);

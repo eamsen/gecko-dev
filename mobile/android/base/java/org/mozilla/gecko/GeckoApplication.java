@@ -102,7 +102,7 @@ public class GeckoApplication extends Application
         return sSessionUUID;
     }
 
-    public static String addDefaultGeckoArgs(String args) {
+    public static String[] getDefaultGeckoArgs() {
         if (!AppConstants.MOZILLA_OFFICIAL) {
             // In un-official builds, we want to load Javascript resources fresh
             // with each build.  In official builds, the startup cache is purged by
@@ -110,9 +110,9 @@ public class GeckoApplication extends Application
             // buildid, so we purge here instead.
             Log.w(LOG_TAG, "STARTUP PERFORMANCE WARNING: un-official build: purging the " +
                            "startup (JavaScript) caches.");
-            args = (args != null) ? (args + " -purgecaches") : "-purgecaches";
+            return new String[] { "-purgecaches" };
         }
-        return args;
+        return null;
     }
 
     public static String getDefaultUAString() {

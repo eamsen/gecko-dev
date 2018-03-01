@@ -5,15 +5,16 @@
 package org.mozilla.gecko.process;
 
 import org.mozilla.gecko.GeckoAppShell;
+import org.mozilla.gecko.GeckoThread;
 import org.mozilla.gecko.IGeckoEditableParent;
 import org.mozilla.gecko.annotation.WrapForJNI;
-import org.mozilla.gecko.mozglue.GeckoLoader;
 import org.mozilla.gecko.util.ThreadUtils;
 
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
@@ -74,7 +75,6 @@ public final class GeckoProcessManager extends IProcessManager.Stub {
             final Intent intent = new Intent();
             intent.setClassName(context,
                                 GeckoServiceChildProcess.class.getName() + '$' + mType);
-            GeckoLoader.addEnvironmentToIntent(intent);
 
             if (context.bindService(intent, this, Context.BIND_AUTO_CREATE)) {
                 waitForChildLocked();
@@ -182,6 +182,7 @@ public final class GeckoProcessManager extends IProcessManager.Stub {
             return 0;
         }
 
+        final Bundle extras = GeckoThread.getActiveExtras();
         final ParcelFileDescriptor crashPfd;
         final ParcelFileDescriptor ipcPfd;
         final ParcelFileDescriptor crashAnnotationPfd;
@@ -196,7 +197,7 @@ public final class GeckoProcessManager extends IProcessManager.Stub {
 
         boolean started = false;
         try {
-            started = child.start(this, args, crashPfd, ipcPfd, crashAnnotationPfd);
+            started = child.start(this, args, extras, crashPfd, ipcPfd, crashAnnotationPfd);
         } catch (final RemoteException e) {
         }
 

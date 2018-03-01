@@ -15,6 +15,7 @@ import java.util.zip.ZipFile;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Environment;
 import java.util.ArrayList;
 import android.util.Log;
@@ -26,7 +27,6 @@ import org.mozilla.geckoview.BuildConfig;
 public final class GeckoLoader {
     private static final String LOGTAG = "GeckoLoader";
 
-    private static volatile SafeIntent sIntent;
     private static File sCacheFile;
     private static File sGREDir;
 
@@ -34,7 +34,6 @@ public final class GeckoLoader {
     private static boolean sSQLiteLibsLoaded;
     private static boolean sNSSLibsLoaded;
     private static boolean sMozGlueLoaded;
-    private static String[] sEnvList;
 
     private GeckoLoader() {
         // prevent instantiation
@@ -91,34 +90,17 @@ public final class GeckoLoader {
         return tmpDir;
     }
 
-    public static void setLastIntent(SafeIntent intent) {
-        sIntent = intent;
-    }
-
-    public static void addEnvironmentToIntent(Intent intent) {
-        if (sEnvList != null) {
-            for (int ix = 0; ix < sEnvList.length; ix++) {
-                intent.putExtra("env" + ix, sEnvList[ix]);
-            }
-        }
-    }
-
-    public static void setupGeckoEnvironment(Context context, String profilePath) {
+    public static void setupGeckoEnvironment(final Context context, final String profilePath,
+                                             final Bundle extras) {
         // if we have an intent (we're being launched by an activity)
         // read in any environmental variables from it here
-        final SafeIntent intent = sIntent;
-        if (intent != null) {
-            final ArrayList<String> envList = new ArrayList<String>();
-            String env = intent.getStringExtra("env0");
+        if (extras != null) {
+            String env = extras.getString("env0");
             Log.d(LOGTAG, "Gecko environment env0: " + env);
             for (int c = 1; env != null; c++) {
-                envList.add(env);
                 putenv(env);
-                env = intent.getStringExtra("env" + c);
+                env = extras.getString("env" + c);
                 Log.d(LOGTAG, "env" + c + ": " + env);
-            }
-            if (envList.size() > 0) {
-              sEnvList = envList.toArray(new String[envList.size()]);
             }
         }
 
@@ -160,9 +142,6 @@ public final class GeckoLoader {
             }
         }
         setupLocaleEnvironment();
-
-        // We don't need this any more.
-        sIntent = null;
     }
 
     private static void loadLibsSetupLocked(Context context) {
