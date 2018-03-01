@@ -986,8 +986,7 @@ public abstract class GeckoApp extends GeckoActivity
 
         } else {
             final String action = intent.getAction();
-            final String args = GeckoApplication.addDefaultGeckoArgs(
-                    intent.getStringExtra("args"));
+            final String[] args = GeckoApplication.getDefaultGeckoArgs();
             final int flags = ACTION_DEBUG.equals(action) ? GeckoThread.FLAG_DEBUGGING : 0;
 
             sAlreadyLoaded = true;

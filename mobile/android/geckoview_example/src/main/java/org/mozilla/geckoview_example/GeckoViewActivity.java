@@ -26,6 +26,8 @@ import org.mozilla.geckoview.GeckoSession.PermissionDelegate.MediaSource;
 import org.mozilla.geckoview.GeckoSession.Response;
 import org.mozilla.geckoview.GeckoSession.TrackingProtectionDelegate;
 import org.mozilla.geckoview.GeckoView;
+import org.mozilla.geckoview.GeckoRuntime;
+import org.mozilla.geckoview.GeckoSettings;
 
 public class GeckoViewActivity extends Activity {
     private static final String LOGTAG = "GeckoViewActivity";
@@ -48,18 +50,17 @@ public class GeckoViewActivity extends Activity {
         Log.i(LOGTAG, "zerdatime " + SystemClock.elapsedRealtime() +
               " - application start");
 
-        final String[] geckoArgs;
+        GeckoSettings geckoSettings = new GeckoSettings();
 
         if (BuildConfig.DEBUG) {
             // In debug builds, we want to load JavaScript resources fresh with each build.
-            geckoArgs = new String[] { "-purgecaches" };
-        } else {
-            geckoArgs = null;
+            geckoSettings.addArg("-purgecaches");
         }
 
-        final boolean useMultiprocess = getIntent().getBooleanExtra(USE_MULTIPROCESS_EXTRA,
-                                                                    true);
-        GeckoSession.preload(this, geckoArgs, getIntent().getExtras(), useMultiprocess);
+        geckoSettings.multiprocessHint = getIntent()
+            .getBooleanExtra(USE_MULTIPROCESS_EXTRA, true);
+        geckoSettings.extendExtras(getIntent().getExtras());
+        GeckoRuntime.init(this, geckoSettings);
 
         setContentView(R.layout.geckoview_activity);
 
@@ -82,7 +83,7 @@ public class GeckoViewActivity extends Activity {
         mGeckoSession.setPermissionDelegate(permission);
 
         mGeckoSession.getSettings().setBoolean(GeckoSessionSettings.USE_MULTIPROCESS,
-                                               useMultiprocess);
+                                               geckoSettings.multiprocessHint);
 
         mGeckoSession.enableTrackingProtection(
               TrackingProtectionDelegate.CATEGORY_AD |

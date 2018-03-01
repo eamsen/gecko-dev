@@ -534,43 +534,6 @@ public class GeckoSession extends LayerSession
         }
     };
 
-    /**
-     * Preload GeckoSession by starting Gecko in the background, if Gecko is not already running.
-     *
-     * @param context Activity or Application Context for starting GeckoSession.
-     */
-    public static void preload(final @NonNull Context context) {
-        preload(context, /* geckoArgs */ null,
-                /* extras */ null, /* multiprocess */ false);
-    }
-
-    /**
-     * Preload GeckoSession by starting Gecko with the specified arguments in the background,
-     * if Gecko is not already running.
-     *
-     * @param context Activity or Application Context for starting GeckoSession.
-     * @param geckoArgs Arguments to be passed to Gecko, if Gecko is not already running.
-     * @param multiprocess True if child process in multiprocess mode should be preloaded.
-     */
-    public static void preload(final @NonNull Context context,
-                               final @Nullable String[] geckoArgs,
-                               final @Nullable Bundle extras,
-                               final boolean multiprocess) {
-        final Context appContext = context.getApplicationContext();
-        if (!appContext.equals(GeckoAppShell.getApplicationContext())) {
-            GeckoAppShell.setApplicationContext(appContext);
-        }
-
-        if (GeckoThread.isLaunched()) {
-            return;
-        }
-
-        final int flags = multiprocess ? GeckoThread.FLAG_PRELOAD_CHILD : 0;
-        if (GeckoThread.initMainProcess(/* profile */ null, geckoArgs, extras, flags)) {
-            GeckoThread.launch();
-        }
-    }
-
     public boolean isOpen() {
         return mWindow != null;
     }
@@ -587,9 +550,10 @@ public class GeckoSession extends LayerSession
         }
 
         if (appContext != null) {
-            final boolean multiprocess =
+            GeckoSettings geckoSettings = new GeckoSettings();
+            geckoSettings.multiprocessHint = 
                     mSettings.getBoolean(GeckoSessionSettings.USE_MULTIPROCESS);
-            preload(appContext, /* geckoArgs */ null, /* extras */ null, multiprocess);
+            GeckoRuntime.init(appContext, geckoSettings);
         }
 
         openWindow();
