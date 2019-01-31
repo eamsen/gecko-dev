@@ -14,6 +14,7 @@ import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.UiThread;
+import android.util.Log;
 
 import org.mozilla.gecko.util.GeckoBundle;
 
@@ -147,6 +148,8 @@ public class ContentBlocking {
             mFp.commit(ContentBlocking.catToFpPref(cat));
             mFpList.commit(ContentBlocking.catToFpListPref(cat));
 
+            Log.d("rabbitdebug", "" + ContentBlocking.catToAtPref(cat));
+
             mSbMalware.commit(ContentBlocking.catToSbMalware(cat));
             mSbPhishing.commit(ContentBlocking.catToSbPhishing(cat));
             return this;
@@ -216,6 +219,7 @@ public class ContentBlocking {
             value = { NONE, AT_AD, AT_ANALYTIC, AT_SOCIAL, AT_CONTENT,
                       AT_TEST, AT_CRYPTOMINING, AT_FINGERPRINTING,
                       AT_DEFAULT, AT_STRICT,
+                      AD_ALL,
                       SB_MALWARE, SB_UNWANTED,
                       SB_HARMFUL, SB_PHISHING,
                       CB_DEFAULT, CB_STRICT })
@@ -272,6 +276,8 @@ public class ContentBlocking {
      */
     public static final int AT_STRICT =
         AT_DEFAULT | AT_CONTENT | AT_CRYPTOMINING | AT_FINGERPRINTING;
+
+    public static final int AD_ALL = 1 << 7;
 
     // Safe browsing
     /**
@@ -442,6 +448,14 @@ public class ContentBlocking {
     private static final String FINGERPRINTING =
         "base-fingerprinting-track-digest256";
 
+    private static final String[] ADS = new String[] {
+        "fanboyannoyance-ads-digest256",
+        "fanboysocial-ads-digest256",
+        "easylist-ads-digest256",
+        "easyprivacy-ads-digest256",
+        "adguard-ads-digest256"
+    };
+
     /* package */ static @Category int sbMalwareToCat(final boolean enabled) {
         return enabled ? (SB_MALWARE | SB_UNWANTED | SB_HARMFUL)
                        : NONE;
@@ -477,6 +491,11 @@ public class ContentBlocking {
         }
         if ((cat & AT_CONTENT) != 0) {
             builder.append(CONTENT).append(',');
+        }
+        if ((cat & AD_ALL) != 0) {
+            for (final String l: ADS) {
+                builder.append(l).append(',');
+            }
         }
         if (builder.length() == 0) {
             return "";
@@ -535,6 +554,12 @@ public class ContentBlocking {
         }
         if (list.indexOf(CONTENT) != -1) {
             cat |= AT_CONTENT;
+        }
+        for (final String l: ADS) {
+            if (list.indexOf(l) != -1) {
+                cat |= AD_ALL;
+                break;
+            }
         }
         return cat;
     }

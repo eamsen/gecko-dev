@@ -50,6 +50,7 @@ import java.io.InputStreamReader;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Locale;
+import java.util.ArrayList;
 
 public class GeckoViewActivity extends AppCompatActivity {
     private static final String LOGTAG = "GeckoViewActivity";
@@ -96,6 +97,254 @@ public class GeckoViewActivity extends AppCompatActivity {
         }
     };
 
+    public static final String[] types = new String[]{
+      "none", "at_ad", "at_analytic", "at_social", "at_content",
+      "at_test", "ad", "other"};
+
+    public static int blockedIdx(int cat) {
+        switch (cat) {
+            case ContentBlocking.NONE:
+              return 0;
+            case ContentBlocking.AT_AD:
+              return 1;
+            case ContentBlocking.AT_ANALYTIC:
+              return 2;
+            case ContentBlocking.AT_SOCIAL:
+              return 3;
+            case ContentBlocking.AT_CONTENT:
+              return 4;
+            case ContentBlocking.AT_TEST:
+              return 5;
+            case ContentBlocking.AD_ALL:
+              return 6;
+            default:
+              return 7;
+        }
+    }
+
+    private final class Benchmark {
+        class Entry {
+            public String uri;
+            public long startTime = 0;
+            public long endTime = 0;
+            public int aborted = 0;
+            public int[] blocked = new int[]{0, 0, 0, 0, 0, 0, 0, 0};
+
+            public Entry(final String uri) {
+                this.uri = uri;
+            }
+
+            public boolean onBlock(final String uri, int cat) {
+                if (startTime == 0 || !uri.contains(this.uri)) {
+                    return false;
+                }
+
+                if ((cat & ContentBlocking.NONE) != 0) {
+                    blocked[0]++;
+                }
+                if ((cat & ContentBlocking.AT_AD) != 0) {
+                    blocked[1]++;
+                }
+                if ((cat & ContentBlocking.AT_ANALYTIC) != 0) {
+                    blocked[2]++;
+                }
+                if ((cat & ContentBlocking.AT_SOCIAL) != 0) {
+                    blocked[3]++;
+                }
+                if ((cat & ContentBlocking.AT_CONTENT) != 0) {
+                    blocked[4]++;
+                }
+                if ((cat & ContentBlocking.AT_TEST) != 0) {
+                    blocked[5]++;
+                }
+                if ((cat & ContentBlocking.AD_ALL) != 0) {
+                    blocked[6]++;
+                }
+                return true;
+            }
+
+            public boolean onStart(final String uri) {
+                if (startTime != 0 || !uri.contains(this.uri)) {
+                    return false;
+                }
+                aborted = 0;
+                startTime = SystemClock.elapsedRealtime();
+                return true;
+            }
+
+            public boolean onStop(final String uri) {
+                if (startTime == 0 || !uri.contains(this.uri)) {
+                    return false;
+                }
+                endTime = SystemClock.elapsedRealtime();
+                return true;
+            }
+
+            public boolean onAbort() {
+                startTime = 0;
+                endTime = 0;
+                aborted = 1;
+                return true;
+            }
+
+            @Override
+            public String toString() {
+                StringBuilder b = new StringBuilder();
+                b.append("entry").append("\t")
+                 .append(sGeckoRuntime.getSettings()
+                         .getContentBlocking().getCategories())
+                 .append("\t")
+                 .append(aborted).append("\t")
+                 .append(uri).append("\t")
+                 // .append(startTime).append("\t")
+                 // .append(endTime).append("\t")
+                 .append(endTime - startTime).append("\t")
+                 .append(Arrays.toString(blocked)).append("\n");
+                return b.toString();
+            }
+        }
+
+        final ArrayList<Entry> entries = new ArrayList<Entry>();
+        int cur = 0;
+        boolean running = false;
+        Thread poll;
+
+        public void test(int runs, final String[] list) {
+            Log.d("rabbitdebug", "test");
+            running = true;
+
+            poll = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    int lastRetry = -1;
+                    int lastIdx = -1;
+                    Log.d("rabbitdebug", "poll run");
+                    while (running) {
+                        try {
+                            Log.d("rabbitdebug", "poll sleep");
+                            Thread.sleep(20000);
+                        } catch (Exception e) {
+                            Log.d("rabbitdebug", "poll ex", e);
+                        }
+                        Log.d("rabbitdebug", "poll " + lastIdx + " " + cur);
+                        if (lastIdx == cur) {
+                            entries.get(cur).onAbort();
+                            if (lastRetry == cur) {
+                                next(cur+1);
+                            } else {
+                                next(cur);
+                                lastRetry = cur;
+                            }
+                        }
+                        lastIdx = cur;
+                    }
+                }
+            });
+            // poll.start();
+
+            while (runs-- > 0) {
+                for (final String uri: list) {
+                    entries.add(new Entry(uri));
+                }
+            }
+            next(0);
+        }
+
+        public void reset() {
+            entries.clear();
+        }
+
+        public void next(int idx) {
+            Log.d("rabbitdebug", "next " + idx);
+
+            if (!running) {
+                return;
+            }
+
+            final Entry prev = entries.get(cur);
+            if (prev.endTime == 0) {
+                prev.onAbort();
+            }
+            cur = idx;
+            if (cur >= entries.size()) {
+                finish();
+                return;
+            }
+            final Entry next = entries.get(cur);
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    GeckoViewActivity.this.mGeckoSession.loadUri(next.uri);
+                    GeckoViewActivity.this.mGeckoView.requestFocus();
+                }
+            });
+        }
+
+        public void onStart(final String uri) {
+            Log.d("rabbitdebug", "onStart " + uri);
+            if (!running) {
+                return;
+            }
+            Log.d("rabbitbench", "start\t" + uri + "\t" + SystemClock.elapsedRealtime());
+
+            entries.get(cur).onStart(uri);
+        }
+
+        public void onRedirect(final String uri) {
+            Log.d("rabbitdebug", "onRedirect " + uri);
+            if (!running) {
+                return;
+            }
+
+            // if (uri.contains(entries.get(cur).uri)) {
+                // entries.get(cur).onAbort();
+            // } else if (cur > 0 && uri.contains(entries.get(cur-1).uri)) {
+                // entries.get(cur).onAbort();
+                // entries.get(cur-1).onStart(uri);
+            // } else {
+                // entries.get(cur).onStart(uri);
+            // }
+        }
+
+        public void onStop(final String uri) {
+            Log.d("rabbitdebug", "onStop " + uri);
+            if (!running) {
+                return;
+            }
+
+            Log.d("rabbitbench", "stop\t" + uri + "\t" + SystemClock.elapsedRealtime());
+            if (entries.get(cur).onStop(uri)) {
+                Log.d("rabbitbench", entries.get(cur).toString());
+                next(cur + 1);
+            }
+        }
+
+        public void onBlock(final String uri, int cat) {
+            Log.d("rabbitdebug", "onBlock " + uri + " " + cat);
+            if (!running) {
+                return;
+            }
+            Log.d("rabbitbench", "block\t" + uri + "\t" + cat);
+
+            // entries.get(cur).onBlock(uri, cat);
+        }
+
+        public void finish() {
+            Log.d("rabbitdebug", "finish");
+            if (!running) {
+                return;
+            }
+
+            running = false;
+            cur = 0;
+            for (final Entry e: entries) {
+              // Log.d("rabbitdebug", e.toString());
+            }
+        }
+    }
+
+    final Benchmark bench = new Benchmark();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -137,9 +386,6 @@ public class GeckoViewActivity extends AppCompatActivity {
                     .useContentProcessHint(mUseMultiprocess)
                     .remoteDebuggingEnabled(mEnableRemoteDebugging)
                     .consoleOutput(true)
-                    .contentBlocking(new ContentBlocking.Settings.Builder()
-                        .categories(ContentBlocking.AT_DEFAULT)
-                        .build())
                     .crashHandler(ExampleCrashHandler.class);
 
             sGeckoRuntime = GeckoRuntime.create(this, runtimeSettingsBuilder.build());
@@ -167,13 +413,20 @@ public class GeckoViewActivity extends AppCompatActivity {
         }
 
         mLocationView.setCommitListener(mCommitListener);
+
+
+        sGeckoRuntime.getSettings().getContentBlocking().setCategories(
+            // ContentBlocking.NONE);
+            // ContentBlocking.AT_ALL);
+            // ContentBlocking.AD_ALL);
+            ContentBlocking.AT_ALL | ContentBlocking.AD_ALL);
     }
 
     private GeckoSession createSession() {
         GeckoSession session = new GeckoSession(new GeckoSessionSettings.Builder()
                 .useMultiprocess(mUseMultiprocess)
                 .usePrivateMode(mUsePrivateBrowsing)
-                .useTrackingProtection(mUseTrackingProtection)
+                .useTrackingProtection(true)
                 .fullAccessibilityTree(mFullAccessibilityTree)
                 .build());
 
@@ -225,7 +478,7 @@ public class GeckoViewActivity extends AppCompatActivity {
     }
 
     private void updateTrackingProtection(GeckoSession session) {
-        session.getSettings().setUseTrackingProtection(mUseTrackingProtection);
+        session.getSettings().setUseTrackingProtection(true);
     }
 
     @Override
@@ -324,7 +577,552 @@ public class GeckoViewActivity extends AppCompatActivity {
 
     private void loadFromIntent(final Intent intent) {
         final Uri uri = intent.getData();
-        mGeckoSession.loadUri(uri != null ? uri.toString() : DEFAULT_URL);
+        Log.d("rabbitdebug", "loadFromIntent " + uri);
+        if (uri == null || !uri.toString().equals("benchmark")) {
+            mGeckoSession.loadUri(uri != null ? uri.toString() : DEFAULT_URL);
+            return;
+        }
+        int numRuns = 5;
+        final String[] list = new String[]{
+            // "about:blank",
+"google.com",
+"youtube.com",
+"facebook.com",
+"baidu.com",
+"wikipedia.org",
+"qq.com",
+"yahoo.com",
+"tmall.com",
+"taobao.com",
+"amazon.com",
+"twitter.com",
+"sohu.com",
+"jd.com",
+"live.com",
+"weibo.com",
+"instagram.com",
+"sina.com.cn",
+"login.tmall.com",
+"360.cn",
+"reddit.com",
+"linkedin.com",
+"blogspot.com",
+"netflix.com",
+"yandex.ru",
+"microsoftonline.com",
+"twitch.tv",
+"mail.ru",
+"yahoo.co.jp",
+"porn555.com",
+"pornhub.com",
+"csdn.net",
+"vk.com",
+"pages.tmall.com",
+"google.co.in",
+"microsoft.com",
+"t.co",
+"aliexpress.com",
+"google.com.hk",
+"bilibili.com",
+"stackoverflow.com",
+"ebay.com",
+"bing.com",
+"github.com",
+"naver.com",
+"livejasmin.com",
+"tribunnews.com",
+"alipay.com",
+"amazon.co.jp",
+"163.com",
+"office.com",
+"msn.com",
+"xvideos.com",
+"imdb.com",
+"wordpress.com",
+"whatsapp.com",
+"zhihu.com",
+"paypal.com",
+"googleusercontent.com",
+"google.co.jp",
+"apple.com",
+"xhamster.com",
+"imgur.com",
+"google.ru",
+"google.de",
+"xinhuanet.com",
+"adobe.com",
+"mozilla.org",
+"google.com.br",
+"pinterest.com",
+"google.fr",
+"amazon.de",
+"fbcdn.net",
+"fandom.com",
+"dropbox.com",
+"amazon.in",
+"tumblr.com",
+"google.it",
+"speakol.com",
+"quora.com",
+"amazonaws.com",
+"exosrv.com",
+"instructure.com",
+"popads.net",
+"amazon.co.uk",
+"douyu.com",
+"tianya.cn",
+"douban.com",
+"rakuten.co.jp",
+"salesforce.com",
+"onlinesbi.com",
+"aparat.com",
+"cnblogs.com",
+"hao123.com",
+"bbc.co.uk",
+"detail.tmall.com",
+"thestartmagazine.com",
+"cnn.com",
+"bodelen.com",
+"google.co.uk",
+"google.cn",
+"bbc.com",
+"detik.com",
+"pixnet.net",
+"force.com",
+"booking.com",
+"google.es",
+"nicovideo.jp",
+"stackexchange.com",
+"ettoday.net",
+"xnxx.com",
+"soundcloud.com",
+"bukalapak.com",
+"otvfoco.com.br",
+"google.com.mx",
+"panda.tv",
+"weather.com",
+"spotify.com",
+"sogou.com",
+"roblox.com",
+"nytimes.com",
+"espn.com",
+"nih.gov",
+"aliyun.com",
+"bongacams.com",
+"zhanqi.tv",
+"youku.com",
+"craigslist.org",
+"indeed.com",
+"researchgate.net",
+"ask.com",
+"vimeo.com",
+"avito.ru",
+"gmw.cn",
+"ifeng.com",
+"softonic.com",
+"ok.ru",
+"chase.com",
+"china.com.cn",
+"w3schools.com",
+"theguardian.com",
+"google.com.tr",
+"globo.com",
+"caijing.com.cn",
+"discordapp.com",
+"daum.net",
+"eastday.com",
+"intuit.com",
+"google.com.tw",
+"ebay.de",
+"iqiyi.com",
+"openload.co",
+"dailymotion.com",
+"fc2.com",
+"mercadolivre.com.br",
+"mediafire.com",
+"49oa3o49b6.com",
+"txxx.com",
+"thouth.net",
+"ebay.co.uk",
+"slideshare.net",
+"45eijvhgj2.com",
+"etsy.com",
+"godaddy.com",
+"wetransfer.com",
+"uol.com.br",
+"google.ca",
+"babytree.com",
+"steamcommunity.com",
+"amazon.it",
+"vice.com",
+"soso.com",
+"tokopedia.com",
+"canva.com",
+"youdao.com",
+"shutterstock.com",
+"chaturbate.com",
+"indiatimes.com",
+"youm7.com",
+"gurabinhetot.info",
+"jianshu.com",
+"flipkart.com",
+"so.com",
+"amazon.fr",
+"freepik.com",
+"bet9ja.com",
+"trello.com",
+"spankbang.com",
+"cobalten.com",
+"blogger.com",
+"slack.com",
+"cnet.com",
+"ci123.com",
+"digikala.com",
+"google.pl",
+"alibaba.com",
+"okezone.com",
+"1688.com",
+"deviantart.com",
+"quizlet.com",
+"scribd.com",
+"wikihow.com",
+"google.com.sa",
+"twimg.com",
+"zillow.com",
+"rednet.cn",
+"gearbest.com",
+"sciencedirect.com",
+"huanqiu.com",
+"steampowered.com",
+"medium.com",
+"yy.com",
+"a63t9o1azf.com",
+"abs-cbn.com",
+"google.co.id",
+"dailymail.co.uk",
+"google.co.kr",
+"google.co.th",
+"walmart.com",
+"yts.am",
+"hulu.com",
+"google.com.eg",
+"kompas.com",
+"messenger.com",
+"google.com.ar",
+"liputan6.com",
+"myshopify.com",
+"bankofamerica.com",
+"ladbible.com",
+"yelp.com",
+"momoshop.com.tw",
+"udemy.com",
+"amazon.es",
+"sindonews.com",
+"gamersky.com",
+"duckduckgo.com",
+"google.com.au",
+"savefrom.net",
+"office365.com",
+"livejournal.com",
+"foxnews.com",
+"mega.nz",
+"zoom.us",
+"onlinevideoconverter.com",
+"rambler.ru",
+"gamepedia.com",
+"speedtest.net",
+"youporn.com",
+"wellsfargo.com",
+"ebay-kleinanzeigen.de",
+"accuweather.com",
+"alwafd.news",
+"shopify.com",
+"archive.org",
+"hintonsfeetred.info",
+"doubleclick.net",
+"smzdm.com",
+"forbes.com",
+"amazon.cn",
+"rly-rect-appn.in",
+"mixturehopeful.com",
+"amazon.ca",
+"kinopoisk.ru",
+"cdstm.cn",
+"kakaku.com",
+"cloudfront.net",
+"breitbart.com",
+"hupu.com",
+"varzesh3.com",
+"zendesk.com",
+"allegro.pl",
+"k618.cn",
+"redd.it",
+"reverso.net",
+"gfycat.com",
+"usps.com",
+"pinimg.com",
+"rt.com",
+"zoho.com",
+"mailchimp.com",
+"washingtonpost.com",
+"tistory.com",
+"autohome.com.cn",
+"livedoor.com",
+"line.me",
+"ikea.com",
+"wikimedia.org",
+"okta.com",
+"namnak.com",
+"weebly.com",
+"airbnb.com",
+"zol.com.cn",
+"hp.com",
+"box.com",
+"thesaurus.com",
+"chouftv.ma",
+"thepiratebay.org",
+"tripadvisor.com",
+"chinadaily.com.cn",
+"dmm.co.jp",
+"sarkariresult.com",
+"dkn.tv",
+"wordreference.com",
+"hubspot.com",
+"genius.com",
+"1337x.to",
+"bet365.com",
+"wordpress.org",
+"jf71qh5v14.com",
+"jrj.com.cn",
+"glassdoor.com",
+"bestbuy.com",
+"cricbuzz.com",
+"primevideo.com",
+"google.com.ua",
+"rutracker.org",
+"oracle.com",
+"17ok.com",
+"patch.com",
+"ltn.com.tw",
+"mercadolibre.com.ar",
+"wix.com",
+"behance.net",
+"taboola.com",
+"patria.org.ve",
+"orange.fr",
+"okdiario.com",
+"atlassian.net",
+"buzzfeed.com",
+"doublepimp.com",
+"livedoor.jp",
+"crunchyroll.com",
+"hotstar.com",
+"xfinity.com",
+"sex.com",
+"gamespot.com",
+"pixabay.com",
+"googlevideo.com",
+"ebc.net.tw",
+"pixiv.net",
+"patreon.com",
+"academia.edu",
+"ign.com",
+"goodreads.com",
+"fedex.com",
+"kaskus.co.id",
+"redtube.com",
+"bp.blogspot.com",
+"ameblo.jp",
+"fiverr.com",
+"sourceforge.net",
+"ouo.io",
+"asos.com",
+"kooora.com",
+"manoramaonline.com",
+"op.gg",
+"ensonhaber.com",
+"aol.com",
+"egy.best",
+"skype.com",
+"huya.com",
+"hola.com",
+"uptodown.com",
+"ups.com",
+"feedly.com",
+"dell.com",
+"flickr.com",
+"list.tmall.com",
+"google.gr",
+"cambridge.org",
+"gosuslugi.ru",
+"cdninstagram.com",
+"hdfcbank.com",
+"mercadolibre.com.mx",
+"americanexpress.com",
+"myway.com",
+"webex.com",
+"zippyshare.com",
+"healthline.com",
+"grammarly.com",
+"nga.cn",
+"news-speaker.com",
+"ctrip.com",
+"exoclick.com",
+"setn.com",
+"playstation.com",
+"google.com.pk",
+"telegram.org",
+"wunderground.com",
+"baike.com",
+"namu.wiki",
+"homedepot.com",
+"themeforest.net",
+"evernote.com",
+"upwork.com",
+"businessinsider.com",
+"google.co.ve",
+"outbrain.com",
+"crptentry.com",
+"wease.im",
+"chinaz.com",
+"bitly.com",
+"idntimes.com",
+"cnbeta.com",
+"v2ex.com",
+"rectanthenwirit.info",
+"yao.tmall.com",
+"samsung.com",
+"huffingtonpost.com",
+"gismeteo.ru",
+"hclips.com",
+"files.wordpress.com",
+"siteadvisor.com",
+"51sole.com",
+"marca.com",
+"capitalone.com",
+"blackboard.com",
+"rarbg.to",
+"espncricinfo.com",
+"wiktionary.org",
+"pikabu.ru",
+"shaparak.ir",
+"adp.com",
+"google.co.za",
+"icloud.com",
+"zhibo8.cc",
+"olx.ua",
+"12306.cn",
+"onet.pl",
+"slickdeals.net",
+"infourok.ru",
+"toutiao.com",
+"elpais.com",
+"userapi.com",
+"friv.com",
+"gmx.net",
+"ilovepdf.com",
+"hespress.com",
+"free.fr",
+"leboncoin.fr",
+"nur.kz",
+"dianping.com",
+"bancodevenezuela.com",
+"ria.ru",
+"springer.com",
+"divar.ir",
+"ouedkniss.com",
+"elsevier.com",
+"ndtv.com",
+"investing.com",
+"mi.com",
+"uidai.gov.in",
+"tutorialspoint.com",
+"getawesome1.com",
+"inquirer.net",
+"seasonvar.ru",
+"hellomagazine.com",
+"irs.gov",
+"nyetm2mkch.com",
+"taleo.net",
+"3dmgame.com",
+"yandex.kz",
+"olx.pl",
+"irctc.co.in",
+"google.com.sg",
+"grid.id",
+"dytt8.net",
+"webmd.com",
+"sahibinden.com",
+"doublepimpssl.com",
+"wp.pl",
+"kumparan.com",
+"discogs.com",
+"banggood.com",
+"geeksforgeeks.org",
+"theverge.com",
+"google.ro",
+"termometropolitico.it",
+"goo.ne.jp",
+"mit.edu",
+"9gag.com",
+"cnbc.com",
+"usatoday.com",
+"google.com.vn",
+"wiley.com",
+"kissanime.ru",
+"myanimelist.net",
+"oschina.net",
+"dcinside.com",
+"rediff.com",
+"ebay.it",
+"360doc.com",
+"souq.com",
+"livescore.com",
+"indoxxi.bz",
+"tencent.com",
+"wixsite.com",
+"go.com",
+"freejobalert.com",
+"bloomberg.com",
+"coco02.net",
+"digitaldsp.com",
+"pexels.com",
+"smallpdf.com",
+"unsplash.com",
+"artstation.com",
+"icicibank.com",
+"biobiochile.cl",
+"google.cl",
+"ibm.com"
+
+        };
+
+        final String[] list2 = new String[]{
+          "me73.com",
+          "mozilla.github.io/tracking-test/full.html"
+        };
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                // bench.test(numRuns, list);
+
+                for (final String uri: list) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            GeckoViewActivity.this.mGeckoSession.stop();
+                            GeckoViewActivity.this.mGeckoSession.loadUri(uri);
+                            GeckoViewActivity.this.mGeckoView.requestFocus();
+                        }
+                    });
+                    try {
+                        Thread.sleep(20000);
+                    } catch (Exception e) {
+                    }
+                }
+            }
+        }).start();
     }
 
     @Override
@@ -563,6 +1361,15 @@ public class GeckoViewActivity extends AppCompatActivity {
             Log.i(LOGTAG, "zerdatime " + SystemClock.elapsedRealtime() +
                   " - page load start");
             mCb.clearCounters();
+            Log.d("rabbitbench", "start\t" + url + "\t" +
+                  sGeckoRuntime.getSettings().getContentBlocking().getCategories() + "\t" +
+                  SystemClock.elapsedRealtime());
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    // GeckoViewActivity.this.bench.onStart(url);
+                }
+            }).start();
         }
 
         @Override
@@ -571,6 +1378,19 @@ public class GeckoViewActivity extends AppCompatActivity {
             Log.i(LOGTAG, "zerdatime " + SystemClock.elapsedRealtime() +
                   " - page load stop");
             mCb.logCounters();
+            if (success) {
+                Log.d("rabbitbench", "stop\t" + mCurrentUri + "\t" +
+                  sGeckoRuntime.getSettings().getContentBlocking().getCategories() + "\t" +
+                    SystemClock.elapsedRealtime());
+            }
+            if (success) {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        // GeckoViewActivity.this.bench.onStop(mCurrentUri);
+                    }
+                }).start();
+            }
         }
 
         @Override
@@ -766,6 +1586,9 @@ public class GeckoViewActivity extends AppCompatActivity {
                   " triggerUri=" + request.triggerUri +
                   " where=" + request.target +
                   " isRedirect=" + request.isRedirect);
+            if (request.isRedirect) {
+                // GeckoViewActivity.this.bench.onRedirect(request.uri);
+            }
 
             return GeckoResult.fromValue(AllowOrDeny.ALLOW);
         }
@@ -946,6 +1769,11 @@ public class GeckoViewActivity extends AppCompatActivity {
                                      final ContentBlocking.BlockEvent event) {
             Log.d(LOGTAG, "onContentBlocked " + event.categories +
                   " (" + event.uri + ")");
+            Log.d("rabbitbench", "block\t" + mCurrentUri + "\t" +
+                  sGeckoRuntime.getSettings().getContentBlocking().getCategories() + "\t" +
+                event.categories);
+            // GeckoViewActivity.this.bench.onBlock(mCurrentUri, event.categories);
+
             if ((event.categories & ContentBlocking.AT_TEST) != 0) {
                 mBlockedTest++;
             }
