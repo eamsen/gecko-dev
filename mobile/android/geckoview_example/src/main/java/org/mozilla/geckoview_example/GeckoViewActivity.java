@@ -47,6 +47,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Locale;
+import java.util.ArrayList;
 
 public class GeckoViewActivity extends AppCompatActivity {
     private static final String LOGTAG = "GeckoViewActivity";
@@ -89,6 +90,157 @@ public class GeckoViewActivity extends AppCompatActivity {
             mGeckoView.requestFocus();
         }
     };
+
+    public static final String[] types = new String[]{
+      "none", "at_ad", "at_analytic", "at_social", "at_content",
+      "at_test", "ad", "other"};
+
+    public static int blockedIdx(int cat) {
+        switch (cat) {
+            case ContentBlocking.NONE:
+              return 0;
+            case ContentBlocking.AT_AD:
+              return 1;
+            case ContentBlocking.AT_ANALYTIC:
+              return 2;
+            case ContentBlocking.AT_SOCIAL:
+              return 3;
+            case ContentBlocking.AT_CONTENT:
+              return 4;
+            case ContentBlocking.AT_TEST:
+              return 5;
+            case ContentBlocking.AD_ALL:
+              return 6;
+            default:
+              return 7;
+        }
+    }
+
+    private final class Benchmark {
+        class Entry {
+            public String uri;
+            public long startTime = 0;
+            public long endTime = 0;
+            public int[] blocked = new int[]{0, 0, 0, 0, 0, 0, 0, 0};
+
+            public Entry(final String uri) {
+                this.uri = uri;
+            }
+
+            public boolean onBlock(final String uri, int cat) {
+                if (startTime == 0 || !uri.contains(this.uri)) {
+                    return false;
+                }
+
+                if ((cat & ContentBlocking.NONE) != 0) {
+                    blocked[0]++;
+                }
+                if ((cat & ContentBlocking.AT_AD) != 0) {
+                    blocked[1]++;
+                }
+                if ((cat & ContentBlocking.AT_ANALYTIC) != 0) {
+                    blocked[2]++;
+                }
+                if ((cat & ContentBlocking.AT_SOCIAL) != 0) {
+                    blocked[3]++;
+                }
+                if ((cat & ContentBlocking.AT_CONTENT) != 0) {
+                    blocked[4]++;
+                }
+                if ((cat & ContentBlocking.AT_TEST) != 0) {
+                    blocked[5]++;
+                }
+                if ((cat & ContentBlocking.AD_ALL) != 0) {
+                    blocked[6]++;
+                }
+                return true;
+            }
+
+            public boolean onStart(final String uri) {
+                if (startTime != 0 || !uri.contains(this.uri)) {
+                    return false;
+                }
+                startTime = SystemClock.elapsedRealtime();
+                return true;
+            }
+
+            public boolean onStop(final String uri) {
+                if (startTime == 0 || !uri.contains(this.uri)) {
+                    return false;
+                }
+                endTime = SystemClock.elapsedRealtime();
+                return true;
+            }
+
+            @Override
+            public String toString() {
+                StringBuilder b = new StringBuilder();
+                b.append("entry").append("\t")
+                 .append(uri).append("\t")
+                 // .append(startTime).append("\t")
+                 // .append(endTime).append("\t")
+                 .append(endTime - startTime).append("\t")
+                 .append(Arrays.toString(blocked)).append("\n");
+                return b.toString();
+            }
+        }
+
+        final ArrayList<Entry> entries = new ArrayList<Entry>();
+        int cur = 0;
+
+        public void test(final String[] list) {
+            Log.d("rabbit bench", "test");
+
+            for (final String uri: list) {
+                entries.add(new Entry(uri));
+            }
+            next(0);
+        }
+
+        public void next(int idx) {
+            // Log.d("rabbit bench", "next " + idx);
+
+            cur = idx;
+            if (cur >= entries.size()) {
+                finish();
+                return;
+            }
+            final Entry e = entries.get(cur);
+            GeckoViewActivity.this.mGeckoSession.loadUri(e.uri);
+            GeckoViewActivity.this.mGeckoView.requestFocus();
+        }
+
+        public void onStart(final String uri) {
+            // Log.d("rabbit bench", "onStart " + uri);
+
+            entries.get(cur).onStart(uri);
+        }
+
+        public void onStop(final String uri) {
+            // Log.d("rabbit bench", "onStop " + uri);
+
+            if (entries.get(cur).onStop(uri)) {
+                next(cur + 1);
+            }
+        }
+
+        public void onBlock(final String uri, int cat) {
+            // Log.d("rabbit bench", "onBlock " uri + " " + cat);
+
+            entries.get(cur).onBlock(uri, cat);
+        }
+
+        public void finish() {
+            // Log.d("rabbit bench", "finish");
+
+            cur = 0;
+            for (final Entry e: entries) {
+              Log.d("rabbit bench", e.toString());
+            }
+        }
+    }
+
+    final Benchmark bench = new Benchmark();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -160,13 +312,22 @@ public class GeckoViewActivity extends AppCompatActivity {
         }
 
         mLocationView.setCommitListener(mCommitListener);
+
+        bench.test(new String[]{
+            "about:blank",
+            "google.com",
+            "amazon.com",
+            "me73.com",
+            "cnn.com",
+            "me73.com"
+        });
     }
 
     private GeckoSession createSession() {
         GeckoSession session = new GeckoSession(new GeckoSessionSettings.Builder()
                 .useMultiprocess(mUseMultiprocess)
                 .usePrivateMode(mUsePrivateBrowsing)
-                .useTrackingProtection(mUseTrackingProtection)
+                .useTrackingProtection(true)
                 .fullAccessibilityTree(mFullAccessibilityTree)
                 .build());
 
@@ -218,7 +379,7 @@ public class GeckoViewActivity extends AppCompatActivity {
     }
 
     private void updateTrackingProtection(GeckoSession session) {
-        session.getSettings().setUseTrackingProtection(mUseTrackingProtection);
+        session.getSettings().setUseTrackingProtection(true);
     }
 
     @Override
@@ -540,6 +701,7 @@ public class GeckoViewActivity extends AppCompatActivity {
             Log.i(LOGTAG, "zerdatime " + SystemClock.elapsedRealtime() +
                   " - page load start");
             mCb.clearCounters();
+            GeckoViewActivity.this.bench.onStart(url);
         }
 
         @Override
@@ -548,6 +710,7 @@ public class GeckoViewActivity extends AppCompatActivity {
             Log.i(LOGTAG, "zerdatime " + SystemClock.elapsedRealtime() +
                   " - page load stop");
             mCb.logCounters();
+            GeckoViewActivity.this.bench.onStop(mCurrentUri);
         }
 
         @Override
@@ -880,6 +1043,8 @@ public class GeckoViewActivity extends AppCompatActivity {
                                      final ContentBlocking.BlockEvent event) {
             Log.d(LOGTAG, "onContentBlocked " + event.categories +
                   " (" + event.uri + ")");
+            GeckoViewActivity.this.bench.onBlock(mCurrentUri, event.categories);
+
             if ((event.categories & ContentBlocking.AT_TEST) != 0) {
                 mBlockedTest++;
             }

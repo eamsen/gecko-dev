@@ -195,7 +195,7 @@ public class ContentBlocking {
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(flag = true,
             value = { NONE, AT_AD, AT_ANALYTIC, AT_SOCIAL, AT_CONTENT,
-                      AT_ALL, AT_TEST,
+                      AT_ALL, AT_TEST, AD_ALL,
                       SB_MALWARE, SB_UNWANTED,
                       SB_HARMFUL, SB_PHISHING })
     /* package */ @interface Category {}
@@ -232,6 +232,7 @@ public class ContentBlocking {
      * Block all known trackers.
      */
     public static final int AT_ALL = (1 << 6) - 1;
+    public static final int AD_ALL = 1 << 7;
 
     // Safe browsing
     /**
@@ -381,6 +382,13 @@ public class ContentBlocking {
     private static final String ANALYTIC = "analytics-track-digest256";
     private static final String SOCIAL = "social-track-digest256";
     private static final String CONTENT = "content-track-digest256";
+    private static final String[] ADS = new String[] {
+        "fanboyannoyance-ads-digest256",
+        "fanboysocial-ads-digest256",
+        "easylist-ads-digest256",
+        "easyprivacy-ads-digest256",
+        "adguard-ads-digest256"
+    };
 
     /* package */ static @Category int sbMalwareToCat(boolean enabled) {
         return enabled ? (SB_MALWARE | SB_UNWANTED | SB_HARMFUL)
@@ -418,6 +426,11 @@ public class ContentBlocking {
         if ((cat & AT_CONTENT) != 0) {
             builder.append(CONTENT).append(',');
         }
+        if ((cat & AD_ALL) != 0) {
+            for (final String l: ADS) {
+                builder.append(l).append(',');
+            }
+        }
         if (builder.length() == 0) {
             return "";
         }
@@ -441,6 +454,12 @@ public class ContentBlocking {
         }
         if (list.indexOf(CONTENT) != -1) {
             cat |= AT_CONTENT;
+        }
+        for (final String l: ADS) {
+            if (list.indexOf(l) != -1) {
+                cat |= AD_ALL;
+                break;
+            }
         }
         return cat;
     }
