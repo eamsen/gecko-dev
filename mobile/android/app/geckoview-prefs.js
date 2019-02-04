@@ -37,3 +37,18 @@ pref("layout.scroll.root-frame-containers", 2);
 
 // Inherit locale from the OS, used for multi-locale builds
 pref("intl.locale.requested", "");
+
+pref("browser.safebrowsing.features.phishing.update", true);
+pref("browser.safebrowsing.features.malware.update", true);
+
+pref("browser.safebrowsing.features.blockedURIs.update", true);
+pref("browser.safebrowsing.features.flashBlock.update", true);
+
+pref("browser.safebrowsing.features.passwords.update", true);
+pref("browser.safebrowsing.features.downloads.update", true);
+
+pref("browser.safebrowsing.features.trackingAnnotation.update", true);
+pref("browser.safebrowsing.features.trackingProtection.update", true);
+
+pref("browser.safebrowsing.features.fingerprinting.update", true);
+pref("browser.safebrowsing.features.cryptomining.update", true);
