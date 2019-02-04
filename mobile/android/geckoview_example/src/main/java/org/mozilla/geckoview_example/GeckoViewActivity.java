@@ -1093,7 +1093,22 @@ public class GeckoViewActivity extends AppCompatActivity {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                bench.test(numRuns, list);
+                // bench.test(numRuns, list);
+
+                for (final String uri: list) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            GeckoViewActivity.this.mGeckoSession.stop();
+                            GeckoViewActivity.this.mGeckoSession.loadUri(uri);
+                            GeckoViewActivity.this.mGeckoView.requestFocus();
+                        }
+                    });
+                    try {
+                        Thread.sleep(20000);
+                    } catch (Exception e) {
+                    }
+                }
             }
         }).start();
     }
@@ -1323,10 +1338,13 @@ public class GeckoViewActivity extends AppCompatActivity {
             Log.i(LOGTAG, "zerdatime " + SystemClock.elapsedRealtime() +
                   " - page load start");
             mCb.clearCounters();
+            Log.d("rabbitbench", "start\t" + url + "\t" +
+                  sGeckoRuntime.getSettings().getContentBlocking().getCategories() + "\t" +
+                  SystemClock.elapsedRealtime());
             new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    GeckoViewActivity.this.bench.onStart(url);
+                    // GeckoViewActivity.this.bench.onStart(url);
                 }
             }).start();
         }
@@ -1338,10 +1356,15 @@ public class GeckoViewActivity extends AppCompatActivity {
                   " - page load stop");
             mCb.logCounters();
             if (success) {
+                Log.d("rabbitbench", "stop\t" + mCurrentUri + "\t" +
+                  sGeckoRuntime.getSettings().getContentBlocking().getCategories() + "\t" +
+                    SystemClock.elapsedRealtime());
+            }
+            if (success) {
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        GeckoViewActivity.this.bench.onStop(mCurrentUri);
+                        // GeckoViewActivity.this.bench.onStop(mCurrentUri);
                     }
                 }).start();
             }
@@ -1680,7 +1703,10 @@ public class GeckoViewActivity extends AppCompatActivity {
                                      final ContentBlocking.BlockEvent event) {
             Log.d(LOGTAG, "onContentBlocked " + event.categories +
                   " (" + event.uri + ")");
-            GeckoViewActivity.this.bench.onBlock(mCurrentUri, event.categories);
+            Log.d("rabbitbench", "block\t" + mCurrentUri + "\t" +
+                  sGeckoRuntime.getSettings().getContentBlocking().getCategories() + "\t" +
+                event.categories);
+            // GeckoViewActivity.this.bench.onBlock(mCurrentUri, event.categories);
 
             if ((event.categories & ContentBlocking.AT_TEST) != 0) {
                 mBlockedTest++;
