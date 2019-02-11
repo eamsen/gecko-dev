@@ -60,6 +60,7 @@ public class GeckoViewActivity extends AppCompatActivity {
     private static final int REQUEST_WRITE_EXTERNAL_STORAGE = 3;
 
     private static GeckoRuntime sGeckoRuntime;
+    private static Integer sNextCtx = 0;
     private GeckoSession mGeckoSession;
     private GeckoView mGeckoView;
     private boolean mUseMultiprocess;
@@ -170,6 +171,7 @@ public class GeckoViewActivity extends AppCompatActivity {
                 .usePrivateMode(mUsePrivateBrowsing)
                 .useTrackingProtection(mUseTrackingProtection)
                 .fullAccessibilityTree(mFullAccessibilityTree)
+                .contextId(sNextCtx.toString())
                 .build());
 
         connectSession(session);
@@ -230,12 +232,14 @@ public class GeckoViewActivity extends AppCompatActivity {
             return;
         }
 
-        if (mCanGoBack && mGeckoSession != null) {
-            mGeckoSession.goBack();
+        // if (mCanGoBack && mGeckoSession != null) {
+            // mGeckoSession.goBack();
+            sNextCtx++;
+            recreateSession();
             return;
-        }
+        // }
 
-        super.onBackPressed();
+        // super.onBackPressed();
     }
 
     @Override
