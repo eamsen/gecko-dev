@@ -1171,4 +1171,84 @@ class NavigationDelegateTest : BaseSessionTest() {
         mainSession.loadTestPath(HELLO_HTML_PATH)
         sessionRule.waitForPageStop()
     }
+
+    @WithDevToolsAPI
+    @Test fun sessionContextId() {
+        val setLocalStorageJs = "localStorage.setItem('ctx', window.location.search.substr(1));";
+        val setTitleJs = "document.title = 'storage=' + localStorage.getItem('ctx');";
+        val session1 = sessionRule.createOpenSession(
+                GeckoSessionSettings.Builder(mainSession.settings)
+                .contextId("1")
+                .build())
+        session1.loadTestPath(HELLO_HTML_PATH + "?ctx1")
+        session1.evaluateJS(setLocalStorageJs)
+        session1.evaluateJS(setTitleJs)
+        session1.waitForPageStop()
+
+        session1.forCallbacksDuringWait(object: Callbacks.ContentDelegate {
+            @AssertCalled(count = 1)
+            override fun onTitleChange(session: GeckoSession, title: String?) {
+                assertThat("Title should not be empty", title, not(isEmptyOrNullString()))
+                assertThat("Title should match", title,
+                           equalTo("storage=ctx1"))
+            }
+        })
+
+        session1.loadTestPath(HELLO_HTML_PATH)
+        session1.evaluateJS(setTitleJs)
+        session1.waitForPageStop()
+
+        session1.forCallbacksDuringWait(object: Callbacks.ContentDelegate {
+            @AssertCalled(count = 1)
+            override fun onTitleChange(session: GeckoSession, title: String?) {
+                assertThat("Title should not be empty", title, not(isEmptyOrNullString()))
+                assertThat("Title should match", title,
+                           equalTo("storage=ctx1"))
+            }
+        })
+
+        val session2 = sessionRule.createOpenSession(
+                GeckoSessionSettings.Builder(mainSession.settings)
+                .contextId("2")
+                .build())
+        session2.loadTestPath(HELLO_HTML_PATH)
+        session2.evaluateJS(setTitleJs)
+        session2.waitForPageStop()
+
+        session2.forCallbacksDuringWait(object: Callbacks.ContentDelegate {
+            @AssertCalled(count = 1)
+            override fun onTitleChange(session: GeckoSession, title: String?) {
+                assertThat("Title should not be empty", title, not(isEmptyOrNullString()))
+                assertThat("Title should match", title,
+                           equalTo("storage=null"))
+            }
+        })
+
+        session2.loadTestPath(HELLO_HTML_PATH + "?ctx2")
+        session2.evaluateJS(setLocalStorageJs)
+        session2.evaluateJS(setTitleJs)
+        session2.waitForPageStop()
+
+        session2.forCallbacksDuringWait(object: Callbacks.ContentDelegate {
+            @AssertCalled(count = 1)
+            override fun onTitleChange(session: GeckoSession, title: String?) {
+                assertThat("Title should not be empty", title, not(isEmptyOrNullString()))
+                assertThat("Title should match", title,
+                           equalTo("storage=ctx2"))
+            }
+        })
+
+        session1.loadTestPath(HELLO_HTML_PATH)
+        session1.evaluateJS(setTitleJs)
+        session1.waitForPageStop()
+
+        session1.forCallbacksDuringWait(object: Callbacks.ContentDelegate {
+            @AssertCalled(count = 1)
+            override fun onTitleChange(session: GeckoSession, title: String?) {
+                assertThat("Title should not be empty", title, not(isEmptyOrNullString()))
+                assertThat("Title should match", title,
+                           equalTo("storage=ctx1"))
+            }
+        })
+    }
 }
