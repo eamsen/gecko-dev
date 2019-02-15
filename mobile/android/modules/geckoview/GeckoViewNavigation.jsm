@@ -13,6 +13,7 @@ XPCOMUtils.defineLazyModuleGetters(this, {
   E10SUtils: "resource://gre/modules/E10SUtils.jsm",
   LoadURIDelegate: "resource://gre/modules/LoadURIDelegate.jsm",
   Services: "resource://gre/modules/Services.jsm",
+  PrivateBrowsingUtils: "resource://gre/modules/PrivateBrowsingUtils.jsm",
 });
 
 XPCOMUtils.defineLazyGetter(this, "ReferrerInfo", () =>
@@ -54,6 +55,8 @@ class GeckoViewNavigation extends GeckoViewModule {
   }
 
   onInit() {
+    debug `onInit`;
+
     this.registerListener([
       "GeckoView:GoBack",
       "GeckoView:GoForward",
@@ -64,6 +67,16 @@ class GeckoViewNavigation extends GeckoViewModule {
     ]);
 
     this.messageManager.addMessageListener("Browser:LoadURI", this);
+
+    debug `sessionContextId=${this.settings.sessionContextId}`;
+
+    if (this.settings.sessionContextId !== null) {
+      this.browser.webNavigation.setOriginAttributesBeforeLoading({
+        geckoViewSessionContextId: this.settings.sessionContextId,
+        privateBrowsingId:
+          PrivateBrowsingUtils.isBrowserPrivate(this.browser) ? 1 : 0,
+      });
+    }
   }
 
   // Bundle event handler.
