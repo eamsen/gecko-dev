@@ -91,6 +91,8 @@ const ProgressTracker = {
 
   start: function(aUri) {
     debug `ProgressTracker start ${aUri}`;
+    this.rabbitStart = content.performance.now();
+    dump(`rabbitbench: pt:start\t${aUri}\t${this.rabbitStart}\t${this.rabbitStart}`);
 
     if (this._tracking) {
       PAGE_LOAD_PROGRESS_PROBE.cancel();
@@ -122,6 +124,7 @@ const ProgressTracker = {
 
   changeLocation: function(aUri) {
     debug `ProgressTracker changeLocation ${aUri}`;
+    dump(`rabbitbench: pt:changeLocation\t${aUri}\t${this.rabbitStart}\t${content.performance.now()}`);
 
     let data = this._data;
     data.locationChange = true;
@@ -130,6 +133,7 @@ const ProgressTracker = {
 
   stop: function() {
     debug `ProgressTracker stop`;
+    dump(`rabbitbench: pt:stop\t${this._data.uri}\t${this.rabbitStart}\t${content.performance.now()}`);
 
     let data = this._data;
     data.pageStop = true;
@@ -169,6 +173,7 @@ const ProgressTracker = {
     }
 
     debug `ProgressTracker handleEvent: ${aEvent.type}`;
+    dump(`rabbitbench: pt:handleEvent:${aEvent.type}\t${this._data.uri}\t${this.rabbitStart}\t${content.performance.now()}`);
 
     let needsUpdate = false;
 
@@ -231,6 +236,7 @@ const ProgressTracker = {
 
   handleProgress: function(aChannelUri, aProgress, aMax) {
     debug `ProgressTracker handleProgress ${aChannelUri} ${aProgress}/${aMax}`;
+    dump(`rabbitbench: pt:handleProgress\t${this._data.uri}\t${this.rabbitStart}\t${content.performance.now()}`);
 
     let data = this._data;
 
@@ -302,6 +308,14 @@ const ProgressTracker = {
     const minExpected = 1024 * 1;
     const maxExpected = 1024 * 1024 * 0.5;
 
+    const received = (data.pageStop ? 1 : 0) |
+                     (data.pageStart ? 2 : 0) |
+                     (data.firstPaint ? 4 : 0) |
+                     (data.parsed ? 8 : 0) |
+                     (data.pageShow ? 16 : 0) |
+                     ((data.totalReceived > minExpected) ? 32 : 0) |
+                     ((data.totalReceived >= data.totalExpected) ? 64 : 0);
+
     if (data.pageStop ||
         (data.pageStart && data.firstPaint && data.parsed && data.pageShow &&
          data.totalReceived > minExpected &&
@@ -311,6 +325,7 @@ const ProgressTracker = {
       const a = Math.min(1, (data.totalExpected / maxExpected)) * 30;
       progress += data.totalReceived / data.totalExpected * a;
     }
+    dump(`rabbitbench: pt:updateProgress\t${received}\t${parseInt(progress)}`);
 
     debug `ProgressTracker updateProgress data=${this._debugData()}
            progress=${progress}`;
