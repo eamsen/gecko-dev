@@ -83,6 +83,8 @@ const ProgressTracker = {
 
   start: function(aUri) {
     debug `ProgressTracker start ${aUri}`;
+    this.rabbitStart = content.performance.now();
+    dump(`rabbitbench: pt:start\t${aUri}\t${this.rabbitStart}\t${this.rabbitStart}`);
 
     if (this._tracking) {
       PAGE_LOAD_PROGRESS_PROBE.cancel();
@@ -114,6 +116,7 @@ const ProgressTracker = {
 
   changeLocation: function(aUri) {
     debug `ProgressTracker changeLocation ${aUri}`;
+    dump(`rabbitbench: pt:changeLocation\t${aUri}\t${this.rabbitStart}\t${content.performance.now()}`);
 
     let data = this._data;
     data.locationChange = true;
@@ -122,6 +125,7 @@ const ProgressTracker = {
 
   stop: function() {
     debug `ProgressTracker stop`;
+    dump(`rabbitbench: pt:stop\t${this._data.uri}\t${this.rabbitStart}\t${content.performance.now()}`);
 
     let data = this._data;
     data.pageStop = true;
@@ -161,6 +165,7 @@ const ProgressTracker = {
     }
 
     debug `ProgressTracker handleEvent: ${aEvent.type}`;
+    dump(`rabbitbench: pt:handleEvent:${aEvent.type}\t${this._data.uri}\t${this.rabbitStart}\t${content.performance.now()}`);
 
     let needsUpdate = false;
 
@@ -237,6 +242,8 @@ const ProgressTracker = {
     } else if (data.pageStart) {
       progress = 15;
     }
+
+    dump(`rabbitbench: pt:updateProgress\t${data.uri}\t${parseInt(data.prev)}\t${parseInt(progress)}`);
 
     if (data.prev >= progress) {
       return;

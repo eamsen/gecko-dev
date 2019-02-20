@@ -47,3 +47,7 @@ pref("browser.safebrowsing.features.trackingProtection.update", true);
 pref("browser.safebrowsing.features.cryptomining.update", true);
 // Enable fingerprinting protection blocklist updates
 pref("browser.safebrowsing.features.fingerprinting.update", true);
+
+pref("privacy.reduceTimerPrecision", true);
+pref("privacy.resistFingerprinting.reduceTimerPrecision.microseconds", 1000);
+pref("privacy.resistFingerprinting.reduceTimerPrecision.jitter", false);
