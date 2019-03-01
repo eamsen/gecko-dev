@@ -325,7 +325,7 @@ const ProgressTracker = {
       const a = Math.min(1, (data.totalExpected / maxExpected)) * 30;
       progress += data.totalReceived / data.totalExpected * a;
     }
-    dump(`rabbitbench: pt:updateProgress\t${received}\t${parseInt(progress)}`);
+    dump(`rabbitbench: pt:updateProgress\t${data.uri}\t${received}\t${parseInt(progress)}`);
 
     debug `ProgressTracker updateProgress data=${this._debugData()}
            progress=${progress}`;
