@@ -589,6 +589,7 @@ public class GeckoViewActivity extends AppCompatActivity {
             return;
         }
         int numRuns = 5;
+        // rabbitbenchstart
         final String[] list = new String[]{
             // "about:blank",
 "google.com",
