@@ -43,6 +43,11 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.ProgressBar;
 
+import android.graphics.Bitmap;
+import android.os.Environment;
+import java.io.File;
+import java.io.FileOutputStream;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -51,6 +56,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Locale;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class GeckoViewActivity extends AppCompatActivity {
     private static final String LOGTAG = "GeckoViewActivity";
@@ -1096,6 +1102,7 @@ public class GeckoViewActivity extends AppCompatActivity {
 "ibm.com"
 
         };
+        // rabbitbenchend
 
         final String[] list2 = new String[]{
           "me73.com",
@@ -1117,7 +1124,52 @@ public class GeckoViewActivity extends AppCompatActivity {
                         }
                     });
                     try {
-                        Thread.sleep(20000);
+                        Thread.sleep(25000);
+                    } catch (Exception e) {
+                    }
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            GeckoViewActivity.this.mGeckoView.capturePixels()
+                                .then(new GeckoResult.OnValueListener<Bitmap, Void>() {
+                            @Override
+                            public GeckoResult<Void> onValue(final Bitmap bitmap) throws Throwable {
+                                if (bitmap == null) {
+                                  return null;
+                                }
+
+                                final String root = Environment.getExternalStorageDirectory().toString();
+                                final File dir = new File(root + "/rabbitbench");
+                                dir.mkdirs();
+                                final String name = uri + ".jpg";
+                                final File file = new File(dir, name);
+                                if (file.exists()) {
+                                    file.delete();
+                                }
+                                try {
+                                    FileOutputStream out = new FileOutputStream(file);
+                                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
+                                    out.flush();
+                                    out.close();
+                                } catch (final Exception e) {
+                                    e.printStackTrace();
+                                }
+
+                                return null;
+                            }
+                        }, new GeckoResult.OnExceptionListener<Void>() {
+                            @Override
+                            public GeckoResult<Void> onException(Throwable exception) throws Throwable {
+                                Log.d(LOGTAG, "rabbitdebug Could not get screenshot");
+                                // getUserAgent() cannot fail.
+                                // throw new IllegalStateException("Could not get screenshot.");
+                                return null;
+                            }
+                        });
+                        }
+                    });
+                    try {
+                        Thread.sleep(1000);
                     } catch (Exception e) {
                     }
                 }
