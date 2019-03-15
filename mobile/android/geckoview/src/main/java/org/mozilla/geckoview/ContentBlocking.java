@@ -449,11 +449,11 @@ public class ContentBlocking {
         "base-fingerprinting-track-digest256";
 
     private static final String[] ADS = new String[] {
-        "fanboyannoyance-ads-digest256",
-        "fanboysocial-ads-digest256",
-        "easylist-ads-digest256",
-        "easyprivacy-ads-digest256",
-        "adguard-ads-digest256"
+        // "fanboyannoyance-ads-digest256",
+        // "fanboysocial-ads-digest256",
+        "easylist-ads-digest256"
+        // "easyprivacy-ads-digest256"
+        // "adguard-ads-digest256"
     };
 
     /* package */ static @Category int sbMalwareToCat(final boolean enabled) {

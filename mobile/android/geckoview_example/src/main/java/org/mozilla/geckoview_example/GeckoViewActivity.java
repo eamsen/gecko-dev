@@ -397,8 +397,8 @@ public class GeckoViewActivity extends AppCompatActivity {
 
             sGeckoRuntime = GeckoRuntime.create(this, runtimeSettingsBuilder.build());
             sGeckoRuntime.registerWebExtension(new WebExtension(
-                  "file://sdcard/ublock",
-                  "uBlock0@raymondhill.net"));
+                  "resource:///android/assets/ublock/",
+                  "ublock"));
         }
 
         if(savedInstanceState == null) {
@@ -428,8 +428,8 @@ public class GeckoViewActivity extends AppCompatActivity {
         sGeckoRuntime.getSettings().getContentBlocking().setCategories(
             // ContentBlocking.NONE);
             // ContentBlocking.AT_ALL);
-            // ContentBlocking.AD_ALL);
-            ContentBlocking.AT_ALL | ContentBlocking.AD_ALL);
+            ContentBlocking.AD_ALL);
+            // ContentBlocking.AT_ALL | ContentBlocking.AD_ALL);
     }
 
     private GeckoSession createSession() {
@@ -1030,7 +1030,7 @@ public class GeckoViewActivity extends AppCompatActivity {
 "ouedkniss.com",
 "elsevier.com",
 "ndtv.com",
-"investing.com",
+// "investing.com",
 "mi.com",
 "uidai.gov.in",
 "tutorialspoint.com",
