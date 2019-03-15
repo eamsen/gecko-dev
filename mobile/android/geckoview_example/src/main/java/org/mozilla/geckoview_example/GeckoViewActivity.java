@@ -17,6 +17,7 @@ import org.mozilla.geckoview.GeckoSessionSettings;
 import org.mozilla.geckoview.GeckoView;
 import org.mozilla.geckoview.WebExtension;
 import org.mozilla.geckoview.WebRequestError;
+import org.mozilla.geckoview.WebExtension;
 
 import android.Manifest;
 import android.app.DownloadManager;
@@ -395,6 +396,9 @@ public class GeckoViewActivity extends AppCompatActivity {
                     .crashHandler(ExampleCrashHandler.class);
 
             sGeckoRuntime = GeckoRuntime.create(this, runtimeSettingsBuilder.build());
+            sGeckoRuntime.registerWebExtension(new WebExtension(
+                  "file://sdcard/ublock",
+                  "uBlock0@raymondhill.net"));
         }
 
         if(savedInstanceState == null) {

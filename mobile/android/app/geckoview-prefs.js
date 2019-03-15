@@ -51,3 +51,5 @@ pref("browser.safebrowsing.features.fingerprinting.update", true);
 pref("privacy.reduceTimerPrecision", true);
 pref("privacy.resistFingerprinting.reduceTimerPrecision.microseconds", 1000);
 pref("privacy.resistFingerprinting.reduceTimerPrecision.jitter", false);
+
+pref("xpinstall.signatures.required", false);

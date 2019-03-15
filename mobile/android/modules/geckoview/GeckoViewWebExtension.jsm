@@ -16,8 +16,6 @@ XPCOMUtils.defineLazyModuleGetters(this, {
   ExtensionChild: "resource://gre/modules/ExtensionChild.jsm",
 });
 
-const {debug, warn} = GeckoViewUtils.initLogging("Console"); // eslint-disable-line no-unused-vars
-
 class EmbedderPort extends ExtensionChild.Port {
   constructor(...args) {
     super(...args);
@@ -129,6 +127,8 @@ class GeckoViewConnection {
   }
 }
 
+const {debug, warn} = GeckoViewUtils.initLogging("WebExtension"); // eslint-disable-line no-unused-vars
+
 var GeckoViewWebExtension = {
   async registerWebExtension(aId, aUri, allowContentMessaging,
                              aCallback) {
@@ -162,6 +162,7 @@ var GeckoViewWebExtension = {
       this.extensionScopes.delete(aId);
       aCallback.onSuccess();
     } catch (ex) {
+      debug `Error registering WebExtension at: ${aId}. ${ex}`;
       aCallback.onError(`Error unregistering WebExtension ${aId}. ${ex}`);
     }
   },
@@ -174,11 +175,15 @@ var GeckoViewWebExtension = {
         const uri = Services.io.newURI(aData.locationUri);
         if (uri == null || (!(uri instanceof Ci.nsIFileURL) &&
               !(uri instanceof Ci.nsIJARURI))) {
+          debug `Extension does not point to a resource URI or a file URL. extension=${aData.locationUri}`;
+
           aCallback.onError(`Extension does not point to a resource URI or a file URL. extension=${aData.locationUri}`);
           return;
         }
 
         if (uri.fileName != "" && uri.fileExtension != "xpi") {
+          debug `Extension does not point to a folder or an .xpi file. Hint: the path needs to end with a "/" to be considered a folder. extension=${aData.locationUri}`;
+
           aCallback.onError(`Extension does not point to a folder or an .xpi file. Hint: the path needs to end with a "/" to be considered a folder. extension=${aData.locationUri}`);
           return;
         }
