@@ -396,9 +396,12 @@ public class GeckoViewActivity extends AppCompatActivity {
                     .crashHandler(ExampleCrashHandler.class);
 
             sGeckoRuntime = GeckoRuntime.create(this, runtimeSettingsBuilder.build());
+            // sGeckoRuntime.registerWebExtension(new WebExtension(
+                  // "resource://android/assets/ublock/",
+                  // "ublock"));
             sGeckoRuntime.registerWebExtension(new WebExtension(
-                  "resource:///android/assets/ublock/",
-                  "ublock"));
+                  "resource://android/assets/ghostery/",
+                  "ghostery"));
         }
 
         if(savedInstanceState == null) {
