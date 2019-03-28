@@ -426,9 +426,9 @@ public class GeckoViewActivity extends AppCompatActivity {
 
 
         sGeckoRuntime.getSettings().getContentBlocking().setCategories(
-            // ContentBlocking.NONE);
+            ContentBlocking.NONE);
             // ContentBlocking.AT_ALL);
-            ContentBlocking.AD_ALL);
+            // ContentBlocking.AD_ALL);
             // ContentBlocking.AT_ALL | ContentBlocking.AD_ALL);
     }
 
@@ -1092,7 +1092,7 @@ public class GeckoViewActivity extends AppCompatActivity {
 "ibm.com"
 
         };
-        // rabbitbenchend 494
+        // rabbitbenchend 493
 
         final String[] list2 = new String[]{
           "me73.com",
@@ -1110,11 +1110,11 @@ public class GeckoViewActivity extends AppCompatActivity {
                         public void run() {
                             GeckoViewActivity.this.mGeckoSession.stop();
                             GeckoViewActivity.this.mGeckoSession.loadUri(uri);
-                            GeckoViewActivity.this.mGeckoView.requestFocus();
+                            // GeckoViewActivity.this.mGeckoView.requestFocus();
                         }
                     });
                     try {
-                        Thread.sleep(25000);
+                        Thread.sleep(28000);
                     } catch (Exception e) {
                     }
                     runOnUiThread(new Runnable() {
