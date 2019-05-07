@@ -399,9 +399,15 @@ public class GeckoViewActivity extends AppCompatActivity {
             // sGeckoRuntime.registerWebExtension(new WebExtension(
                   // "resource://android/assets/ublock/",
                   // "ublock"));
+            // sGeckoRuntime.registerWebExtension(new WebExtension(
+                  // "resource://android/assets/ghostery/",
+                  // "ghostery"));
             sGeckoRuntime.registerWebExtension(new WebExtension(
-                  "resource://android/assets/ghostery/",
-                  "ghostery"));
+                  "resource://android/assets/blockrz/",
+                  "blockrz"));
+            // sGeckoRuntime.registerWebExtension(new WebExtension(
+                  // "resource://android/assets/cbext/",
+                  // "cbext"));
         }
 
         if(savedInstanceState == null) {
@@ -430,7 +436,8 @@ public class GeckoViewActivity extends AppCompatActivity {
 
         sGeckoRuntime.getSettings().getContentBlocking().setCategories(
             ContentBlocking.NONE);
-            // ContentBlocking.AT_ALL);
+            // ContentBlocking.AT_STRICT);
+            // ContentBlocking.AT_DEFAULT);
             // ContentBlocking.AD_ALL);
             // ContentBlocking.AT_ALL | ContentBlocking.AD_ALL);
     }
@@ -1117,7 +1124,7 @@ public class GeckoViewActivity extends AppCompatActivity {
                         }
                     });
                     try {
-                        Thread.sleep(28000);
+                        Thread.sleep(30000);
                     } catch (Exception e) {
                     }
                     runOnUiThread(new Runnable() {
