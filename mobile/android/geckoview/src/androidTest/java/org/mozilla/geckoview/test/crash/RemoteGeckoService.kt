@@ -3,9 +3,6 @@ package org.mozilla.geckoview.test.crash
 import android.app.Service
 import android.content.Intent
 import android.os.*
-import org.hamcrest.MatcherAssert.assertThat
-import org.hamcrest.Matchers.equalTo
-import org.mozilla.gecko.GeckoProfile
 import org.mozilla.geckoview.GeckoRuntime
 import org.mozilla.geckoview.GeckoRuntimeSettings
 import org.mozilla.geckoview.GeckoSession

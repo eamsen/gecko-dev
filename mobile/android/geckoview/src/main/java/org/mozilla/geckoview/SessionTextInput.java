@@ -350,8 +350,10 @@ public final class SessionTextInput {
 
     /* package */ void onWindowChanged(final GeckoSession.Window window) {
         if (mQueue.isReady()) {
+            Log.e("sferrog", "queue is ready editable=" + mEditable.hashCode());
             window.attachEditable(mEditable);
         } else {
+            Log.e("sferrog", "queue is not ready editable=" + mEditable.hashCode());
             mQueue.queueUntilReady(window, "attachEditable",
                                    IGeckoEditableParent.class, mEditable);
         }

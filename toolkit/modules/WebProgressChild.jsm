@@ -102,6 +102,9 @@ class WebProgressChild {
   }
 
   onStateChange(aWebProgress, aRequest, aStateFlags, aStatus) {
+    const isStop = (aStateFlags & Ci.nsIWebProgressListener.STATE_STOP) != 0;
+    Cu.reportError(`sferrog WebProgressChild.onStateChange isStop=${isStop}`);
+
     let json = this._setupJSON(aWebProgress, aRequest, aStateFlags);
 
     json.stateFlags = aStateFlags;

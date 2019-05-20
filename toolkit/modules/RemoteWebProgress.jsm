@@ -109,6 +109,8 @@ class RemoteWebProgressManager {
   }
 
   onStateChange(aWebProgress, aRequest, aStateFlags, aStatus) {
+    const isStop = (aStateFlags & Ci.nsIWebProgressListener.STATE_STOP) != 0;
+    Cu.reportError(`sferrog RemoteWebProess.sferrog isStop=${isStop} isLoadingDocument=${aWebProgress.isLoadingDocument}`);
     this._callProgressListeners(
       Ci.nsIWebProgress.NOTIFY_STATE_ALL, "onStateChange", aWebProgress,
       aRequest, aStateFlags, aStatus

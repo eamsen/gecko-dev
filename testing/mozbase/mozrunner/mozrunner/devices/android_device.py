@@ -245,16 +245,13 @@ def verify_android_device(build_obj, install=False, xre=False, debugger=False,
                 build_obj._run_make(directory=".", target='install',
                                     ensure_exit_code=False)
         elif app == 'org.mozilla.geckoview.test':
-            response = response = raw_input(
-                "%s geckoview AndroidTest? (Y/n) " % action).strip()
-            if response.lower().startswith('y') or response == '':
-                if installed:
-                    device.uninstall_app(app)
-                _log_info("Installing geckoview AndroidTest. This may take a while...")
-                sub = 'geckoview:installWithGeckoBinariesDebugAndroidTest'
-                build_obj._mach_context.commands.dispatch('gradle',
-                                                          args=[sub],
-                                                          context=build_obj._mach_context)
+            if installed:
+                device.uninstall_app(app)
+            _log_info("Installing geckoview AndroidTest. This may take a while...")
+            sub = 'geckoview:installWithGeckoBinariesDebugAndroidTest'
+            build_obj._mach_context.commands.dispatch('gradle',
+                                                      args=[sub],
+                                                      context=build_obj._mach_context)
         elif app == 'org.mozilla.geckoview_example':
             response = response = raw_input(
                 "%s geckoview_example? (Y/n) " % action).strip()

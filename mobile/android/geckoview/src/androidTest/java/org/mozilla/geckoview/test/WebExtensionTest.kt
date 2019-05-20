@@ -5,12 +5,12 @@
 package org.mozilla.geckoview.test
 
 import android.support.test.InstrumentationRegistry
-import org.mozilla.geckoview.test.rule.GeckoSessionTestRule.ReuseSession
 
 import android.support.test.filters.MediumTest
 import android.support.test.runner.AndroidJUnit4
-import org.hamcrest.core.StringEndsWith.endsWith
+import android.util.Log
 import org.hamcrest.core.IsEqual.equalTo
+import org.hamcrest.core.StringEndsWith.endsWith
 import org.json.JSONObject
 import org.junit.Assert
 import org.junit.Assert.assertTrue
@@ -19,7 +19,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mozilla.geckoview.*
 import org.mozilla.geckoview.test.rule.GeckoSessionTestRule
-import org.mozilla.geckoview.test.rule.GeckoSessionTestRule.WithDevToolsAPI
 import org.mozilla.geckoview.test.util.Callbacks
 import org.mozilla.geckoview.test.util.HttpBin
 import java.net.URI
@@ -28,7 +27,6 @@ import java.util.UUID
 
 @RunWith(AndroidJUnit4::class)
 @MediumTest
-@ReuseSession(false)
 class WebExtensionTest : BaseSessionTest() {
     companion object {
         val TEST_ENDPOINT: String = "http://localhost:4243"
@@ -37,7 +35,6 @@ class WebExtensionTest : BaseSessionTest() {
     }
 
     @Test
-    @WithDevToolsAPI
     fun registerWebExtension() {
         mainSession.loadUri("example.com")
         sessionRule.waitForPageStop()
@@ -131,14 +128,13 @@ class WebExtensionTest : BaseSessionTest() {
         } else {
             webExtension = WebExtension(MESSAGING_CONTENT, uuid,
                     WebExtension.Flags.ALLOW_CONTENT_MESSAGING)
-            sessionRule.session.setMessageDelegate(messageDelegate, "browser");
+            sessionRule.session.setMessageDelegate(webExtension, messageDelegate, "browser");
         }
 
         return webExtension
     }
 
     @Test
-    @WithDevToolsAPI
     fun contentMessaging() {
         mainSession.loadUri("example.com")
         sessionRule.waitForPageStop()
@@ -146,7 +142,6 @@ class WebExtensionTest : BaseSessionTest() {
     }
 
     @Test
-    @WithDevToolsAPI
     fun backgroundMessaging() {
         testOnMessage(true)
     }
@@ -213,7 +208,6 @@ class WebExtensionTest : BaseSessionTest() {
     }
 
     @Test
-    @WithDevToolsAPI
     fun contentPortMessaging() {
         mainSession.loadUri("example.com")
         sessionRule.waitForPageStop()
@@ -221,7 +215,6 @@ class WebExtensionTest : BaseSessionTest() {
     }
 
     @Test
-    @WithDevToolsAPI
     fun backgroundPortMessaging() {
         testPortMessage(true)
     }
@@ -295,7 +288,6 @@ class WebExtensionTest : BaseSessionTest() {
     }
 
     @Test
-    @WithDevToolsAPI
     fun contentPortDisconnect() {
         mainSession.loadUri("example.com")
         sessionRule.waitForPageStop()
@@ -308,7 +300,6 @@ class WebExtensionTest : BaseSessionTest() {
     }
 
     @Test
-    @WithDevToolsAPI
     fun contentPortDisconnectAfterRefresh() {
         mainSession.loadUri("example.com")
         sessionRule.waitForPageStop()
@@ -375,7 +366,6 @@ class WebExtensionTest : BaseSessionTest() {
     }
 
     @Test
-    @WithDevToolsAPI
     fun contentPortDisconnectFromApp() {
         mainSession.loadUri("example.com")
         sessionRule.waitForPageStop()
@@ -437,7 +427,7 @@ class WebExtensionTest : BaseSessionTest() {
 
         messaging = WebExtension("resource://android/assets/web_extensions/messaging-iframe/",
                 "{${UUID.randomUUID()}}", WebExtension.Flags.ALLOW_CONTENT_MESSAGING)
-        sessionRule.session.setMessageDelegate(messageDelegate, "browser");
+        sessionRule.session.setMessageDelegate(messaging, messageDelegate, "browser");
 
         sessionRule.waitForResult(sessionRule.runtime.registerWebExtension(messaging))
         sessionRule.waitForResult(portTopLevel)
@@ -448,7 +438,6 @@ class WebExtensionTest : BaseSessionTest() {
     }
 
     @Test
-    @WithDevToolsAPI
     fun iframeTopLevel() {
         val httpBin = HttpBin(InstrumentationRegistry.getTargetContext(), URI.create(TEST_ENDPOINT))
 

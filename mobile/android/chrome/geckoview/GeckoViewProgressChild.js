@@ -16,6 +16,15 @@ class GeckoViewProgressChild extends GeckoViewChildModule {
   onInit() {
     debug `onInit`;
 
+    const isStopped = docShell.busyFlags === Ci.nsIDocShell.BUSY_FLAGS_NONE;
+    if (isStopped) {
+      debug `sferrog STOPPED isStopped=${isStopped} busyFlags=${docShell.busyFlags}`;
+      this.eventDispatcher.sendRequest({
+        type: "GeckoView:PageStoppedOnInit",
+        success: true,
+      });
+    }
+
     ProgressTracker.onInit(this);
 
     const flags = Ci.nsIWebProgress.NOTIFY_STATE_NETWORK |

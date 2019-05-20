@@ -147,6 +147,7 @@ class GeckoViewProgress extends GeckoViewModule {
 
   onEnable() {
     debug `onEnable`;
+    this._inProgress = true;
 
     const flags = Ci.nsIWebProgress.NOTIFY_STATE_NETWORK |
                   Ci.nsIWebProgress.NOTIFY_SECURITY |
@@ -154,14 +155,20 @@ class GeckoViewProgress extends GeckoViewModule {
     this.progressFilter =
       Cc["@mozilla.org/appshell/component/browser-status-filter;1"]
       .createInstance(Ci.nsIWebProgress);
+
     this.progressFilter.addProgressListener(this, flags);
     this.browser.addProgressListener(this.progressFilter, flags);
+
+    Cu.reportError(`sferrog onEnable isLoadingDocument=${this.browser.isLoadingDocument}`);
+
     Services.obs.addObserver(this, "oop-frameloader-crashed");
     this.registerListener("GeckoView:FlushSessionState");
+    this.registerListener("GeckoView:PageStoppedOnInit");
   }
 
   onDisable() {
     debug `onDisable`;
+    Cu.reportError("sferrog onDisable");
 
     if (this.progressFilter) {
       this.progressFilter.removeProgressListener(this);
@@ -178,6 +185,17 @@ class GeckoViewProgress extends GeckoViewModule {
     switch (aEvent) {
       case "GeckoView:FlushSessionState":
         this.messageManager.sendAsyncMessage("GeckoView:FlushSessionState");
+        break;
+      case "GeckoView:PageStoppedOnInit":
+        if (this._inProgress) {
+          const message = {
+            type: "GeckoView:PageStop",
+            success: true,
+          };
+
+          this._inProgress = false;
+          this.eventDispatcher.sendRequest(message);
+        }
         break;
     }
   }

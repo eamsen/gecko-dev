@@ -153,7 +153,7 @@ import java.util.Map;
         WebExtension.MessageDelegate delegate = null;
 
         if (sender.session != null) {
-            delegate = sender.session.getMessageDelegate(nativeApp);
+            delegate = sender.session.getMessageDelegate(sender.webExtension, nativeApp);
         } else if (sender.environmentType == WebExtension.MessageSender.ENV_TYPE_EXTENSION) {
             delegate = sender.webExtension.messageDelegates.get(nativeApp);
         }
@@ -239,6 +239,9 @@ import java.util.Map;
 
     public void handleMessage(final String event, final GeckoBundle message,
                               final EventCallback callback, final GeckoSession session) {
+
+        Log.e("sferrog", "handleMessage " + event + " " + message.toString());
+
         if ("GeckoView:WebExtension:Disconnect".equals(event)) {
             disconnect(message.getLong("portId", -1), callback);
             return;

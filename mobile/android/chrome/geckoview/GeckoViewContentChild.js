@@ -397,6 +397,7 @@ class GeckoViewContentChild extends GeckoViewChildModule {
         }
         break;
       case "pagehide":
+        debug `sferrog pagehide: ${aEvent}`;
         if (aEvent.target === content.document) {
           this._autoFill.clearElements();
         }

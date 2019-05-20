@@ -25,8 +25,8 @@ public final class ThreadUtils {
         THROW,
     }
 
-    private static final Thread sUiThread = Looper.getMainLooper().getThread();
-    private static final Handler sUiHandler = new Handler(Looper.getMainLooper());
+    private static Thread sUiThread = Looper.getMainLooper().getThread();
+    private static Handler sUiHandler = new Handler(Looper.getMainLooper());
 
     private static volatile Thread sBackgroundThread;
 
@@ -76,6 +76,11 @@ public final class ThreadUtils {
             }
             Log.w(LOGTAG, "----");
         }
+    }
+
+    public static void setUiLooperForTesting(final Looper looper) {
+        sUiThread = looper.getThread();
+        sUiHandler = new Handler(looper);
     }
 
     public static void setBackgroundThread(final Thread thread) {

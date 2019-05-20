@@ -33,6 +33,9 @@ var ModuleManager = {
   },
 
   init(aBrowser, aModules) {
+    const self = this;
+    debug `sferrog [id=${self._sferrog}] init ${window.location.href}`;
+
     const MODULES_INIT_PROBE =
       new HistogramStopwatch("GV_STARTUP_MODULES_MS", aBrowser);
 
@@ -43,7 +46,6 @@ var ModuleManager = {
     this._settings = initData.settings;
     this._frozenSettings = Object.freeze(Object.assign({}, this._settings));
 
-    const self = this;
     this._modules = new Map((function* () {
       for (const module of aModules) {
         yield [
@@ -57,7 +59,9 @@ var ModuleManager = {
       }
     })());
 
+    debug `sferrog appendingChild browser`;
     window.document.documentElement.appendChild(aBrowser);
+    debug `sferrog progressListener added`;
 
     WindowEventDispatcher.registerListener(this, [
       "GeckoView:UpdateModuleState",
@@ -72,7 +76,8 @@ var ModuleManager = {
       module.onInit();
     });
 
-    window.addEventListener("unload", () => {
+    window.addEventListener("unload", event => {
+      debug `sferrog [id=${self._sferrog}] unload ${window.location.href}`;
       this.forEach(module => {
         module.enabled = false;
         module.onDestroy();
@@ -234,6 +239,8 @@ var ModuleManager = {
   },
 };
 
+ModuleManager._sferrog = Math.random() * Number.MAX_SAFE_INTEGER;
+
 /**
  * ModuleInfo is the structure used by ModuleManager to represent individual
  * modules. It is responsible for loading the module JSM file if necessary,
@@ -378,6 +385,7 @@ class ModuleInfo {
 }
 
 function createBrowser() {
+  debug `sferrog createBrowser()`;
   const browser = window.browser = document.createElement("browser");
   // Identify this `<browser>` element uniquely to Marionette, devtools, etc.
   browser.permanentKey = {};

@@ -1335,6 +1335,7 @@ import android.view.inputmethod.EditorInfo;
                                    /* toggleSoftInput */ false);
                 }
 
+                Log.e("sferrog", "mFocusedChild = " + child);
                 mFocusedChild = child;
                 mNeedSync = false;
                 mText.syncShadowText(/* listener */ null);
@@ -1352,6 +1353,7 @@ import android.view.inputmethod.EditorInfo;
 
             case SessionTextInput.EditableListener.NOTIFY_IME_OF_BLUR:
                 if (mFocusedChild != null) {
+                    Log.e("sferrog", "mFocusedChild = null");
                     mFocusedChild = null;
                     icRestartInput(GeckoSession.TextInputDelegate.RESTART_REASON_BLUR,
                                    /* toggleSoftInput */ true);
@@ -1479,12 +1481,12 @@ import android.view.inputmethod.EditorInfo;
             assertOnIcThread();
         }
 
+        Log.e("sferrog", "icRestartInput(this=" + this.hashCode() + ", reason=" + reason + ")", new RuntimeException());
+
         ThreadUtils.postToUiThread(new Runnable() {
             @Override
             public void run() {
-                if (DEBUG) {
-                    Log.d(LOGTAG, "restartInput(" + reason + ", " + toggleSoftInput + ')');
-                }
+                Log.d("sferrog", "restartInput(" + reason + ", " + toggleSoftInput + ')');
 
                 if (toggleSoftInput) {
                     mSoftInputReentrancyGuard.incrementAndGet();
@@ -1492,7 +1494,10 @@ import android.view.inputmethod.EditorInfo;
 
                 final GeckoSession session = mSession.get();
                 if (session != null) {
+                    Log.e("sferrog", "restartInput(" + session.identity + ")");
                     session.getTextInput().getDelegate().restartInput(session, reason);
+                } else {
+                    Log.e("sferrog", "restartInput session is null.");
                 }
 
                 if (!toggleSoftInput) {

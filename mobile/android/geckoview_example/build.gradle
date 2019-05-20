@@ -22,6 +22,12 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
 
+    if (mozconfig.substs.MOZ_ARTIFACT_BUILDS) {
+        packagingOptions {
+            doNotStrip "**/*.so"
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled false

@@ -359,6 +359,7 @@ import java.lang.reflect.Proxy;
         view.post(new Runnable() {
             @Override
             public void run() {
+                Log.d("sferrog", "restartInput(RESTART_REASON_CONTENT_CHANGE)");
                 getInputDelegate().restartInput(mSession, GeckoSession.TextInputDelegate.RESTART_REASON_CONTENT_CHANGE);
             }
         });

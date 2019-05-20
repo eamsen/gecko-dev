@@ -119,6 +119,12 @@ android {
         buildConfigField 'boolean', 'MOZILLA_OFFICIAL', mozconfig.substs.MOZILLA_OFFICIAL ? 'true' : 'false';
     }
 
+    if (mozconfig.substs.MOZ_ARTIFACT_BUILDS) {
+        packagingOptions {
+            doNotStrip "**/*.so"
+        }
+    }
+
     project.configureProductFlavors.delegate = it
     project.configureProductFlavors()
 

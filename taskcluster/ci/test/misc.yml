@@ -11,10 +11,6 @@ geckoview-junit:
     e10s: true
     target: geckoview-androidTest.apk
     max-run-time: 3600
-    tier:
-        by-test-platform:
-            android-em-7.*: 3
-            default: default
     chunks:
         by-test-platform:
             android-em-4.3-arm7-api-16-ccov/debug: 8
@@ -23,7 +19,7 @@ geckoview-junit:
             default: 1
     run-on-projects:
         by-test-platform:
-            android-em-4.3-arm7-api-16/opt: ['try']
+            android-em-7.0-x86_64/opt: ['try']
             default: built-projects
     mozharness:
         script: android_emulator_unittest.py
