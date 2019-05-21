@@ -17,6 +17,7 @@ import org.mozilla.geckoview.GeckoSessionSettings;
 import org.mozilla.geckoview.GeckoView;
 import org.mozilla.geckoview.WebExtension;
 import org.mozilla.geckoview.WebRequestError;
+import org.mozilla.geckoview.StorageController;
 
 import android.Manifest;
 import android.app.DownloadManager;
@@ -266,7 +267,25 @@ public class GeckoViewActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_reload:
-                mGeckoSession.reload();
+                sGeckoRuntime.getStorageController()
+                    .clearData(StorageController.ClearFlags.ALL)
+                    .then(new GeckoResult.OnValueListener<Void, Void>() {
+                        @Override
+                        public GeckoResult<Void> onValue(final Void response)
+                                throws Throwable {
+                            Log.d(LOGTAG, "clearData success");
+                            GeckoViewActivity.this.mGeckoSession.reload();
+                            return null;
+                        }
+                    }, new GeckoResult.OnExceptionListener<Void>() {
+                        @Override
+                        public GeckoResult<Void> onException(final Throwable exception)
+                                throws Throwable {
+                            Log.d(LOGTAG, "clearData error");
+                            GeckoViewActivity.this.mGeckoSession.reload();
+                            return null;
+                        }
+                    });
                 break;
             case R.id.action_forward:
                 mGeckoSession.goForward();
