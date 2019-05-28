@@ -177,6 +177,7 @@ public class GeckoViewActivity extends AppCompatActivity {
                 .useMultiprocess(mUseMultiprocess)
                 .usePrivateMode(mUsePrivateBrowsing)
                 .useTrackingProtection(mUseTrackingProtection)
+                .contextId("rabbit1")
                 .fullAccessibilityTree(mFullAccessibilityTree)
                 .build());
 
@@ -268,7 +269,9 @@ public class GeckoViewActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.action_reload:
                 sGeckoRuntime.getStorageController()
-                    .clearData(StorageController.ClearFlags.ALL)
+                    .clearDataForSessionContext("rabbit2");
+                GeckoViewActivity.this.mGeckoSession.reload();
+                    /*.clearData(StorageController.ClearFlags.ALL)
                     .then(new GeckoResult.OnValueListener<Void, Void>() {
                         @Override
                         public GeckoResult<Void> onValue(final Void response)
@@ -282,10 +285,9 @@ public class GeckoViewActivity extends AppCompatActivity {
                         public GeckoResult<Void> onException(final Throwable exception)
                                 throws Throwable {
                             Log.d(LOGTAG, "clearData error");
-                            GeckoViewActivity.this.mGeckoSession.reload();
                             return null;
                         }
-                    });
+                    });*/
                 break;
             case R.id.action_forward:
                 mGeckoSession.goForward();
