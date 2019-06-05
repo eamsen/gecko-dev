@@ -398,17 +398,26 @@ public class GeckoViewActivity extends AppCompatActivity {
             sGeckoRuntime = GeckoRuntime.create(this, runtimeSettingsBuilder.build());
             // sGeckoRuntime.registerWebExtension(new WebExtension(
                   // "resource://android/assets/ublock/",
-                  // "ublock"));
+                  // "ublock",
+                  // WebExtension.Flags.ALLOW_CONTENT_MESSAGING));
             // sGeckoRuntime.registerWebExtension(new WebExtension(
                   // "resource://android/assets/ghostery/",
                   // "ghostery"));
-            sGeckoRuntime.registerWebExtension(new WebExtension(
-                  "resource://android/assets/blockrz/",
-                  "blockrz"));
+            // sGeckoRuntime.registerWebExtension(new WebExtension(
+                  // "resource://android/assets/blockrz/",
+                  // "blockrz",
+                  // WebExtension.Flags.ALLOW_CONTENT_MESSAGING));
             // sGeckoRuntime.registerWebExtension(new WebExtension(
                   // "resource://android/assets/cbext/",
                   // "cbext"));
         }
+
+        sGeckoRuntime.getSettings().getContentBlocking().setCategories(
+            // ContentBlocking.NONE);
+            ContentBlocking.AT_STRICT);
+            // ContentBlocking.AT_DEFAULT);
+            // ContentBlocking.AD_ALL);
+            // ContentBlocking.AT_ALL | ContentBlocking.AD_ALL);
 
         if(savedInstanceState == null) {
             mGeckoSession = (GeckoSession)getIntent().getParcelableExtra("session");
@@ -432,14 +441,6 @@ public class GeckoViewActivity extends AppCompatActivity {
         }
 
         mLocationView.setCommitListener(mCommitListener);
-
-
-        sGeckoRuntime.getSettings().getContentBlocking().setCategories(
-            ContentBlocking.NONE);
-            // ContentBlocking.AT_STRICT);
-            // ContentBlocking.AT_DEFAULT);
-            // ContentBlocking.AD_ALL);
-            // ContentBlocking.AT_ALL | ContentBlocking.AD_ALL);
     }
 
     private GeckoSession createSession() {
