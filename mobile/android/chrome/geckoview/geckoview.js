@@ -671,6 +671,21 @@ function startup() {
       name: "GeckoViewAutofill",
       onInit: {
         frameScript: "chrome://geckoview/content/GeckoViewAutofillChild.js",
+        actors: {
+          FormAutofill: {
+            parent: {
+              moduleURI: "resource://gre/modules/FormAutofillParent.jsm",
+            },
+            child: {
+              moduleURI: "resource://gre/modules/FormAutofillChild.jsm",
+              events: {
+                focusin: {},
+                DOMFormBeforeSubmit: {},
+              },
+            },
+            allFrames: true,
+          },
+        },
       },
     },
     {

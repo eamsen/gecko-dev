@@ -280,7 +280,7 @@ public final class GeckoRuntimeSettings extends RuntimeSettings {
         /**
          * Set whether login forms should be filled automatically if only one
          * viable candidate is provided via
-         * {@link Autocomplete.LoginStorageDelegate#onLoginFetch onLoginFetch}.
+         * {@link Autocomplete.StorageDelegate#onLoginFetch onLoginFetch}.
          *
          * @param enabled A flag determining whether login autofill should be
          *                enabled.
@@ -1140,7 +1140,7 @@ public final class GeckoRuntimeSettings extends RuntimeSettings {
     /**
      * Set whether login forms should be filled automatically if only one
      * viable candidate is provided via
-     * {@link Autocomplete.LoginStorageDelegate#onLoginFetch onLoginFetch}.
+     * {@link Autocomplete.StorageDelegate#onLoginFetch onLoginFetch}.
      *
      * @param enabled A flag determining whether login autofill should be
      *                enabled.

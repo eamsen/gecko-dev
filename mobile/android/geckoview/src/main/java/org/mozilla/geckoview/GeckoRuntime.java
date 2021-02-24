@@ -172,13 +172,13 @@ public final class GeckoRuntime implements Parcelable {
     private final WebExtensionController mWebExtensionController;
     private WebPushController mPushController;
     private final ContentBlockingController mContentBlockingController;
-    private final Autocomplete.LoginStorageProxy mLoginStorageProxy;
+    private final Autocomplete.StorageProxy mAutocompleteStorageProxy;
     private final ProfilerController mProfilerController;
 
     private GeckoRuntime() {
         mWebExtensionController = new WebExtensionController(this);
         mContentBlockingController = new ContentBlockingController();
-        mLoginStorageProxy = new Autocomplete.LoginStorageProxy();
+        mAutocompleteStorageProxy = new Autocomplete.StorageProxy();
         mProfilerController = new ProfilerController();
 
         if (sRuntime != null) {
@@ -539,28 +539,28 @@ public final class GeckoRuntime implements Parcelable {
     }
 
     /**
-     * Set the {@link Autocomplete.LoginStorageDelegate} instance on this runtime.
-     * This delegate is required for handling login storage requests.
+     * Set the {@link Autocomplete.StorageDelegate} instance on this runtime.
+     * This delegate is required for handling autocomplete storage requests.
      *
-     * @param delegate The {@link Autocomplete.LoginStorageDelegate} handling login storage
-     *                 requests.
+     * @param delegate The {@link Autocomplete.StorageDelegate} handling
+     *                 autocomplete storage requests.
      */
     @UiThread
-    public void setLoginStorageDelegate(
-            final @Nullable Autocomplete.LoginStorageDelegate delegate) {
+    public void setAutocompleteStorageDelegate(
+            final @Nullable Autocomplete.StorageDelegate delegate) {
         ThreadUtils.assertOnUiThread();
-        mLoginStorageProxy.setDelegate(delegate);
+        mAutocompleteStorageProxy.setDelegate(delegate);
     }
 
     /**
-     * Get the {@link Autocomplete.LoginStorageDelegate} instance set on this runtime.
+     * Get the {@link Autocomplete.StorageDelegate} instance set on this runtime.
      *
-     * @return The {@link Autocomplete.LoginStorageDelegate} set on this runtime.
+     * @return The {@link Autocomplete.StorageDelegate} set on this runtime.
      */
     @UiThread
-    public @Nullable Autocomplete.LoginStorageDelegate getLoginStorageDelegate() {
+    public @Nullable Autocomplete.StorageDelegate getAutocompleteStorageDelegate() {
         ThreadUtils.assertOnUiThread();
-        return mLoginStorageProxy.getDelegate();
+        return mAutocompleteStorageProxy.getDelegate();
     }
 
     @UiThread
