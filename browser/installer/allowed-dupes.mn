@@ -59,6 +59,34 @@ browser/chrome/browser/res/payments/formautofill/editCreditCard.xhtml
 browser/features/formautofill@mozilla.org/chrome/content/autofillEditForms.js
 browser/chrome/browser/res/payments/formautofill/autofillEditForms.js
 
+# Bug 1691821 - Share toolkit modules with the system extension.
+modules/FormAutofill.jsm
+chrome/toolkit/res/FormAutofill.jsm
+modules/FormAutofillChild.jsm
+chrome/toolkit/res/FormAutofillChild.jsm
+modules/FormAutofillSync.jsm
+chrome/toolkit/res/FormAutofillSync.jsm
+modules/FormAutofillNameUtils.jsm
+chrome/toolkit/res/FormAutofillNameUtils.jsm
+modules/FormAutofillPreferences.jsm
+chrome/toolkit/res/FormAutofillPreferences.jsm
+modules/FormAutofillParent.jsm
+chrome/toolkit/res/FormAutofillParent.jsm
+modules/FormAutofillContent.jsm
+chrome/toolkit/res/FormAutofillContent.jsm
+modules/FormAutofillUtils.jsm
+chrome/toolkit/res/FormAutofillUtils.jsm
+modules/FormAutofillHeuristics.jsm
+chrome/toolkit/res/FormAutofillHeuristics.jsm
+modules/FormAutofillHandler.jsm
+chrome/toolkit/res/FormAutofillHandler.jsm
+modules/FormAutofillStorageBase.jsm
+chrome/toolkit/res/FormAutofillStorageBase.jsm
+modules/FormAutofillStorage.jsm
+chrome/toolkit/res/FormAutofillStorage.jsm
+modules/ProfileAutoCompleteResult.jsm
+chrome/toolkit/res/ProfileAutoCompleteResult.jsm
+
 # Bug 1451050 - Remote settings empty dumps (will be populated with data eventually)
 browser/defaults/settings/pinning/pins.json
 browser/defaults/settings/main/example.json

@@ -7,8 +7,6 @@
 DEFINES["MOZ_APP_VERSION"] = CONFIG["MOZ_APP_VERSION"]
 DEFINES["MOZ_APP_MAXVERSION"] = CONFIG["MOZ_APP_MAXVERSION"]
 
-DIRS += ["locales"]
-
 FINAL_TARGET_FILES.features["formautofill@mozilla.org"] += [
     "api.js",
     "background.js",
@@ -32,22 +30,7 @@ elif CONFIG["MOZ_WIDGET_TOOLKIT"] == "windows":
         "skin/windows/editDialog.css",
     ]
 
-BROWSER_CHROME_MANIFESTS += [
-    "test/browser/browser.ini",
-    "test/browser/creditCard/browser.ini",
-    "test/browser/focus-leak/browser.ini",
-]
-
-XPCSHELL_TESTS_MANIFESTS += ["test/unit/xpcshell.ini"]
-
-MOCHITEST_MANIFESTS += [
-    "test/mochitest/creditCard/mochitest.ini",
-    "test/mochitest/mochitest.ini",
-]
-
 JAR_MANIFESTS += ["jar.mn"]
-
-SPHINX_TREES["docs"] = "docs"
 
 with Files("**"):
     BUG_COMPONENT = ("Toolkit", "Form Autofill")

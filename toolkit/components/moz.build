@@ -102,7 +102,7 @@ if CONFIG["BUILD_CTYPES"]:
     DIRS += ["ctypes"]
 
 if CONFIG["MOZ_XUL"]:
-    DIRS += ["autocomplete", "printingui", "satchel"]
+    DIRS += ["autocomplete", "formautofill", "printingui", "satchel"]
 
 DIRS += ["captivedetect"]
 
