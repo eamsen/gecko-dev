@@ -266,7 +266,7 @@
     _onCollapse() {
       if (this.showWarningText) {
         let { FormAutofillParent } = ChromeUtils.import(
-          "resource://formautofill/FormAutofillParent.jsm"
+          "resource://gre/modules/FormAutofillParent.jsm"
         );
         FormAutofillParent.removeMessageObserver(this);
       }
@@ -308,7 +308,7 @@
 
       if (this.showWarningText) {
         let { FormAutofillParent } = ChromeUtils.import(
-          "resource://formautofill/FormAutofillParent.jsm"
+          "resource://gre/modules/FormAutofillParent.jsm"
         );
         FormAutofillParent.addMessageObserver(this);
         this.updateWarningNote();

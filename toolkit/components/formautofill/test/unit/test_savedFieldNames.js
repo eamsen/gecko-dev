@@ -8,7 +8,7 @@ let FormAutofillStatus;
 
 add_task(async function setup() {
   ({ FormAutofillStatus } = ChromeUtils.import(
-    "resource://formautofill/FormAutofillParent.jsm"
+    "resource://gre/modules/FormAutofillParent.jsm"
   ));
 });
 
@@ -44,7 +44,7 @@ add_task(async function test_profileSavedFieldNames_observe() {
 
 add_task(async function test_profileSavedFieldNames_update() {
   registerCleanupFunction(function cleanup() {
-    Services.prefs.clearUserPref("extensions.formautofill.addresses.enabled");
+    Services.prefs.clearUserPref("toolkit.formautofill.addresses.enabled");
   });
 
   Object.defineProperty(

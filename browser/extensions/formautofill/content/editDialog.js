@@ -9,14 +9,14 @@
 
 // eslint-disable-next-line no-unused-vars
 const { FormAutofill } = ChromeUtils.import(
-  "resource://formautofill/FormAutofill.jsm"
+  "resource://gre/modules/FormAutofill.jsm"
 );
 const { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
 
 ChromeUtils.defineModuleGetter(
   this,
   "formAutofillStorage",
-  "resource://formautofill/FormAutofillStorage.jsm"
+  "resource://gre/modules/FormAutofillStorage.jsm"
 );
 
 class AutofillEditDialog {

@@ -38,7 +38,7 @@ var gExceptionPaths = [
 
   // Exclude all the metadata paths under the country metadata folder because these
   // paths will be concatenated in FormAutofillUtils.jsm based on different country/region.
-  "resource://formautofill/addressmetadata/",
+  "resource://gre/modules/addressmetadata/",
 
   // Exclude all search-extensions because they aren't referenced by filename
   "resource://search-extensions/",
@@ -352,7 +352,7 @@ function trackChromeUri(uri) {
   gChromeMap.set(getBaseUriForChromeUri(uri), uri);
 }
 
-// formautofill registers resource://formautofill/ and
+// formautofill registers resource://gre/modules/ and
 // chrome://formautofill/content/ dynamically at runtime.
 // Bug 1480276 is about addressing this without this hard-coding.
 trackResourcePrefix("formautofill");

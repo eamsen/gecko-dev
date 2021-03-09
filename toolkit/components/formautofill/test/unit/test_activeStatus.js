@@ -8,7 +8,7 @@ let FormAutofillStatus;
 
 add_task(async function setup() {
   ({ FormAutofillStatus } = ChromeUtils.import(
-    "resource://formautofill/FormAutofillParent.jsm"
+    "resource://gre/modules/FormAutofillParent.jsm"
   ));
 });
 
@@ -45,12 +45,12 @@ add_task(async function test_activeStatus_observe() {
   FormAutofillStatus.observe(
     null,
     "nsPref:changed",
-    "extensions.formautofill.addresses.enabled"
+    "toolkit.formautofill.addresses.enabled"
   );
   FormAutofillStatus.observe(
     null,
     "nsPref:changed",
-    "extensions.formautofill.creditCards.enabled"
+    "toolkit.formautofill.creditCards.enabled"
   );
   Assert.equal(FormAutofillStatus.onStatusChanged.called, false);
 
@@ -60,12 +60,12 @@ add_task(async function test_activeStatus_observe() {
   FormAutofillStatus.observe(
     null,
     "nsPref:changed",
-    "extensions.formautofill.addresses.enabled"
+    "toolkit.formautofill.addresses.enabled"
   );
   FormAutofillStatus.observe(
     null,
     "nsPref:changed",
-    "extensions.formautofill.creditCards.enabled"
+    "toolkit.formautofill.creditCards.enabled"
   );
   Assert.equal(FormAutofillStatus.onStatusChanged.called, true);
 
@@ -98,8 +98,8 @@ add_task(async function test_activeStatus_observe() {
 
 add_task(async function test_activeStatus_computeStatus() {
   registerCleanupFunction(function cleanup() {
-    Services.prefs.clearUserPref("extensions.formautofill.addresses.enabled");
-    Services.prefs.clearUserPref("extensions.formautofill.creditCards.enabled");
+    Services.prefs.clearUserPref("toolkit.formautofill.addresses.enabled");
+    Services.prefs.clearUserPref("toolkit.formautofill.creditCards.enabled");
   });
 
   sinon.stub(
@@ -118,22 +118,13 @@ add_task(async function test_activeStatus_computeStatus() {
   );
 
   // pref is enabled and profile is empty.
-  Services.prefs.setBoolPref("extensions.formautofill.addresses.enabled", true);
-  Services.prefs.setBoolPref(
-    "extensions.formautofill.creditCards.enabled",
-    true
-  );
+  Services.prefs.setBoolPref("toolkit.formautofill.addresses.enabled", true);
+  Services.prefs.setBoolPref("toolkit.formautofill.creditCards.enabled", true);
   Assert.equal(FormAutofillStatus.computeStatus(), false);
 
   // pref is disabled and profile is empty.
-  Services.prefs.setBoolPref(
-    "extensions.formautofill.addresses.enabled",
-    false
-  );
-  Services.prefs.setBoolPref(
-    "extensions.formautofill.creditCards.enabled",
-    false
-  );
+  Services.prefs.setBoolPref("toolkit.formautofill.addresses.enabled", false);
+  Services.prefs.setBoolPref("toolkit.formautofill.creditCards.enabled", false);
   Assert.equal(FormAutofillStatus.computeStatus(), false);
 
   FormAutofillStatus.formAutofillStorage.addresses.getSavedFieldNames.returns(
@@ -142,35 +133,20 @@ add_task(async function test_activeStatus_computeStatus() {
   FormAutofillStatus.observe(null, "formautofill-storage-changed", "add");
 
   // pref is enabled and profile is not empty.
-  Services.prefs.setBoolPref("extensions.formautofill.addresses.enabled", true);
-  Services.prefs.setBoolPref("extensions.formautofill.addresses.enabled", true);
+  Services.prefs.setBoolPref("toolkit.formautofill.addresses.enabled", true);
+  Services.prefs.setBoolPref("toolkit.formautofill.addresses.enabled", true);
   Assert.equal(FormAutofillStatus.computeStatus(), true);
 
   // pref is partial enabled and profile is not empty.
-  Services.prefs.setBoolPref("extensions.formautofill.addresses.enabled", true);
-  Services.prefs.setBoolPref(
-    "extensions.formautofill.creditCards.enabled",
-    false
-  );
+  Services.prefs.setBoolPref("toolkit.formautofill.addresses.enabled", true);
+  Services.prefs.setBoolPref("toolkit.formautofill.creditCards.enabled", false);
   Assert.equal(FormAutofillStatus.computeStatus(), true);
-  Services.prefs.setBoolPref(
-    "extensions.formautofill.addresses.enabled",
-    false
-  );
-  Services.prefs.setBoolPref(
-    "extensions.formautofill.creditCards.enabled",
-    true
-  );
+  Services.prefs.setBoolPref("toolkit.formautofill.addresses.enabled", false);
+  Services.prefs.setBoolPref("toolkit.formautofill.creditCards.enabled", true);
   Assert.equal(FormAutofillStatus.computeStatus(), true);
 
   // pref is disabled and profile is not empty.
-  Services.prefs.setBoolPref(
-    "extensions.formautofill.addresses.enabled",
-    false
-  );
-  Services.prefs.setBoolPref(
-    "extensions.formautofill.creditCards.enabled",
-    false
-  );
+  Services.prefs.setBoolPref("toolkit.formautofill.addresses.enabled", false);
+  Services.prefs.setBoolPref("toolkit.formautofill.creditCards.enabled", false);
   Assert.equal(FormAutofillStatus.computeStatus(), false);
 });

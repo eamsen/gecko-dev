@@ -63,7 +63,7 @@ const PREFS_WHITELIST = [
   "doh-rollout.",
   "dom.",
   "extensions.checkCompatibility",
-  "extensions.formautofill.",
+  "toolkit.formautofill.",
   "extensions.lastAppVersion",
   "fission.autostart",
   "font.",

@@ -6,17 +6,17 @@
 
 const { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
 const { FormAutofill } = ChromeUtils.import(
-  "resource://formautofill/FormAutofill.jsm"
+  "resource://gre/modules/FormAutofill.jsm"
 );
 const { FormAutofillUtils } = ChromeUtils.import(
-  "resource://formautofill/FormAutofillUtils.jsm"
+  "resource://gre/modules/FormAutofillUtils.jsm"
 );
 const { OSKeyStoreTestUtils } = ChromeUtils.import(
   "resource://testing-common/OSKeyStoreTestUtils.jsm"
 );
 
 let { formAutofillStorage } = ChromeUtils.import(
-  "resource://formautofill/FormAutofillStorage.jsm"
+  "resource://gre/modules/FormAutofillStorage.jsm"
 );
 
 const {

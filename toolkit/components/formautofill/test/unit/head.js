@@ -142,7 +142,7 @@ async function initProfileStorage(
   collectionName = "addresses"
 ) {
   let { FormAutofillStorage } = ChromeUtils.import(
-    "resource://formautofill/FormAutofillStorage.jsm",
+    "resource://gre/modules/FormAutofillStorage.jsm",
     null
   );
   let path = getTempFile(fileName).path;
@@ -209,10 +209,10 @@ var AddressDataLoader, FormAutofillUtils;
 async function runHeuristicsTest(patterns, fixturePathPrefix) {
   add_task(async function setup() {
     ({ FormAutofillHeuristics, LabelUtils } = ChromeUtils.import(
-      "resource://formautofill/FormAutofillHeuristics.jsm"
+      "resource://gre/modules/FormAutofillHeuristics.jsm"
     ));
     ({ AddressDataLoader, FormAutofillUtils } = ChromeUtils.import(
-      "resource://formautofill/FormAutofillUtils.jsm"
+      "resource://gre/modules/FormAutofillUtils.jsm"
     ));
   });
 
@@ -300,33 +300,25 @@ function objectMatches(object, fields) {
 }
 
 add_task(async function head_initialize() {
-  Services.prefs.setStringPref("extensions.formautofill.available", "on");
+  Services.prefs.setStringPref("toolkit.formautofill.available", "on");
   Services.prefs.setBoolPref("extensions.experiments.enabled", true);
   Services.prefs.setBoolPref(
-    "extensions.formautofill.creditCards.available",
+    "toolkit.formautofill.creditCards.available",
     true
   );
-  Services.prefs.setBoolPref(
-    "extensions.formautofill.creditCards.enabled",
-    true
-  );
-  Services.prefs.setBoolPref(
-    "extensions.formautofill.heuristics.enabled",
-    true
-  );
-  Services.prefs.setBoolPref("extensions.formautofill.section.enabled", true);
+  Services.prefs.setBoolPref("toolkit.formautofill.creditCards.enabled", true);
+  Services.prefs.setBoolPref("toolkit.formautofill.heuristics.enabled", true);
+  Services.prefs.setBoolPref("toolkit.formautofill.section.enabled", true);
   Services.prefs.setBoolPref("dom.forms.autocomplete.formautofill", true);
 
   // Clean up after every test.
   registerCleanupFunction(function head_cleanup() {
-    Services.prefs.clearUserPref("extensions.formautofill.available");
+    Services.prefs.clearUserPref("toolkit.formautofill.available");
     Services.prefs.clearUserPref("extensions.experiments.enabled");
-    Services.prefs.clearUserPref(
-      "extensions.formautofill.creditCards.available"
-    );
-    Services.prefs.clearUserPref("extensions.formautofill.creditCards.enabled");
-    Services.prefs.clearUserPref("extensions.formautofill.heuristics.enabled");
-    Services.prefs.clearUserPref("extensions.formautofill.section.enabled");
+    Services.prefs.clearUserPref("toolkit.formautofill.creditCards.available");
+    Services.prefs.clearUserPref("toolkit.formautofill.creditCards.enabled");
+    Services.prefs.clearUserPref("toolkit.formautofill.heuristics.enabled");
+    Services.prefs.clearUserPref("toolkit.formautofill.section.enabled");
     Services.prefs.clearUserPref("dom.forms.autocomplete.formautofill");
   });
 

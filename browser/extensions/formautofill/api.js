@@ -16,17 +16,17 @@ const { XPCOMUtils } = ChromeUtils.import(
 ChromeUtils.defineModuleGetter(
   this,
   "FormAutofill",
-  "resource://formautofill/FormAutofill.jsm"
+  "resource://gre/modules/FormAutofill.jsm"
 );
 ChromeUtils.defineModuleGetter(
   this,
   "FormAutofillStatus",
-  "resource://formautofill/FormAutofillParent.jsm"
+  "resource://gre/modules/FormAutofillParent.jsm"
 );
 ChromeUtils.defineModuleGetter(
   this,
   "FormAutofillParent",
-  "resource://formautofill/FormAutofillParent.jsm"
+  "resource://gre/modules/FormAutofillParent.jsm"
 );
 ChromeUtils.defineModuleGetter(
   this,
@@ -79,17 +79,17 @@ function ensureCssLoaded(domWindow) {
 
 function isAvailable() {
   let availablePref = Services.prefs.getCharPref(
-    "extensions.formautofill.available"
+    "toolkit.formautofill.available"
   );
   if (availablePref == "on") {
     return true;
   } else if (availablePref == "detect") {
     let region = Services.prefs.getCharPref("browser.search.region", "");
     let supportedCountries = Services.prefs
-      .getCharPref("extensions.formautofill.supportedCountries")
+      .getCharPref("toolkit.formautofill.supportedCountries")
       .split(",");
     if (
-      !Services.prefs.getBoolPref("extensions.formautofill.supportRTL") &&
+      !Services.prefs.getBoolPref("toolkit.formautofill.supportRTL") &&
       Services.locale.isAppLocaleRTL
     ) {
       return false;
@@ -186,10 +186,10 @@ this.formautofill = class extends ExtensionAPI {
 
     ChromeUtils.registerWindowActor("FormAutofill", {
       parent: {
-        moduleURI: "resource://formautofill/FormAutofillParent.jsm",
+        moduleURI: "resource://gre/modules/FormAutofillParent.jsm",
       },
       child: {
-        moduleURI: "resource://formautofill/FormAutofillChild.jsm",
+        moduleURI: "resource://gre/modules/FormAutofillChild.jsm",
         events: {
           focusin: {},
           DOMFormBeforeSubmit: {},

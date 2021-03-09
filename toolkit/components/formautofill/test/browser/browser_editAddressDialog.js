@@ -1,7 +1,7 @@
 "use strict";
 
 const { FormAutofillUtils } = ChromeUtils.import(
-  "resource://formautofill/FormAutofillUtils.jsm"
+  "resource://gre/modules/FormAutofillUtils.jsm"
 );
 
 XPCOMUtils.defineLazyModuleGetters(this, {

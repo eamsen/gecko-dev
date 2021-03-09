@@ -133,7 +133,7 @@ add_task(async function check_fallback_for_mismatched_field() {
 // Display history search result if address autofill is disabled.
 add_task(async function check_search_result_for_pref_off() {
   await SpecialPowers.pushPrefEnv({
-    set: [["extensions.formautofill.addresses.enabled", false]],
+    set: [["toolkit.formautofill.addresses.enabled", false]],
   });
 
   await setInput("#tel", "");

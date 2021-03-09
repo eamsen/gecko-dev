@@ -27,7 +27,7 @@ add_task(async function test_active_delay() {
   await SpecialPowers.pushPrefEnv({
     set: [
       ["security.notification_enable_delay", 1000],
-      ["extensions.formautofill.reauth.enabled", false],
+      ["toolkit.formautofill.reauth.enabled", false],
     ],
   });
   await BrowserTestUtils.withNewTab({ gBrowser, url: CC_URL }, async function(
@@ -81,7 +81,7 @@ add_task(async function test_no_delay() {
   await SpecialPowers.pushPrefEnv({
     set: [
       ["security.notification_enable_delay", 1000],
-      ["extensions.formautofill.reauth.enabled", false],
+      ["toolkit.formautofill.reauth.enabled", false],
     ],
   });
   await BrowserTestUtils.withNewTab(

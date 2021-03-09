@@ -30,8 +30,8 @@ let TEST_ADDRESSES = [{
 add_task(async function setup_prefs() {
   await SpecialPowers.pushPrefEnv({
     set: [
-      ["extensions.formautofill.addresses.enabled", true],
-      ["extensions.formautofill.addresses.capture.enabled", true],
+      ["toolkit.formautofill.addresses.enabled", true],
+      ["toolkit.formautofill.addresses.capture.enabled", true],
     ],
   });
 });
@@ -42,7 +42,7 @@ initPopupListener();
 add_task(async function check_storage_after_form_submitted() {
   // We already verified the first time use case in browser test
   await SpecialPowers.pushPrefEnv({
-    "set": [["extensions.formautofill.firstTimeUse", false]],
+    "set": [["toolkit.formautofill.firstTimeUse", false]],
   });
 
   for (let key in TEST_ADDRESSES[0]) {

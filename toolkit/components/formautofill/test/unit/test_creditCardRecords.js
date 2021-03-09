@@ -16,7 +16,7 @@ const { CreditCard } = ChromeUtils.import(
 let FormAutofillStorage;
 add_task(async function setup() {
   ({ FormAutofillStorage } = ChromeUtils.import(
-    "resource://formautofill/FormAutofillStorage.jsm",
+    "resource://gre/modules/FormAutofillStorage.jsm",
     null
   ));
 });
@@ -843,10 +843,7 @@ add_task(async function test_getDuplicateGuidMatch() {
 });
 
 add_task(async function test_creditCardFillDisabled() {
-  Services.prefs.setBoolPref(
-    "extensions.formautofill.creditCards.enabled",
-    false
-  );
+  Services.prefs.setBoolPref("toolkit.formautofill.creditCards.enabled", false);
 
   let path = getTempFile(TEST_STORE_FILE_NAME).path;
   let profileStorage = new FormAutofillStorage(path);
@@ -858,15 +855,12 @@ add_task(async function test_creditCardFillDisabled() {
     "credit card records initialized and available."
   );
 
-  Services.prefs.setBoolPref(
-    "extensions.formautofill.creditCards.enabled",
-    true
-  );
+  Services.prefs.setBoolPref("toolkit.formautofill.creditCards.enabled", true);
 });
 
 add_task(async function test_creditCardFillUnavailable() {
   Services.prefs.setBoolPref(
-    "extensions.formautofill.creditCards.available",
+    "toolkit.formautofill.creditCards.available",
     false
   );
 
@@ -886,7 +880,7 @@ add_task(async function test_creditCardFillUnavailable() {
   }
 
   Services.prefs.setBoolPref(
-    "extensions.formautofill.creditCards.available",
+    "toolkit.formautofill.creditCards.available",
     true
   );
 });

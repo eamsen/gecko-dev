@@ -35,7 +35,7 @@ ChromeUtils.defineModuleGetter(
 ChromeUtils.defineModuleGetter(
   this,
   "FormAutofillUtils",
-  "resource://formautofill/FormAutofillUtils.jsm"
+  "resource://gre/modules/FormAutofillUtils.jsm"
 );
 ChromeUtils.defineModuleGetter(
   this,
@@ -52,7 +52,7 @@ XPCOMUtils.defineLazyGetter(this, "formAutofillStorage", () => {
   let storage;
   try {
     storage = ChromeUtils.import(
-      "resource://formautofill/FormAutofillStorage.jsm",
+      "resource://gre/modules/FormAutofillStorage.jsm",
       {}
     ).formAutofillStorage;
     storage.initialize();

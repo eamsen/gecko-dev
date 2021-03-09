@@ -20,10 +20,10 @@ add_task(async function() {
     sanitizeStorageObject,
     AutofillRecord,
     AddressesEngine,
-  } = ChromeUtils.import("resource://formautofill/FormAutofillSync.jsm", null));
+  } = ChromeUtils.import("resource://gre/modules/FormAutofillSync.jsm", null));
 });
 
-Services.prefs.setCharPref("extensions.formautofill.loglevel", "Trace");
+Services.prefs.setCharPref("toolkit.formautofill.loglevel", "Trace");
 initTestLogging("Trace");
 
 const TEST_STORE_FILE_NAME = "test-profile.json";

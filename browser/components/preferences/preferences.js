@@ -26,7 +26,7 @@ ChromeUtils.defineModuleGetter(
 ChromeUtils.defineModuleGetter(
   this,
   "formAutofillParent",
-  "resource://formautofill/FormAutofillParent.jsm"
+  "resource://gre/modules/FormAutofillParent.jsm"
 );
 
 XPCOMUtils.defineLazyGetter(this, "gSubDialog", function() {

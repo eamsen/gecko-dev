@@ -535,7 +535,7 @@ class TestFirefoxRefresh(MarionetteTestCase):
         self._formAutofillAvailable = self.runCode(
             """
           try {
-            global.formAutofillStorage = Cu.import("resource://formautofill/FormAutofillStorage.jsm", {}).formAutofillStorage;
+            global.formAutofillStorage = Cu.import("resource://gre/modules/FormAutofillStorage.jsm", {}).formAutofillStorage;
           } catch(e) {
             return false;
           }

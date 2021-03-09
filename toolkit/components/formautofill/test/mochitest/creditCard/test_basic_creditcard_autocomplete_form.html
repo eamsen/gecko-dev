@@ -141,7 +141,7 @@ add_task(async function check_search_result_for_pref_off() {
   await setupCreditCardStorage();
 
   await SpecialPowers.pushPrefEnv({
-    set: [["extensions.formautofill.creditCards.enabled", false]],
+    set: [["toolkit.formautofill.creditCards.enabled", false]],
   });
 
   await setInput("#cc-name", "");

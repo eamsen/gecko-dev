@@ -11,7 +11,7 @@ add_task(async function test_defaultTestEnvironment() {
 });
 
 add_task(async function test_unsupportedRegion() {
-  Services.prefs.setCharPref("extensions.formautofill.available", "detect");
+  Services.prefs.setCharPref("toolkit.formautofill.available", "detect");
   Services.prefs.setCharPref("browser.search.region", "ZZ");
   registerCleanupFunction(function cleanupRegion() {
     Services.prefs.clearUserPref("browser.search.region");
@@ -24,7 +24,7 @@ add_task(async function test_unsupportedRegion() {
 });
 
 add_task(async function test_supportedRegion() {
-  Services.prefs.setCharPref("extensions.formautofill.available", "detect");
+  Services.prefs.setCharPref("toolkit.formautofill.available", "detect");
   Services.prefs.setCharPref("browser.search.region", "US");
   registerCleanupFunction(function cleanupRegion() {
     Services.prefs.clearUserPref("browser.search.region");

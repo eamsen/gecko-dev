@@ -5,7 +5,6 @@ l10n:
     # browser and mobile/android l10n.tomls
     include:
         - browser/branding/official/locales/en-US
-        - browser/extensions/formautofill/locales/en-US
         - browser/extensions/report-site-issue/locales/en-US
         - browser/locales/en-US
         - devtools/client/locales/en-US
@@ -17,6 +16,7 @@ l10n:
         - netwerk/locales/en-US
         - security/manager/locales/en-US
         - services/sync/locales/en-US
+        - toolkit/components/formautofill/locales/en-US
         - toolkit/locales/en-US
         - tools/lint/l10n.yml
     # files not supported by compare-locales,

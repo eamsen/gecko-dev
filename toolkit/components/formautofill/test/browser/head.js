@@ -41,17 +41,17 @@ const CREDITCARD_FORM_IFRAME_URL =
   HTTP_TEST_PATH +
   "creditCard/autocomplete_creditcard_iframe.html";
 
-const FTU_PREF = "extensions.formautofill.firstTimeUse";
-const CREDITCARDS_USED_STATUS_PREF = "extensions.formautofill.creditCards.used";
+const FTU_PREF = "toolkit.formautofill.firstTimeUse";
+const CREDITCARDS_USED_STATUS_PREF = "toolkit.formautofill.creditCards.used";
 const ENABLED_AUTOFILL_ADDRESSES_PREF =
-  "extensions.formautofill.addresses.enabled";
+  "toolkit.formautofill.addresses.enabled";
 const ENABLED_AUTOFILL_ADDRESSES_CAPTURE_PREF =
-  "extensions.formautofill.addresses.capture.enabled";
+  "toolkit.formautofill.addresses.capture.enabled";
 const AUTOFILL_CREDITCARDS_AVAILABLE_PREF =
-  "extensions.formautofill.creditCards.available";
+  "toolkit.formautofill.creditCards.available";
 const ENABLED_AUTOFILL_CREDITCARDS_PREF =
-  "extensions.formautofill.creditCards.enabled";
-const SUPPORTED_COUNTRIES_PREF = "extensions.formautofill.supportedCountries";
+  "toolkit.formautofill.creditCards.enabled";
+const SUPPORTED_COUNTRIES_PREF = "toolkit.formautofill.supportedCountries";
 const SYNC_USERNAME_PREF = "services.sync.username";
 const SYNC_ADDRESSES_PREF = "services.sync.engine.addresses";
 const SYNC_CREDITCARDS_PREF = "services.sync.engine.creditcards";
@@ -200,7 +200,7 @@ async function focusAndWaitForFieldsIdentified(browserOrContext, selector) {
   /* eslint no-shadow: ["error", { "allow": ["selector", "previouslyFocused", "previouslyIdentified"] }] */
 
   const { FormAutofillParent } = ChromeUtils.import(
-    "resource://formautofill/FormAutofillParent.jsm"
+    "resource://gre/modules/FormAutofillParent.jsm"
   );
 
   // If the input is previously focused, no more notifications will be

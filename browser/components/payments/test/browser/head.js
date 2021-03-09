@@ -24,7 +24,7 @@ const { AppConstants } = ChromeUtils.import(
   "resource://gre/modules/AppConstants.jsm"
 );
 const { formAutofillStorage } = ChromeUtils.import(
-  "resource://formautofill/FormAutofillStorage.jsm"
+  "resource://gre/modules/FormAutofillStorage.jsm"
 );
 const { OSKeyStoreTestUtils } = ChromeUtils.import(
   "resource://testing-common/OSKeyStoreTestUtils.jsm"

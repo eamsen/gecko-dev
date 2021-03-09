@@ -28,13 +28,13 @@ const TEST_ADDRESSES = [{
 add_task(async function test_DE_is_valid_testcase() {
   await SpecialPowers.pushPrefEnv({
     set: [
-      ["extensions.formautofill.addresses.enabled", true],
-      ["extensions.formautofill.addresses.capture.enabled", true],
-      ["extensions.formautofill.supportedCountries", "US,CA,DE"],
+      ["toolkit.formautofill.addresses.enabled", true],
+      ["toolkit.formautofill.addresses.capture.enabled", true],
+      ["toolkit.formautofill.supportedCountries", "US,CA,DE"],
     ],
   });
   let chromeScript = SpecialPowers.loadChromeScript(function test_country_data() {
-    const {AddressDataLoader} = ChromeUtils.import("resource://formautofill/FormAutofillUtils.jsm");
+    const {AddressDataLoader} = ChromeUtils.import("resource://gre/modules/FormAutofillUtils.jsm");
     let data = AddressDataLoader.getData("DE");
     /* global addMessageListener */
     addMessageListener("CheckSubKeys", () => {
@@ -56,7 +56,7 @@ add_task(async function test_form_will_submit_without_sub_keys() {
       // This needs to match the country in the previous test and must have no sub_keys.
       ["browser.search.region", "DE"],
       // We already verified the first time use case in browser test
-      ["extensions.formautofill.firstTimeUse", false],
+      ["toolkit.formautofill.firstTimeUse", false],
     ],
   });
 

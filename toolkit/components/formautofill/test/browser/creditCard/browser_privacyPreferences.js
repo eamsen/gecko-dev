@@ -216,7 +216,7 @@ add_task(async function test_creditCardNotAvailable() {
 
 add_task(async function test_creditCardHiddenUI() {
   const AUTOFILL_CREDITCARDS_HIDE_UI_PREF =
-    "extensions.formautofill.creditCards.hideui";
+    "toolkit.formautofill.creditCards.hideui";
 
   await SpecialPowers.pushPrefEnv({
     set: [[AUTOFILL_CREDITCARDS_HIDE_UI_PREF, true]],

@@ -667,7 +667,7 @@ add_task(async function test_histogram() {
 
 add_task(async function test_submit_creditCard_new_with_hidden_ui() {
   const AUTOFILL_CREDITCARDS_HIDE_UI_PREF =
-    "extensions.formautofill.creditCards.hideui";
+    "toolkit.formautofill.creditCards.hideui";
 
   Services.telemetry.clearEvents();
   Services.telemetry.clearScalars();

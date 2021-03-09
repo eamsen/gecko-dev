@@ -3,7 +3,7 @@
 var FormAutofillContent;
 add_task(async function setup() {
   ({ FormAutofillContent } = ChromeUtils.import(
-    "resource://formautofill/FormAutofillContent.jsm"
+    "resource://gre/modules/FormAutofillContent.jsm"
   ));
 });
 
@@ -574,26 +574,17 @@ add_task(async function autofill_disabled() {
 
   // "_onFormSubmit" shouldn't be called if both "addresses" and "creditCards"
   // are disabled.
-  Services.prefs.setBoolPref(
-    "extensions.formautofill.addresses.enabled",
-    false
-  );
-  Services.prefs.setBoolPref(
-    "extensions.formautofill.creditCards.enabled",
-    false
-  );
+  Services.prefs.setBoolPref("toolkit.formautofill.addresses.enabled", false);
+  Services.prefs.setBoolPref("toolkit.formautofill.creditCards.enabled", false);
   FormAutofillContent.formSubmitted(form, null);
   Assert.equal(FormAutofillContent._onFormSubmit.called, false);
   FormAutofillContent._onFormSubmit.resetHistory();
 
   // "_onFormSubmit" should be called as usual.
-  Services.prefs.clearUserPref("extensions.formautofill.addresses.enabled");
-  Services.prefs.clearUserPref("extensions.formautofill.creditCards.enabled");
+  Services.prefs.clearUserPref("toolkit.formautofill.addresses.enabled");
+  Services.prefs.clearUserPref("toolkit.formautofill.creditCards.enabled");
 
-  Services.prefs.setBoolPref(
-    "extensions.formautofill.creditCards.enabled",
-    true
-  );
+  Services.prefs.setBoolPref("toolkit.formautofill.creditCards.enabled", true);
 
   FormAutofillContent.formSubmitted(form, null);
   Assert.equal(FormAutofillContent._onFormSubmit.called, true);
@@ -605,10 +596,7 @@ add_task(async function autofill_disabled() {
   FormAutofillContent._onFormSubmit.resetHistory();
 
   // "address" should be empty if "addresses" pref is disabled.
-  Services.prefs.setBoolPref(
-    "extensions.formautofill.addresses.enabled",
-    false
-  );
+  Services.prefs.setBoolPref("toolkit.formautofill.addresses.enabled", false);
   FormAutofillContent.formSubmitted(form, null);
   Assert.equal(FormAutofillContent._onFormSubmit.called, true);
   Assert.deepEqual(FormAutofillContent._onFormSubmit.args[0][0].address, []);
@@ -617,19 +605,16 @@ add_task(async function autofill_disabled() {
     []
   );
   FormAutofillContent._onFormSubmit.resetHistory();
-  Services.prefs.clearUserPref("extensions.formautofill.addresses.enabled");
+  Services.prefs.clearUserPref("toolkit.formautofill.addresses.enabled");
 
   // "creditCard" should be empty if "creditCards" pref is disabled.
-  Services.prefs.setBoolPref(
-    "extensions.formautofill.creditCards.enabled",
-    false
-  );
+  Services.prefs.setBoolPref("toolkit.formautofill.creditCards.enabled", false);
   FormAutofillContent.formSubmitted(form, null);
   Assert.deepEqual(FormAutofillContent._onFormSubmit.called, true);
   Assert.notDeepEqual(FormAutofillContent._onFormSubmit.args[0][0].address, []);
   Assert.deepEqual(FormAutofillContent._onFormSubmit.args[0][0].creditCard, []);
   FormAutofillContent._onFormSubmit.resetHistory();
-  Services.prefs.clearUserPref("extensions.formautofill.creditCards.enabled");
+  Services.prefs.clearUserPref("toolkit.formautofill.creditCards.enabled");
 
   FormAutofillContent._onFormSubmit.restore();
 });
@@ -639,7 +624,7 @@ TESTCASES.forEach(testcase => {
     info("Starting testcase: " + testcase.description);
 
     Services.prefs.setBoolPref(
-      "extensions.formautofill.creditCards.enabled",
+      "toolkit.formautofill.creditCards.enabled",
       true
     );
 
@@ -681,6 +666,6 @@ TESTCASES.forEach(testcase => {
       );
     }
     FormAutofillContent._onFormSubmit.restore();
-    Services.prefs.clearUserPref("extensions.formautofill.creditCards.enabled");
+    Services.prefs.clearUserPref("toolkit.formautofill.creditCards.enabled");
   });
 });

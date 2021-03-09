@@ -598,7 +598,7 @@ add_task(async function test_shipping_address_picker() {
             "resource://testing-common/PaymentTestUtils.jsm"
           );
           const { FormAutofillUtils } = ChromeUtils.import(
-            "resource://formautofill/FormAutofillUtils.jsm"
+            "resource://gre/modules/FormAutofillUtils.jsm"
           );
 
           let state = await PTU.DialogContentUtils.waitForState(
@@ -654,7 +654,7 @@ add_task(async function test_payer_address_picker() {
             "resource://testing-common/PaymentTestUtils.jsm"
           );
           const { FormAutofillUtils } = ChromeUtils.import(
-            "resource://formautofill/FormAutofillUtils.jsm"
+            "resource://gre/modules/FormAutofillUtils.jsm"
           );
 
           let state = await PTU.DialogContentUtils.waitForState(
