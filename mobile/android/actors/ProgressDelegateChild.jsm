@@ -17,7 +17,7 @@ const EXPORTED_SYMBOLS = ["ProgressDelegateChild"];
 class ProgressDelegateChild extends GeckoViewActorChild {
   // eslint-disable-next-line complexity
   handleEvent(aEvent) {
-    debug`handleEvent: ${aEvent.type}`;
+    // debug`handleEvent: ${aEvent.type}`;
     if (!this.isContentWindow) {
       // This not a GeckoView-controlled window
       return;

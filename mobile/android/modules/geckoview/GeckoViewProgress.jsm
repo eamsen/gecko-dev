@@ -195,7 +195,7 @@ class ProgressTracker extends Tracker {
   }
 
   start(aUri) {
-    debug`ProgressTracker start ${aUri}`;
+    // debug`ProgressTracker start ${aUri}`;
 
     if (this._eventReceived) {
       // A request was already in process, let's cancel it
@@ -219,7 +219,7 @@ class ProgressTracker extends Tracker {
   }
 
   changeLocation(aUri) {
-    debug`ProgressTracker changeLocation ${aUri}`;
+    // debug`ProgressTracker changeLocation ${aUri}`;
 
     const data = this._data;
     data.locationChange = true;
@@ -227,7 +227,7 @@ class ProgressTracker extends Tracker {
   }
 
   stop(aIsSuccess) {
-    debug`ProgressTracker stop`;
+    // debug`ProgressTracker stop`;
 
     if (!this._eventReceived) {
       // No request in progress
@@ -247,8 +247,8 @@ class ProgressTracker extends Tracker {
   }
 
   onStateChange(aWebProgress, aRequest, aStateFlags, aStatus) {
-    debug`ProgressTracker onStateChange: isTopLevel=${aWebProgress.isTopLevel},
-                          flags=${aStateFlags}, status=${aStatus}`;
+    // debug`ProgressTracker onStateChange: isTopLevel=${aWebProgress.isTopLevel},
+    // flags=${aStateFlags}, status=${aStatus}`;
 
     if (!aWebProgress || !aWebProgress.isTopLevel) {
       return;
@@ -260,7 +260,7 @@ class ProgressTracker extends Tracker {
       return;
     }
 
-    debug`ProgressTracker onStateChange: uri=${displaySpec}`;
+    // debug`ProgressTracker onStateChange: uri=${displaySpec}`;
 
     const isPageReload =
       (aWebProgress.loadType & Ci.nsIDocShell.LOAD_CMD_RELOAD) != 0;
@@ -293,8 +293,8 @@ class ProgressTracker extends Tracker {
       return;
     }
 
-    debug`ProgressTracker onLocationChange: location=${aLocationURI.displaySpec},
-                             flags=${aFlags}`;
+    // debug`ProgressTracker onLocationChange: location=${aLocationURI.displaySpec},
+    // flags=${aFlags}`;
 
     if (aFlags & Ci.nsIWebProgressListener.LOCATION_CHANGE_ERROR_PAGE) {
       this.stop(/* isSuccess */ false);
@@ -315,7 +315,7 @@ class ProgressTracker extends Tracker {
       return;
     }
 
-    debug`ProgressTracker handleEvent: ${aEvent.name}`;
+    // debug`ProgressTracker handleEvent: ${aEvent.name}`;
 
     let needsUpdate = false;
 
@@ -368,7 +368,7 @@ class ProgressTracker extends Tracker {
   }
 
   updateProgress() {
-    debug`ProgressTracker updateProgress`;
+    // debug`ProgressTracker updateProgress`;
 
     const data = this._data;
 
@@ -393,8 +393,8 @@ class ProgressTracker extends Tracker {
       return;
     }
 
-    debug`ProgressTracker updateProgress data=${this._debugData()}
-           progress=${progress}`;
+    // debug`ProgressTracker updateProgress data=${this._debugData()}
+    // progress=${progress}`;
 
     this.eventDispatcher.sendRequest({
       type: "GeckoView:ProgressChanged",
@@ -442,9 +442,9 @@ class StateTracker extends Tracker {
   }
 
   onStateChange(aWebProgress, aRequest, aStateFlags, aStatus) {
-    debug`StateTracker onStateChange: isTopLevel=${aWebProgress.isTopLevel},
-                          flags=${aStateFlags}, status=${aStatus}
-                          loadType=${aWebProgress.loadType}`;
+    // debug`StateTracker onStateChange: isTopLevel=${aWebProgress.isTopLevel},
+    // flags=${aStateFlags}, status=${aStatus}
+    // loadType=${aWebProgress.loadType}`;
 
     if (!aWebProgress.isTopLevel) {
       return;
@@ -469,14 +469,14 @@ class SecurityTracker extends Tracker {
   }
 
   onLocationChange(aWebProgress, aRequest, aLocationURI, aFlags) {
-    debug`SecurityTracker onLocationChange: location=${aLocationURI.displaySpec},
-                             flags=${aFlags}`;
+    // debug`SecurityTracker onLocationChange: location=${aLocationURI.displaySpec},
+    // flags=${aFlags}`;
 
     this._hostChanged = true;
   }
 
   onSecurityChange(aWebProgress, aRequest, aState) {
-    debug`onSecurityChange`;
+    // debug`onSecurityChange`;
 
     // Don't need to do anything if the data we use to update the UI hasn't changed
     if (this._state === aState && !this._hostChanged) {
@@ -497,7 +497,7 @@ class SecurityTracker extends Tracker {
 
 class GeckoViewProgress extends GeckoViewModule {
   onEnable() {
-    debug`onEnable`;
+    // debug`onEnable`;
 
     this._fireInitialLoad();
     this._initialAboutBlank = true;
@@ -520,7 +520,7 @@ class GeckoViewProgress extends GeckoViewModule {
   }
 
   onDisable() {
-    debug`onDisable`;
+    // debug`onDisable`;
 
     if (this.progressFilter) {
       this.progressFilter.removeProgressListener(this);
@@ -532,7 +532,7 @@ class GeckoViewProgress extends GeckoViewModule {
   }
 
   receiveMessage(aMsg) {
-    debug`receiveMessage: ${aMsg.name}`;
+    // debug`receiveMessage: ${aMsg.name}`;
 
     switch (aMsg.name) {
       case "DOMContentLoaded": // fall-through
@@ -545,7 +545,7 @@ class GeckoViewProgress extends GeckoViewModule {
   }
 
   onEvent(aEvent, aData, aCallback) {
-    debug`onEvent: event=${aEvent}, data=${aData}`;
+    // debug`onEvent: event=${aEvent}, data=${aData}`;
 
     switch (aEvent) {
       case "GeckoView:FlushSessionState":
@@ -604,7 +604,7 @@ class GeckoViewProgress extends GeckoViewModule {
 
   // nsIObserver event handler
   observe(aSubject, aTopic, aData) {
-    debug`observe: topic=${aTopic}`;
+    // debug`observe: topic=${aTopic}`;
 
     switch (aTopic) {
       case "oop-frameloader-crashed": {

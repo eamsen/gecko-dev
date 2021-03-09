@@ -194,6 +194,12 @@ AutofillProfileAutoCompleteSearch.prototype = {
     let isFormAutofillSearch = true;
     let pendingSearchResult = null;
 
+    this.debug(
+      `FormAutofillContent startSearch: searchParam:${searchParam}, searchPermitted:${searchPermitted}, isInputAutofilled:${isInputAutofilled}, isAddressField:${isAddressField}, isCreditCardField:${isCreditCardField}, savedFieldNames:${JSON.stringify(
+        savedFieldNames
+      )}, activeFieldDetail:${JSON.stringify(activeFieldDetail)}`
+    );
+
     ProfileAutocomplete.lastProfileAutoCompleteFocusedInput = activeInput;
     // Fallback to form-history if ...
     //   - specified autofill feature is pref off.
@@ -211,6 +217,7 @@ AutofillProfileAutoCompleteSearch.prototype = {
         allFieldNames.filter(field => savedFieldNames.has(field)).length <
           FormAutofillUtils.AUTOFILL_FIELDS_THRESHOLD)
     ) {
+      this.debug(`FormAutofillContent startSearch c1`);
       isFormAutofillSearch = false;
       if (activeInput.autocomplete == "off") {
         // Create a dummy result as an empty search result.
@@ -226,10 +233,12 @@ AutofillProfileAutoCompleteSearch.prototype = {
         });
       }
     } else if (isInputAutofilled) {
+      this.debug(`FormAutofillContent startSearch c2`);
       pendingSearchResult = new AutocompleteResult(searchString, "", [], [], {
         isInputAutofilled,
       });
     } else {
+      this.debug(`FormAutofillContent startSearch c3`);
       let infoWithoutElement = { ...activeFieldDetail };
       delete infoWithoutElement.elementWeakRef;
 
@@ -614,6 +623,10 @@ var FormAutofillContent = {
           if (this._popupPending) {
             this._popupPending = false;
             this.debug("handleEvent: Opening deferred popup");
+            this.debug(
+              "handleEvent: Opening deferred popup",
+              formFillController
+            );
             formFillController.showPopup();
           }
         } else {
@@ -693,6 +706,7 @@ var FormAutofillContent = {
       if (this.activeFieldDetail?.fieldName?.startsWith("cc-")) {
         if (Services.cpmm.sharedData.get("FormAutofill:enabled")) {
           this.debug("updateActiveElement: opening pop up");
+          this.debug("updateACtiveElement: opening pop up", formFillController);
           formFillController.showPopup();
         } else {
           this.debug(

@@ -911,7 +911,10 @@ this.FormAutofillHeuristics = {
       FormAutofillUtils.isFieldEligibleForAutofill(elem)
     );
 
+    log.debug(`getFormInfo eligibleFields`, eligibleFields);
     if (eligibleFields.length <= 0) {
+      log.debug(`getFormInfo []`);
+
       return [];
     }
 

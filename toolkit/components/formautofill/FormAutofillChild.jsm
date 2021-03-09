@@ -39,6 +39,7 @@ ChromeUtils.defineModuleGetter(
 class FormAutofillChild extends JSWindowActorChild {
   constructor() {
     super();
+    console.debug("FormAutofillChild constructor");
 
     this._nextHandleElement = null;
     this._alreadyDOMContentLoaded = false;
@@ -114,6 +115,8 @@ class FormAutofillChild extends JSWindowActorChild {
     if (!evt.isTrusted) {
       return;
     }
+
+    console.debug(`FormAutofillChild handleEvent ${evt.type}`);
 
     switch (evt.type) {
       case "focusin": {

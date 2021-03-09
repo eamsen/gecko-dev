@@ -23,6 +23,10 @@ static const char* kAutoCompleteSearchCID =
 
 using namespace mozilla;
 
+#define rabbit(fmt, ...)                                                       \
+  __android_log_print(ANDROID_LOG_INFO, "autocomplete nsFormFillerController", \
+                      "%s: " fmt, __func__, ##__VA_ARGS__)
+
 NS_IMPL_CYCLE_COLLECTION_CLASS(nsAutoCompleteController)
 
 MOZ_CAN_RUN_SCRIPT_BOUNDARY
@@ -397,6 +401,7 @@ nsAutoCompleteController::HandleKeyNavigation(uint32_t aKey, bool* _retval) {
   // By default, don't cancel the event
   *_retval = false;
 
+  rabbit("%u", aKey);
   if (!mInput) {
     // Stop all searches in case they are async.
     StopSearch();
@@ -406,15 +411,18 @@ nsAutoCompleteController::HandleKeyNavigation(uint32_t aKey, bool* _retval) {
     NS_ERROR(
         "Called before attaching to the control or after detaching from the "
         "control");
+    rabbit("r1");
     return NS_OK;
   }
 
   nsCOMPtr<nsIAutoCompleteInput> input(mInput);
   nsCOMPtr<nsIAutoCompletePopup> popup(GetPopup());
+  rabbit("1");
   NS_ENSURE_TRUE(popup != nullptr, NS_ERROR_FAILURE);
 
   bool disabled;
   input->GetDisableAutoComplete(&disabled);
+  rabbit("2");
   NS_ENSURE_TRUE(!disabled, NS_OK);
 
   if (aKey == dom::KeyboardEvent_Binding::DOM_VK_UP ||
@@ -423,7 +431,9 @@ nsAutoCompleteController::HandleKeyNavigation(uint32_t aKey, bool* _retval) {
       aKey == dom::KeyboardEvent_Binding::DOM_VK_PAGE_DOWN) {
     bool isOpen = false;
     input->GetPopupOpen(&isOpen);
+    rabbit("3");
     if (isOpen) {
+      rabbit("4");
       // Prevent the input from handling up/down events, as it may move
       // the cursor to home/end on some systems
       *_retval = true;
@@ -447,6 +457,7 @@ nsAutoCompleteController::HandleKeyNavigation(uint32_t aKey, bool* _retval) {
       popup->SelectBy(reverse, page);
 
       if (completeSelection) {
+        rabbit("5");
         int32_t selectedIndex;
         popup->GetSelectedIndex(&selectedIndex);
         if (selectedIndex >= 0) {
@@ -475,6 +486,7 @@ nsAutoCompleteController::HandleKeyNavigation(uint32_t aKey, bool* _retval) {
           }
           mCompletedSelectionIndex = selectedIndex;
         } else {
+          rabbit("6");
           // Nothing is selected, so fill in the last typed value
           SetValueOfInputTo(mSearchString,
                             nsIAutoCompleteInput::TEXTVALUE_REASON_REVERT);
@@ -484,6 +496,7 @@ nsAutoCompleteController::HandleKeyNavigation(uint32_t aKey, bool* _retval) {
         }
       }
     } else {
+      rabbit("7");
       // Only show the popup if the caret is at the start or end of the input
       // and there is no selection, so that the default defined key shortcuts
       // for up and down move to the beginning and end of the field otherwise.
@@ -642,6 +655,7 @@ nsAutoCompleteController::HandleKeyNavigation(uint32_t aKey, bool* _retval) {
     SetSearchStringInternal(value);
   }
 
+  rabbit("rOK");
   return NS_OK;
 }
 

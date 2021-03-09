@@ -132,6 +132,7 @@ class AutoCompleteChild extends JSWindowActorChild {
   }
 
   openAutocompletePopup(input, element) {
+    console.debug(`AutoCompleteChild openAutocompletePopup`);
     if (this._popupOpen || !input) {
       return;
     }

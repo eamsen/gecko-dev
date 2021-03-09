@@ -298,6 +298,9 @@ class FormAutofillParent extends JSWindowActorParent {
    * @param   {object} message.data The data of the message.
    */
   async receiveMessage({ name, data }) {
+    log.debug(`receiveMessage ${name}`);
+    console.debug(`receiveMessage ${name}`);
+
     switch (name) {
       case "FormAutofill:InitStorage": {
         await gFormAutofillStorage.initialize();
@@ -405,6 +408,10 @@ class FormAutofillParent extends JSWindowActorParent {
    */
   static async _getRecords({ collectionName, searchString, info }) {
     let collection = gFormAutofillStorage[collectionName];
+    log.debug(`getRecords ${collectionName}: ${JSON.stringify(collection)}`);
+    console.debug(
+      `getRecords ${collectionName}: ${JSON.stringify(collection)}`
+    );
     if (!collection) {
       return [];
     }
@@ -457,6 +464,7 @@ class FormAutofillParent extends JSWindowActorParent {
   }
 
   async _onAddressSubmit(address, browser, timeStartedFillingMS) {
+    log.debug(`_onAddressSubmit`);
     let showDoorhanger = null;
     if (!FormAutofill.isAutofillAddressesCaptureEnabled) {
       return showDoorhanger;
@@ -584,6 +592,7 @@ class FormAutofillParent extends JSWindowActorParent {
   }
 
   async _onCreditCardSubmit(creditCard, browser, timeStartedFillingMS) {
+    log.debug(`_onCreditCardSubmit`);
     if (FormAutofill.isAutofillCreditCardsHideUI) {
       return false;
     }

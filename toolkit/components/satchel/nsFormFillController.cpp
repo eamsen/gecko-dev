@@ -51,6 +51,10 @@ using mozilla::LogLevel;
 
 static mozilla::LazyLogModule sLogger("satchel");
 
+#define rabbit(fmt, ...)                                                       \
+  __android_log_print(ANDROID_LOG_INFO, "autocomplete nsFormFillerController", \
+                      "%s: " fmt, __func__, ##__VA_ARGS__)
+
 static nsIFormAutoComplete* GetFormAutoComplete() {
   static nsCOMPtr<nsIFormAutoComplete> sInstance;
   static bool sInitialized = false;
@@ -101,6 +105,7 @@ nsFormFillController::nsFormFillController()
       mForceComplete(false),
       mSuppressOnInput(false),
       mPasswordPopupAutomaticallyOpened(false) {
+  rabbit("");
   mController = do_GetService("@mozilla.org/autocomplete/controller;1");
   MOZ_ASSERT(mController);
 
@@ -364,6 +369,7 @@ nsFormFillController::GetPopupOpen(bool* aPopupOpen) {
 
 NS_IMETHODIMP
 nsFormFillController::SetPopupOpen(bool aPopupOpen) {
+  rabbit("%d %d", !!mFocusedPopup, !!aPopupOpen);
   if (mFocusedPopup) {
     if (aPopupOpen) {
       // make sure input field is visible before showing popup (bug 320938)
@@ -509,12 +515,14 @@ nsFormFillController::GetSearchAt(uint32_t index, nsACString& _retval) {
         "@mozilla.org/autocomplete/search;1?name=autofill-profiles");
     if (profileSearch) {
       _retval.AssignLiteral("autofill-profiles");
+      rabbit("autofill-profiles");
       return NS_OK;
     }
   }
 
   MOZ_LOG(sLogger, LogLevel::Debug, ("GetSearchAt: form-history field"));
   _retval.AssignLiteral("form-history");
+  rabbit("form-history");
   return NS_OK;
 }
 
@@ -1205,6 +1213,7 @@ NS_IMETHODIMP
 nsFormFillController::ShowPopup() {
   bool isOpen = false;
   GetPopupOpen(&isOpen);
+  rabbit("isOpen:%d", isOpen);
   if (isOpen) {
     return SetPopupOpen(false);
   }
@@ -1213,6 +1222,7 @@ nsFormFillController::ShowPopup() {
 
   nsCOMPtr<nsIAutoCompleteInput> input;
   controller->GetInput(getter_AddRefs(input));
+  rabbit("%d mController=%d", !!input, !!mController);
   if (!input) {
     return NS_OK;
   }
@@ -1223,15 +1233,18 @@ nsFormFillController::ShowPopup() {
     // Show the popup with a filtered result set
     controller->SetSearchString(u""_ns);
     bool unused = false;
+    rabbit("1->");
     controller->HandleText(&unused);
   } else {
     // Show the popup with the complete result set.  Can't use HandleText()
     // because it doesn't display the popup if the input is blank.
     bool cancel = false;
+    rabbit("2->");
     controller->HandleKeyNavigation(KeyboardEvent_Binding::DOM_VK_DOWN,
                                     &cancel);
   }
 
+  rabbit("ok");
   return NS_OK;
 }
 
