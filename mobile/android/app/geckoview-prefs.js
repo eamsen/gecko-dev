@@ -92,3 +92,17 @@ pref("toolkit.autocomplete.delegate", true);
 pref("webextensions.storage.sync.kinto", true);
 
 pref("browser.formfill.enable", true);
+pref("browser.formfill.debug", true);
+
+pref("toolkit.formautofill.loglevel", "Debug");
+pref("toolkit.formautofill.creditCards.available", true);
+pref("toolkit.formautofill.creditCards.enabled", true);
+pref("toolkit.formautofill.creditCards.used", true);
+pref("toolkit.formautofill.creditCards.hideui", false);
+pref("toolkit.formautofill.addresses.enabled", true);
+pref("toolkit.formautofill.addresses.capture.enabled", true);
+pref("toolkit.formautofill.heuristics.enabled", true);
+pref("toolkit.formautofill.section.enabled", true);
+pref("toolkit.formautofill.firstTimeUse", true);
+pref("toolkit.formautofill.reauth.enabled", false);
+pref("toolkit.formautofill.supportedCountries", "US,DE");
