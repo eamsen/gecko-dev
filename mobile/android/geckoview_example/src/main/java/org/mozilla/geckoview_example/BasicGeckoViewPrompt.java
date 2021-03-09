@@ -53,6 +53,8 @@ import org.mozilla.geckoview.GeckoSession;
 import org.mozilla.geckoview.GeckoSession.PermissionDelegate.MediaSource;
 import org.mozilla.geckoview.SlowScriptResponse;
 
+import org.mozilla.geckoview.Autocomplete;
+
 final class BasicGeckoViewPrompt implements GeckoSession.PromptDelegate {
     protected static final String LOGTAG = "BasicGeckoViewPrompt";
 
@@ -64,6 +66,80 @@ final class BasicGeckoViewPrompt implements GeckoSession.PromptDelegate {
 
     public BasicGeckoViewPrompt(final Activity activity) {
         mActivity = activity;
+    }
+
+    @Override
+    public GeckoResult<PromptResponse> onLoginSave(
+            final GeckoSession session,
+            final AutocompleteRequest<Autocomplete.LoginSaveOption> request) {
+        Log.d("GeckoViewActivity", "Autocomplete onLoginSave");
+
+        return GeckoResult.fromValue(request.confirm(request.options[0]));
+    }
+
+    @Override
+    public GeckoResult<PromptResponse> onLoginSelect(
+            final GeckoSession session,
+            final AutocompleteRequest<Autocomplete.LoginSelectOption> request) {
+        Log.d("GeckoViewActivity", "Autocomplete onLoginSelect");
+
+        String origin = null;
+        String formActionOrigin = null;
+        String httpRealm = null;
+
+        for (final Autocomplete.LoginSelectOption option: request.options) {
+            Log.d("GeckoViewActivity", "Autocomplete onLoginSelect option " +
+                  "{ value=" + option.value +
+                  ", hint=" + option.hint +
+                  "}, ");
+            if (option.value.origin != null) {
+                origin = option.value.origin;
+            }
+            if (option.value.formActionOrigin != null) {
+                formActionOrigin = option.value.formActionOrigin;
+            }
+            if (option.value.httpRealm != null) {
+                httpRealm = option.value.httpRealm;
+            }
+        }
+
+        // return GeckoResult.fromValue(request.confirm(
+            // new Autocomplete.LoginSelectOption(new Autocomplete.LoginEntry.Builder()
+                // .origin(origin)
+                // .formActionOrigin(formActionOrigin)
+                // .httpRealm(httpRealm)
+                // .username("zzz1")
+                // .password("zzz1")
+                // .build()
+            // )
+        // ));
+        return GeckoResult.fromValue(request.confirm(request.options[0]));
+    }
+
+    @Override
+    public GeckoResult<PromptResponse> onCreditCardSelect(
+            final GeckoSession session,
+            final AutocompleteRequest<Autocomplete.CreditCardSelectOption> request) {
+        Log.d("GeckoViewActivity", "Autocomplete onCreditCardSelect");
+
+        for (final Autocomplete.CreditCardSelectOption option: request.options) {
+            Log.d("GeckoViewActivity", "Autocomplete onCreditCardSelect option " +
+                  "{ value=" + option.value +
+                  ", hint=" + option.hint +
+                  "}, ");
+        }
+
+        // return GeckoResult.fromValue(request.confirm(
+            // new Autocomplete.LoginSelectOption(new Autocomplete.LoginEntry.Builder()
+                // .origin(origin)
+                // .formActionOrigin(formActionOrigin)
+                // .httpRealm(httpRealm)
+                // .username("zzz1")
+                // .password("zzz1")
+                // .build()
+            // )
+        // ));
+        return GeckoResult.fromValue(request.confirm(request.options[0]));
     }
 
     @Override

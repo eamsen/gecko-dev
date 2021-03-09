@@ -89,6 +89,12 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.mozilla.geckoview.Autocomplete;
+import org.mozilla.geckoview.Autocomplete.LoginEntry;
+import org.mozilla.geckoview.Autocomplete.CreditCard;
+import org.mozilla.geckoview.Autocomplete.Address;
+import java.util.Arrays;
+
 interface WebExtensionDelegate {
     default GeckoSession toggleBrowserActionPopup(boolean force) {
         return null;
@@ -725,7 +731,7 @@ public class GeckoViewActivity
             }
             runtimeSettingsBuilder
                     .remoteDebuggingEnabled(mRemoteDebugging.value())
-                    .consoleOutput(true)
+                    .consoleOutput(false)
                     .contentBlocking(new ContentBlocking.Settings.Builder()
                         .antiTracking(ContentBlocking.AntiTracking.DEFAULT |
                                       ContentBlocking.AntiTracking.STP)
@@ -740,6 +746,8 @@ public class GeckoViewActivity
                     .aboutConfigEnabled(true);
 
             sGeckoRuntime = GeckoRuntime.create(this, runtimeSettingsBuilder.build());
+            sGeckoRuntime.setAutocompleteStorageDelegate(new ExampleAutocompleteStorageDelegate());
+
 
             sExtensionManager = new WebExtensionManager(sGeckoRuntime, mTabSessionManager);
             mTabSessionManager.setTabObserver(sExtensionManager);
@@ -1505,7 +1513,7 @@ public class GeckoViewActivity
         @Override
         public void onHistoryStateChange(final GeckoSession session,
                                          final GeckoSession.HistoryDelegate.HistoryList state) {
-            Log.i(LOGTAG, "History state updated");
+            // Log.i(LOGTAG, "History state updated");
         }
     }
 
@@ -1674,12 +1682,12 @@ public class GeckoViewActivity
 
         @Override
         public void onSecurityChange(GeckoSession session, SecurityInformation securityInfo) {
-            Log.i(LOGTAG, "Security status changed to " + securityInfo.securityMode);
+            // Log.i(LOGTAG, "Security status changed to " + securityInfo.securityMode);
         }
 
         @Override
         public void onSessionStateChange(GeckoSession session, GeckoSession.SessionState state) {
-            Log.i(LOGTAG, "New Session state: " + state.toString());
+            // Log.i(LOGTAG, "New Session state: " + state.toString());
         }
     }
 
@@ -2197,19 +2205,137 @@ public class GeckoViewActivity
             implements RuntimeTelemetry.Delegate {
         @Override
         public void onHistogram(final @NonNull RuntimeTelemetry.Histogram histogram) {
-            Log.d(LOGTAG, "onHistogram " + histogram);
+            // Log.d(LOGTAG, "onHistogram " + histogram);
         }
         @Override
         public void onBooleanScalar(final @NonNull RuntimeTelemetry.Metric<Boolean> scalar) {
-            Log.d(LOGTAG, "onBooleanScalar " + scalar);
+            // Log.d(LOGTAG, "onBooleanScalar " + scalar);
         }
         @Override
         public void onLongScalar(final @NonNull RuntimeTelemetry.Metric<Long> scalar) {
-            Log.d(LOGTAG, "onLongScalar " + scalar);
+            // Log.d(LOGTAG, "onLongScalar " + scalar);
         }
         @Override
         public void onStringScalar(final @NonNull RuntimeTelemetry.Metric<String> scalar) {
-            Log.d(LOGTAG, "onStringScalar " + scalar);
+            // Log.d(LOGTAG, "onStringScalar " + scalar);
+        }
+    }
+
+    private static ArrayList<LoginEntry> sSavedLogins =
+    new ArrayList<LoginEntry>();
+    //new ArrayList<LoginEntry>(
+        /**Arrays.asList(
+           new LoginEntry.Builder()
+                .guid("1111")
+                .origin("http://ikascreens.bplaced.net")
+                .httpRealm("Bitte einloggen, um die IP-Adressen auszulesen")
+                .username("test")
+                .password("testpwd1")
+                .build()
+        ));*/
+        /**Arrays.asList(
+           new LoginEntry.Builder()
+                .guid("1111")
+                .origin("https://bugs.mattn.ca")
+                .formActionOrigin("https://bugs.mattn.ca")
+                .username("uuuu1")
+                .password("pppp1")
+                .build(),
+           new LoginEntry.Builder()
+                .guid("2222")
+                .origin("https://bugs.mattn.ca")
+                .formActionOrigin("https://bugs.mattn.ca")
+                .username("uuuu2")
+                .password("pppp2")
+                .build(),
+           new LoginEntry.Builder()
+                .guid("3333")
+                .origin("https://bugs.mattn.ca")
+                .formActionOrigin("https://bugs.mattn.ca")
+                .username("uuuu3")
+                .password("pppp3")
+                .build()
+        ));
+        */
+
+    private static ArrayList<CreditCard> sSavedCreditCards =
+    new ArrayList<CreditCard>();
+
+    private final class ExampleAutocompleteStorageDelegate
+            implements Autocomplete.StorageDelegate {
+        @Override
+        public GeckoResult<LoginEntry[]> onLoginFetch(final String domain) {
+            Log.d(LOGTAG, "Autocomplete onLoginFetch " + domain);
+            LoginEntry[] arr = sSavedLogins.toArray(new LoginEntry[sSavedLogins.size()]);
+            return GeckoResult.fromValue(arr);
+        }
+
+        @Override
+        public void onLoginSave(final LoginEntry login) {
+            Log.d(LOGTAG, "Autocomplete onLoginSave " + login.toString());
+
+            final String guid = "guid" + sSavedLogins.size() + 1;
+
+            final LoginEntry save = new LoginEntry.Builder()
+                .guid(guid)
+                .origin(login.origin)
+                .formActionOrigin(login.formActionOrigin)
+                .httpRealm(login.httpRealm)
+                .username(login.username)
+                .password(login.password)
+                .build();
+
+            sSavedLogins.add(save);
+        }
+
+        @Override
+        public void onLoginUsed(final LoginEntry login, final int usedFields) {
+            Log.d(LOGTAG, "Autocomplete onLoginused " + login.toString());
+        }
+
+        @Override
+        public GeckoResult<CreditCard[]> onCreditCardFetch() {
+            Log.d(LOGTAG, "Autocomplete onCreditCardFetch");
+            if (sSavedCreditCards.isEmpty()) {
+                final String guid = "guid" + sSavedCreditCards.size() + 1;
+
+                final CreditCard save = new CreditCard.Builder()
+                    .guid(guid)
+                    .version(1)
+                    .name("Peter Parker")
+                    .number("1234-1234-1234-1234")
+                    .expMonth("Apr")
+                    .expYear("03")
+                    .build();
+
+                sSavedCreditCards.add(save);
+            }
+            CreditCard[] arr = sSavedCreditCards.toArray(new CreditCard[sSavedCreditCards.size()]);
+            return GeckoResult.fromValue(arr);
+        }
+
+        @Override
+        public void onCreditCardSave(final CreditCard creditCard) {
+            Log.d(LOGTAG, "Autocomplete onCreditCardSave " + creditCard.toString());
+
+            final String guid = "guid" + sSavedCreditCards.size() + 1;
+
+            final CreditCard save = new CreditCard.Builder()
+                .guid(guid)
+                .version(creditCard.version)
+                .name(creditCard.name)
+                .number(creditCard.number)
+                .expMonth(creditCard.expMonth)
+                .expYear(creditCard.expYear)
+                .build();
+
+            sSavedCreditCards.add(save);
+        }
+
+        @Override
+        public GeckoResult<Address[]> onAddressFetch() {
+            Log.d(LOGTAG, "Autocomplete onAddressFetch");
+            return null;
         }
     }
 }
