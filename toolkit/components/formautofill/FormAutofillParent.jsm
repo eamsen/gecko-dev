@@ -31,11 +31,13 @@
 // constructor via a backstage pass.
 var EXPORTED_SYMBOLS = ["FormAutofillParent", "FormAutofillStatus"];
 
+const { AppConstants } = ChromeUtils.import(
+  "resource://gre/modules/AppConstants.jsm"
+);
 const { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
 const { XPCOMUtils } = ChromeUtils.import(
   "resource://gre/modules/XPCOMUtils.jsm"
 );
-
 const { FormAutofill } = ChromeUtils.import(
   "resource://gre/modules/FormAutofill.jsm"
 );
@@ -170,18 +172,15 @@ let FormAutofillStatus = {
     }
   },
 
-  updateSavedFieldNames() {
+  async updateSavedFieldNames() {
     log.debug("updateSavedFieldNames");
 
-    let savedFieldNames;
+    let savedFieldNames = await gFormAutofillStorage.addresses.getSavedFieldNames();
+
     // Don't access the credit cards store unless it is enabled.
     if (FormAutofill.isAutofillCreditCardsAvailable) {
-      savedFieldNames = new Set([
-        ...gFormAutofillStorage.addresses.getSavedFieldNames(),
-        ...gFormAutofillStorage.creditCards.getSavedFieldNames(),
-      ]);
-    } else {
-      savedFieldNames = gFormAutofillStorage.addresses.getSavedFieldNames();
+      const creditCardNames = await gFormAutofillStorage.creditCards.getSavedFieldNames();
+      savedFieldNames.add(...creditCardNames);
     }
 
     Services.ppmm.sharedData.set(
@@ -260,9 +259,14 @@ let FormAutofillStatus = {
 // Lazily load the storage JSM to avoid disk I/O until absolutely needed.
 // Once storage is loaded we need to update saved field names and inform content processes.
 XPCOMUtils.defineLazyGetter(this, "gFormAutofillStorage", () => {
-  let { formAutofillStorage } = ChromeUtils.import(
-    "resource://gre/modules/FormAutofillStorage.jsm",
-  );
+  let storagePath = "resource://gre/modules/FormAutofillStorage.jsm";
+
+  if (AppConstants.platform == "android") {
+    storagePath = "resource://gre/modules/GeckoViewFormAutofillStorage.jsm";
+  }
+
+  let { formAutofillStorage } = ChromeUtils.import(storagePath);
+
   log.debug("Loading formAutofillStorage");
 
   formAutofillStorage.initialize().then(() => {

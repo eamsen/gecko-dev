@@ -124,15 +124,16 @@
 
 "use strict";
 
-// We expose a singleton from this module. Some tests may import the
-// constructor via a backstage pass.
-this.EXPORTED_SYMBOLS = ["formAutofillStorage"];
+this.EXPORTED_SYMBOLS = [
+  "FormAutofillStorageBase",
+  "CreditCardsBase",
+  "AddressesBase",
+];
 
 const { XPCOMUtils } = ChromeUtils.import(
   "resource://gre/modules/XPCOMUtils.jsm"
 );
 const { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
-const { OS } = ChromeUtils.import("resource://gre/modules/osfile.jsm");
 
 const { FormAutofill } = ChromeUtils.import(
   "resource://gre/modules/FormAutofill.jsm"
@@ -181,8 +182,6 @@ const CryptoHash = Components.Constructor(
   "nsICryptoHash",
   "initWithString"
 );
-
-const PROFILE_JSON_FILE_NAME = "autofill-profiles.json";
 
 const STORAGE_SCHEMA_VERSION = 1;
 const ADDRESS_SCHEMA_VERSION = 1;
@@ -289,6 +288,7 @@ class AutofillRecords {
     validComputedFields,
     schemaVersion
   ) {
+    console.debug(`autofill storage construct base`);
     FormAutofill.defineLazyLogGetter(this, "AutofillRecords:" + collectionName);
 
     this.VALID_FIELDS = validFields;
@@ -299,9 +299,13 @@ class AutofillRecords {
     this._schemaVersion = schemaVersion;
 
     this._initialize();
+    this._initializePromise.then(() => {
+      console.debug(`autofill storage data: ${JSON.stringify(this._data)}`);
+    });
   }
 
   _initialize() {
+    console.debug(`autofill storage _initialize base`);
     this._initializePromise = Promise.all(
       this._data.map(async (record, index) =>
         this._migrateRecord(record, index)
@@ -331,6 +335,10 @@ class AutofillRecords {
    *          The data object.
    */
   get _data() {
+    return this._getData();
+  }
+
+  _getData() {
     return this._store.data[this._collectionName];
   }
 
@@ -1445,7 +1453,7 @@ class AutofillRecords {
   async mergeIfPossible(guid, record, strict) {}
 }
 
-class Addresses extends AutofillRecords {
+class AddressesBase extends AutofillRecords {
   constructor(store) {
     super(
       store,
@@ -1762,7 +1770,7 @@ class Addresses extends AutofillRecords {
   }
 }
 
-class CreditCards extends AutofillRecords {
+class CreditCardsBase extends AutofillRecords {
   constructor(store) {
     super(
       store,
@@ -1830,6 +1838,12 @@ class CreditCards extends AutofillRecords {
     }
 
     // Encrypt credit card number
+    await this._encryptNumber(creditCard);
+
+    return hasNewComputedFields;
+  }
+
+  async _encryptNumber(creditCard) {
     if (!("cc-number-encrypted" in creditCard)) {
       if ("cc-number" in creditCard) {
         let ccNumber = creditCard["cc-number"];
@@ -1846,8 +1860,6 @@ class CreditCards extends AutofillRecords {
         creditCard["cc-number-encrypted"] = "";
       }
     }
-
-    return hasNewComputedFields;
   }
 
   async _computeMigratedRecord(creditCard) {
@@ -2118,32 +2130,27 @@ class CreditCards extends AutofillRecords {
   }
 }
 
-function FormAutofillStorage(path) {
-  this._path = path;
-  this._initializePromise = null;
-  this.INTERNAL_FIELDS = INTERNAL_FIELDS;
-}
+class FormAutofillStorageBase {
+  constructor(path) {
+    this._path = path;
+    this._initializePromise = null;
+    this.INTERNAL_FIELDS = INTERNAL_FIELDS;
+  }
 
-FormAutofillStorage.prototype = {
   get version() {
     return STORAGE_SCHEMA_VERSION;
-  },
+  }
 
   get addresses() {
-    if (!this._addresses) {
-      this._store.ensureDataReady();
-      this._addresses = new Addresses(this._store);
-    }
-    return this._addresses;
-  },
+    return this.getAddresses();
+  }
 
   get creditCards() {
-    if (!this._creditCards) {
-      this._store.ensureDataReady();
-      this._creditCards = new CreditCards(this._store);
-    }
-    return this._creditCards;
-  },
+    return this.getCreditCards();
+  }
+
+  getAddresses() {}
+  getCreditCards() {}
 
   /**
    * Loads the profile data from file to memory.
@@ -2178,7 +2185,7 @@ FormAutofillStorage.prototype = {
       });
     }
     return this._initializePromise;
-  },
+  }
 
   _dataPostProcessor(data) {
     data.version = this.version;
@@ -2189,19 +2196,14 @@ FormAutofillStorage.prototype = {
       data.creditCards = [];
     }
     return data;
-  },
+  }
 
   // For test only.
   _saveImmediately() {
     return this._store._save();
-  },
+  }
 
   _finalize() {
     return this._store.finalize();
-  },
-};
-
-// The singleton exposed by this module.
-this.formAutofillStorage = new FormAutofillStorage(
-  OS.Path.join(OS.Constants.Path.profileDir, PROFILE_JSON_FILE_NAME)
-);
+  }
+}
