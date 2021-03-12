@@ -41,7 +41,7 @@ codespell:
         - testing/marionette/doc/
         - testing/mozbase/docs/
         - toolkit/components/extensions/docs/
-        - toolkit/components/formautofill/locales/en-US/
+        - browser/extensions/formautofill/locales/en-US/
         - toolkit/components/normandy/docs/
         - toolkit/components/search/docs/
         - toolkit/components/telemetry/docs/

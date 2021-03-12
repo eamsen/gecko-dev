@@ -16,7 +16,7 @@ l10n:
         - netwerk/locales/en-US
         - security/manager/locales/en-US
         - services/sync/locales/en-US
-        - toolkit/components/formautofill/locales/en-US
+        - browser/extensions/formautofill/locales/en-US
         - toolkit/locales/en-US
         - tools/lint/l10n.yml
     # files not supported by compare-locales,
