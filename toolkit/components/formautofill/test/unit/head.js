@@ -142,8 +142,7 @@ async function initProfileStorage(
   collectionName = "addresses"
 ) {
   let { FormAutofillStorage } = ChromeUtils.import(
-    "resource://gre/modules/FormAutofillStorage.jsm",
-    null
+    "resource://gre/modules/FormAutofillStorage.jsm"
   );
   let path = getTempFile(fileName).path;
   let profileStorage = new FormAutofillStorage(path);

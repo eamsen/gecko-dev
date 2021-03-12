@@ -20,7 +20,7 @@ add_task(async function() {
     sanitizeStorageObject,
     AutofillRecord,
     AddressesEngine,
-  } = ChromeUtils.import("resource://gre/modules/FormAutofillSync.jsm", null));
+  } = ChromeUtils.import("resource://gre/modules/FormAutofillSync.jsm"));
 });
 
 Services.prefs.setCharPref("toolkit.formautofill.loglevel", "Trace");

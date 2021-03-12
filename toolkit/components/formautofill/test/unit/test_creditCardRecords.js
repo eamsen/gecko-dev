@@ -16,8 +16,7 @@ const { CreditCard } = ChromeUtils.import(
 let FormAutofillStorage;
 add_task(async function setup() {
   ({ FormAutofillStorage } = ChromeUtils.import(
-    "resource://gre/modules/FormAutofillStorage.jsm",
-    null
+    "resource://gre/modules/FormAutofillStorage.jsm"
   ));
 });
 
