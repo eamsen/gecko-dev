@@ -86,6 +86,8 @@ modules/FormAutofillStorage.jsm
 chrome/toolkit/res/FormAutofillStorage.jsm
 modules/ProfileAutoCompleteResult.jsm
 chrome/toolkit/res/ProfileAutoCompleteResult.jsm
+modules/GeckoViewFormAutofillStorage.jsm
+chrome/toolkit/res/GeckoViewFormAutofillStorage.jsm
 
 # Bug 1451050 - Remote settings empty dumps (will be populated with data eventually)
 browser/defaults/settings/pinning/pins.json

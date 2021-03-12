@@ -54,3 +54,5 @@ modules/FormAutofillStorage.jsm
 chrome/toolkit/res/FormAutofillStorage.jsm
 modules/ProfileAutoCompleteResult.jsm
 chrome/toolkit/res/ProfileAutoCompleteResult.jsm
+modules/GeckoViewFormAutofillStorage.jsm
+chrome/toolkit/res/GeckoViewFormAutofillStorage.jsm
