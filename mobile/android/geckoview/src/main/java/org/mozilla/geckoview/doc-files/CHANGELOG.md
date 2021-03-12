@@ -13,6 +13,11 @@ exclude: true
 
 ⚠️  breaking change and deprecation notices
 
+## v89
+- Extended [`Autocomplete`][78.7] API to support credit cards and addresses.
+- ⚠️  Refactored shared base classes of the [`Autocomplete`][78.7] API to
+  accomodate for extended entry type support (login, credit card, address).
+
 ## v88
 - Added [`WebExtension.Download#update`][88.1] that can be used to
   implement the WebExtension `downloads` API. This method is used to communicate
@@ -921,4 +926,4 @@ to allow adding gecko profiler markers.
 [65.24]: {{javadoc_uri}}/CrashReporter.html#sendCrashReport-android.content.Context-android.os.Bundle-java.lang.String-
 [65.25]: {{javadoc_uri}}/GeckoResult.html
 
-[api-version]: f97675adf85a37a764245f17806897b796d4a546
+[api-version]: f95e82484629fda1035d7178dc714271179d2709
