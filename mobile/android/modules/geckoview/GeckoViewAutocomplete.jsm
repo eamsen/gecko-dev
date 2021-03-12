@@ -148,37 +148,39 @@ class Address {
     // TODO: Not supported by GV.
     this.timeCreated = timeCreated ?? null;
     this.timeLastUsed = timeLastUsed ?? null;
-    this.timeLastModified = timeLastModified  ?? null;
+    this.timeLastModified = timeLastModified ?? null;
     this.timesUsed = timesUsed ?? null;
   }
 
   isValid() {
-    return this.version !== null &&
-        (this.givenName ?? this.familyName) !== null &&
-        this.streetAddress !== null &&
-        this.postalCode !== null;
+    return (
+      this.version !== null &&
+      (this.givenName ?? this.familyName) !== null &&
+      this.streetAddress !== null &&
+      this.postalCode !== null
+    );
   }
 
   static fromGecko(aObj) {
     return new Address({
-      version: aObj["version"],
+      version: aObj.version,
       givenName: aObj["given-name"],
       additionalName: aObj["additional-name"],
       familyName: aObj["family-name"],
-      organization: aObj["organization"],
+      organization: aObj.organization,
       streetAddress: aObj["street-address"],
       addressLevel1: aObj["address-level1"],
       addressLevel2: aObj["address-level2"],
       addressLevel3: aObj["address-level3"],
       postalCode: aObj["postal-code"],
-      country: aObj["country"],
-      tel: aObj["tel"],
-      email: aObj["email"],
-      guid: aObj["guid"],
-      timeCreated: aObj["timeCreated"],
-      timeLastUsed: aObj["timeLastUsed"],
-      timeLastModified: aObj["timeLastModified"],
-      timesUsed: aObj["timesUsed"],
+      country: aObj.country,
+      tel: aObj.tel,
+      email: aObj.email,
+      guid: aObj.guid,
+      timeCreated: aObj.timeCreated,
+      timeLastUsed: aObj.timeLastUsed,
+      timeLastModified: aObj.timeLastModified,
+      timesUsed: aObj.timesUsed,
     });
   }
 
@@ -191,20 +193,20 @@ class Address {
 
   toGecko() {
     return {
-      "version": this.version,
+      version: this.version,
       "given-name": this.givenName,
       "additional-name": this.additionalName,
       "family-name": this.familyName,
-      "organization": this.organization,
+      organization: this.organization,
       "street-address": this.streetAddress,
       "address-level1": this.addressLevel1,
       "address-level2": this.addressLevel2,
       "address-level3": this.addressLevel3,
       "postal-code": this.postalCode,
-      "country": this.country,
-      "tel": this.tel,
-      "email": this.email,
-      "guid": this.guid,
+      country: this.country,
+      tel: this.tel,
+      email: this.email,
+      guid: this.guid,
     };
   }
 }
@@ -240,26 +242,28 @@ class CreditCard {
   }
 
   isValid() {
-    return this.version !== null &&
-        this.name !== null &&
-        this.number !== null &&
-        this.expMonth !== null &&
-        this.expYear !== null;
+    return (
+      this.version !== null &&
+      this.name !== null &&
+      this.number !== null &&
+      this.expMonth !== null &&
+      this.expYear !== null
+    );
   }
 
   static fromGecko(aObj) {
     return new CreditCard({
-      version: aObj["version"],
+      version: aObj.version,
       name: aObj["cc-name"],
       number: aObj["cc-number"],
       expMonth: aObj["cc-exp-month"],
       expYear: aObj["cc-exp-year"],
       type: aObj["cc-type"],
-      guid: aObj["guid"],
-      timeCreated: aObj["timeCreated"],
-      timeLastUsed: aObj["timeLastUsed"],
-      timeLastModified: aObj["timeLastModified"],
-      timesUsed: aObj["timesUsed"],
+      guid: aObj.guid,
+      timeCreated: aObj.timeCreated,
+      timeLastUsed: aObj.timeLastUsed,
+      timeLastModified: aObj.timeLastModified,
+      timesUsed: aObj.timesUsed,
     });
   }
 
@@ -272,13 +276,13 @@ class CreditCard {
 
   toGecko() {
     return {
-      "version": this.version,
+      version: this.version,
       "cc-name": this.name,
       "cc-number": this.number,
       "cc-exp-month": this.expMonth,
       "cc-exp-year": this.expYear,
       "cc-type": this.type,
-      "guid": this.guid,
+      guid: this.guid,
     };
   }
 }
@@ -548,7 +552,6 @@ const GeckoViewAutocomplete = {
     });
   },
 
-
   async delegateSelection({
     browsingContext,
     options,
@@ -655,12 +658,11 @@ const GeckoViewAutocomplete = {
     let selectedOption = null;
     const browser = browsingContext.top.embedderElement;
     if (selectionType === "login") {
-      selectedOption = await this.onLoginSelect(
-        browser,
-        selectOptions
-      ).catch(_ => {
-        debug`No GV delegate attached`;
-      });
+      selectedOption = await this.onLoginSelect(browser, selectOptions).catch(
+        _ => {
+          debug`No GV delegate attached`;
+        }
+      );
     } else if (selectionType === "creditCard") {
       selectedOption = await this.onCreditCardSelect(
         browser,
@@ -684,7 +686,9 @@ const GeckoViewAutocomplete = {
 
       debug`delegateSelection - filling form`;
 
-      const actor = browsingContext.currentWindowGlobal.getActor("LoginManager");
+      const actor = browsingContext.currentWindowGlobal.getActor(
+        "LoginManager"
+      );
 
       await actor.fillForm({
         browser,
@@ -698,12 +702,16 @@ const GeckoViewAutocomplete = {
       });
     } else if (selectionType === "creditCard") {
       const selectedCreditCard = selectedOption?.value?.toGecko();
-      const actor = browsingContext.currentWindowGlobal.getActor("FormAutofill");
+      const actor = browsingContext.currentWindowGlobal.getActor(
+        "FormAutofill"
+      );
 
       actor.sendAsyncMessage("FormAutofill:FillForm", selectedCreditCard);
     } else if (selectionType === "address") {
       const selectedAddress = selectedOption?.value?.toAddress();
-      const actor = browsingContext.currentWindowGlobal.getActor("FormAutofill");
+      const actor = browsingContext.currentWindowGlobal.getActor(
+        "FormAutofill"
+      );
 
       actor.sendAsyncMessage("FormAutofill:FillForm", selectedAddress);
     }
